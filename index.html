@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LARCH.AE — True Build. Smash the Fake.</title>
+    <link rel="icon" href="assets/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Preloader -->
+    <div id="preloader" class="preloader">
+        <div class="preloader-content">
+            <div class="preloader-logo">LARCH.AE</div>
+            <div class="preloader-spinner"></div>
+        </div>
+    </div>
+
+    <!-- Grain overlay -->
+    <div class="grain-overlay"></div>
+
+    <!-- Main app container -->
+    <div id="app" class="app">
+          
+        <!-- Language switcher -->
+        <div class="language-switcher">
+            <button class="lang-btn active" data-lang="en" aria-label="Switch to English">
+                EN
+            </button>
+            <span class="lang-separator">|</span>
+            <button class="lang-btn" data-lang="ar" aria-label="Switch to Arabic">
+                العربية
+            </button>
+        </div>
+        <!-- Navigation arrows -->
+        <button class="nav-arrow nav-left" aria-label="Previous page">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+
+        <button class="nav-arrow nav-right" aria-label="Next page">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </button>
+
+        <!-- Page content container -->
+        <main id="page-content" class="page-content">
+            <!-- Content will be rendered here by JavaScript -->
+        </main>
+    </div>
+  <!-- Utility Rail (desktop/tablet) -->
+<nav class="utility-rail" aria-label="Quick actions">
+    <a class="ur-btn ur-call" href="tel:+971501234567" title="Call Sales">
+      <!-- phone -->
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.89.31 1.76.57 2.6a2 2 0 0 1-.45 2.11L8 9a16 16 0 0 0 7 7l.57-1.23a2 2 0 0 1 2.11-.45c.84.26 1.71.45 2.6.57A2 2 0 0 1 22 16.92z"/>
+      </svg>
+    </a>
+    <a class="ur-btn ur-wa" target="_blank"
+       href="https://wa.me/971501234567?text=Hi%20LARCH.AE%2C%20I%20need%20Siberian%20larch%20(Decking/Cladding)%20in%20Dubai."
+       title="WhatsApp">
+      <!-- wa -->
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20.52 3.48A11.78 11.78 0 0 0 12.2.02C5.62.02.3 5.33.3 11.9a11.6 11.6 0 0 0 1.64 5.98L.02 24l6.29-1.64A11.76 11.76 0 0 0 12.2 23.8c6.58 0 11.9-5.31 11.9-11.9 0-3.18-1.24-6.16-3.58-8.42zM12.2 21.4a9.45 9.45 0 0 1-4.83-1.32l-.35-.2-3.73.97.99-3.63-.23-.37a9.48 9.48 0 1 1 8.16 4.55zm5.46-7.13c-.3-.15-1.75-.86-2.02-.95-.27-.1-.47-.15-.66.15s-.76.95-.93 1.15-.34.22-.64.07c-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.67-2.07-.17-.3-.02-.46.13-.6.14-.14.3-.34.44-.52.15-.18.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.66-1.59-.91-2.17-.24-.58-.49-.5-.66-.5h-.56c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.06 2.88 1.21 3.08c.15.2 2.1 3.21 5.08 4.51.71.31 1.26.5 1.69.64.71.22 1.35.19 1.86.12.57-.08 1.75-.71 2-1.38.25-.67.25-1.25.18-1.37-.07-.12-.27-.19-.57-.34z"/>
+      </svg>
+    </a>
+    <a class="ur-btn ur-pdf" href="assets/catalog.pdf" download title="Spec sheet (PDF)">
+      <!-- doc -->
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+      </svg>
+    </a>
+  </nav>
+  
+  <!-- FAB (mobile) -->
+  <button class="fab" id="fab" aria-label="Quick actions" aria-expanded="false">⋯</button>
+  <div class="fab-menu" id="fabMenu" role="menu" aria-hidden="true">
+    <a href="tel:+971501234567" role="menuitem">Call Sales</a>
+    <a href="https://wa.me/971501234567?text=Hi%20LARCH.AE%2C%20I%20need%20Siberian%20larch%20(Decking/Cladding)%20in%20Dubai."
+       target="_blank" role="menuitem">WhatsApp</a>
+    <a href="assets/catalog.pdf" download role="menuitem">Spec sheet (PDF)</a>
+  </div>
+  
+    <!-- Modal for demo form -->
+    <div id="modal" class="modal" aria-hidden="true">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" aria-label="Close modal">×</button>
+            <div class="modal-body">
+                <!-- Modal content will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="content.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
