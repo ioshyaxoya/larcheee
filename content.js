@@ -72,7 +72,10 @@ const PAGES = {
                 {
                     type: 'sub-block',
                     title: 'For contractors',
-                    content: 'Dubai stock. Delivery in 24–72h across UAE. Decking · Cladding · Panels. Clear pricing & warranty.'
+                    content: `Dubai stock. Delivery in 24–72h across UAE. Decking ・ Cladding ・ Panels. Clear pricing & warranty. 
+                      <a class="wa-cta" href="https://wa.me/971501234567?text=Hi%20LARCH.AE%20%E2%80%94%20I%20want%20to%20order" target="_blank" rel="noopener">
+                        Call manager
+                      </a>`                    
                   },
                 {
                     type: 'footer',

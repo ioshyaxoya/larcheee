@@ -38,6 +38,7 @@ class LarchApp {
             if (smashCrew) {
                 if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
                     smashCrew.style.display = 'flex';
+                    window.addEventListener('resize', () => this.updateLangSwitcherVisibility());
                 } else {
                     smashCrew.remove();
                 }
@@ -663,6 +664,17 @@ class LarchApp {
         rightArrow.classList.toggle('hidden', !nextPage);
     }
 
+    updateLangSwitcherVisibility() {
+        const ls = document.querySelector('.language-switcher');
+        if (!ls) return;
+      
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        const onFirstPage = this.currentPage === 'page-0';
+      
+        // На мобиле показываем только на page-0, на десктопе — всегда
+        ls.classList.toggle('hidden-mobile', isMobile && !onFirstPage);
+      }
+      
     openModal(type) {
         const modal = document.getElementById('modal');
         const modalBody = modal.querySelector('.modal-body');
