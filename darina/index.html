@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Darina Danilyuk</title>
+<meta name="description" content="Darina Danilyuk — director. Showreel.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="image" href="assets/hero.jpg">
+<link rel="preload" as="image" href="assets/logo-darina.svg">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ── fixed chrome ─────────────────────────────────────────────── -->
+<a class="side side-left" href="#about" data-panel="about">about</a>
+<a class="side side-right" href="#contact" data-panel="contact">contact</a>
+
+<!-- ── the deck: one full-viewport section per screen ───────────── -->
+<main id="deck" class="deck">
+
+  <!-- 1. hero — the photo, exactly as in the source design -->
+  <section class="section section--hero" data-anchor="1">
+    <img class="hero-photo" src="assets/hero.jpg" alt="">
+    <div class="grain"></div>
+    <div class="vignette"></div>
+    <div class="hero-logo">
+      <img src="assets/logo-darina.svg" alt="Darina Danilyuk">
+    </div>
+  </section>
+
+  <!-- 2..N. film sections are generated from films.js -->
+
+</main>
+
+<!-- ── scroll cue ───────────────────────────────────────────────── -->
+<button class="cue" id="cue" aria-label="Дальше">↓</button>
+
+<!-- ── 29-cut indicator ─────────────────────────────────────────── -->
+<div class="cuts" id="cuts" aria-hidden="true"></div>
+
+<!-- ── overlay panels ───────────────────────────────────────────── -->
+<div class="panel" id="panel-about" hidden>
+  <button class="panel-close" aria-label="Закрыть">×</button>
+  <div class="panel-inner">
+    <h2>about</h2>
+    <p>Darina Danilyuk — режиссёр.</p>
+    <p class="muted">Замените этот текст в <code>index.html</code>.</p>
+  </div>
+</div>
+
+<div class="panel" id="panel-contact" hidden>
+  <button class="panel-close" aria-label="Закрыть">×</button>
+  <div class="panel-inner">
+    <h2>contact</h2>
+    <p><a href="mailto:hello@example.com">hello@example.com</a></p>
+    <p class="muted">Замените контакты в <code>index.html</code>.</p>
+  </div>
+</div>
+
+<script src="films.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

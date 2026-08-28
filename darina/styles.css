@@ -1,0 +1,316 @@
+/* ===========================================================================
+   Darina Danilyuk — палитра и типографика взяты из исходного макета:
+   фон #0b0b0b, текст #f3f1ea, акцент #ff2a12, Verdana.
+   =========================================================================== */
+
+:root {
+  --bg: #0b0b0b;
+  --ink: #f3f1ea;
+  --ink-dim: #e6e2d9;
+  --accent: #ff2a12;
+  --speed: 700ms;
+  --ease: cubic-bezier(0.66, 0, 0.16, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;                    /* прокрутку ведёт JS, как на референсе */
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--accent); }
+::selection { background: var(--accent); color: var(--bg); }
+
+@keyframes blink { 0%, 100% { opacity: 1 } 50% { opacity: .25 } }
+
+/* ── дека экранов ────────────────────────────────────────────────────────── */
+
+.deck {
+  position: fixed;
+  inset: 0;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  transition: transform var(--speed) var(--ease);
+}
+.deck.is-instant { transition: none; }
+
+.section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 640px;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+/* ── общие оверлеи: зерно + виньетка (из исходного макета) ───────────────── */
+
+.grain,
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.grain {
+  background-image: radial-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px);
+  background-size: 3px 3px;
+  mix-blend-mode: overlay;
+  z-index: 2;
+}
+.vignette {
+  background: radial-gradient(120% 85% at 50% 50%, #0b0b0b22, #0b0b0bcc);
+  z-index: 3;
+}
+/* на кадрах фильма виньетка мягче, чтобы нарезка читалась */
+.section--film .vignette {
+  background: radial-gradient(125% 90% at 50% 50%, #0b0b0b0d, #0b0b0b99);
+}
+
+/* ── 1. герой ────────────────────────────────────────────────────────────── */
+
+.hero-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(.15) contrast(1.05);
+  z-index: 1;
+}
+
+.hero-logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -104%);
+  width: min(74vw, 860px);
+  text-align: center;
+  z-index: 4;
+}
+.hero-logo img { display: block; width: 100%; height: auto; }
+
+/* ── боковые ссылки about / contact ──────────────────────────────────────── */
+
+.side {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--ink-dim);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-shadow: 0 1px 2px #000;
+  z-index: 60;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+.side-left  { left: 22px; }
+.side-right { right: 22px; }
+
+/* ── 2..N. экраны с фильмами ─────────────────────────────────────────────── */
+
+.section--film .film-media {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: var(--bg);
+}
+.section--film video,
+.section--film .film-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(.15) contrast(1.05);
+}
+.section--film .film-poster {
+  z-index: 0;
+  opacity: 1;
+  transition: opacity 400ms linear;
+}
+.section--film.is-playing .film-poster { opacity: 0; }
+.section--film video { z-index: 1; opacity: 0; transition: opacity 400ms linear; }
+.section--film.is-playing video { opacity: 1; }
+
+/* мгновенная «склейка» между кусками */
+.section--film .cut-flash {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+.section--film.is-cutting .cut-flash { opacity: .55; }
+
+/* подпись фильма */
+.film-title {
+  position: absolute;
+  left: 22px;
+  bottom: 26px;
+  z-index: 6;
+  max-width: min(70vw, 640px);
+  text-shadow: 0 1px 3px #000;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+.is-active .film-title { opacity: 1; transform: none; }
+
+.film-title .t {
+  display: block;
+  font-size: clamp(15px, 2.1vw, 22px);
+  letter-spacing: .02em;
+}
+.film-title .s {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .8;
+}
+.film-title a.t:hover { color: var(--accent); }
+
+/* заглушка, если файла нет */
+.film-missing {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .55;
+}
+
+/* ── стрелка вниз ────────────────────────────────────────────────────────── */
+
+.cue {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 60;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  animation: blink 3.2s ease-in-out infinite;
+  text-shadow: 0 1px 2px #000;
+}
+.cue:hover { color: var(--accent); }
+.cue.is-hidden { opacity: 0; pointer-events: none; }
+
+/* ── индикатор 29 кусков ─────────────────────────────────────────────────── */
+
+.cuts {
+  position: fixed;
+  right: 22px;
+  bottom: 28px;
+  z-index: 60;
+  display: flex;
+  gap: 3px;
+  align-items: flex-end;
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+.cuts.is-on { opacity: .85; }
+.cuts i {
+  display: block;
+  width: 2px;
+  height: 7px;
+  background: var(--ink-dim);
+  opacity: .28;
+  transition: opacity 120ms linear, height 120ms linear, background 120ms linear;
+}
+.cuts i.done { opacity: .5; }
+.cuts i.now  { opacity: 1; height: 13px; background: var(--accent); }
+
+/* ── оверлеи about / contact ─────────────────────────────────────────────── */
+
+.panel {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(11, 11, 11, .94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 320ms ease;
+}
+.panel.is-open { opacity: 1; }
+.panel[hidden] { display: none; }
+
+.panel-inner {
+  max-width: 560px;
+  padding: 0 32px;
+  line-height: 1.75;
+  font-size: 13px;
+}
+.panel-inner h2 {
+  font-size: 11px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 400;
+  margin-bottom: 18px;
+}
+.panel-inner p { margin-bottom: 12px; }
+.panel-inner .muted { color: var(--ink-dim); opacity: .45; font-size: 11px; }
+.panel-inner code { font-family: ui-monospace, monospace; }
+.panel-inner a { text-decoration: underline; text-underline-offset: 3px; }
+
+.panel-close {
+  position: absolute;
+  top: 18px;
+  right: 24px;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--ink-dim);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+.panel-close:hover { color: var(--accent); }
+
+/* ── мобильные ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .section { min-height: 0; }
+  .hero-logo { transform: translate(-50%, -132%); width: 78vw; }
+  .side-left  { left: 14px; }
+  .side-right { right: 14px; }
+  .film-title { left: 14px; bottom: 54px; }
+  .cuts { right: 14px; bottom: 56px; gap: 2px; }
+  .cuts i { width: 1px; }
+}
+
+/* ── доступность ─────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .deck { transition: none; }
+  .cue { animation: none; }
+  .section--film .cut-flash { display: none; }
+}
