@@ -287,6 +287,68 @@ def crow_wing(sx: float = -1.0) -> list:
     return parts
 
 
+def crow_head() -> list:
+    """Шея, голова, клюв, глаза — отдельным планом.
+
+    В испытании время стоит: мир застыл, и это правило (visual_direction §4).
+    Двигается только присутствие — оно вне времени. Ворон расхаживает и поводит
+    головой; чтобы голова жила отдельно от корпуса, она вынесена в свой план.
+    """
+    parts: list = []
+    # Шея и голова: голова опущена, поэтому шея короткая и широкая.
+    parts.append(part(stroke(line([(0.0, 2.90, 0.30, 0.0), (0.0, 3.34, 0.28, 0.0)], n=6),
+                             1.060, 1.000), CROW, "crow_neck"))
+    parts.append(part(oval(0.0, 3.52, 0.680, 0.560), CROW, "crow_head"))
+    parts.append(part(shape([(-0.42, 3.72, 0.24, 0.04), (0.16, 3.86, 0.22, -0.06),
+                             (0.40, 3.56, -0.06, -0.20), (-0.30, 3.48, -0.24, 0.10)], n=10),
+                      CROW_SHEEN, "crow_head_sheen"))
+    parts.append(part(stroke(arc(0.0, 3.60, 0.640, 0.520, math.pi * 0.08, math.pi * 0.92, 16), 0.075),
+                      CROW_EDGE, "crow_head_edge"))
+
+    # Клюв: тяжёлый клин вниз, к зрителю. Им можно ударить.
+    parts.append(part(shape([
+        (-0.36, 3.34, 0.24, 0.06),
+        (0.36, 3.34, 0.05, -0.18),
+        (0.19, 2.60, -0.12, -0.24),
+        (0.0, 2.40, -0.10, 0.0),
+        (-0.19, 2.60, -0.03, 0.24),
+    ], n=12), BEAK, "crow_beak"))
+    parts.append(part(stroke(line([(-0.06, 3.28, 0.02, -0.20), (0.0, 2.84, 0.0, -0.18),
+                                   (0.02, 2.46, 0.0, -0.08)], n=8), 0.090, 0.032),
+                      BEAK_LIT, "crow_culmen"))
+    parts.append(part(stroke(line([(-0.33, 3.24, 0.18, -0.02), (0.0, 3.17, 0.18, 0.0),
+                                   (0.33, 3.24, 0.16, 0.02)], n=10), 0.052, 0.030),
+                      CROW_DEEP, "crow_gape"))
+
+    # Ноздря и надклювье: без них клюв — просто треугольник.
+    parts.append(part(oval(-0.135, 3.20, 0.052, 0.038), CROW_DEEP, "crow_nostril"))
+    parts.append(part(oval(0.135, 3.20, 0.052, 0.038), CROW_DEEP, "crow_nostril_r"))
+
+    # Глаза: в упор. Без белка — у птицы его нет, — но с веком, иначе это
+    # пришитые кружки, а не взгляд.
+    for sx in [-1.0, 1.0]:
+        ex, ey = sx * 0.40, 3.62
+        parts.append(part(oval(ex, ey, 0.205, 0.195), CROW_DEEP, "crow_socket"))
+        parts.append(part(oval(ex, ey - 0.008, 0.118, 0.112), EYE_GOLD, "crow_iris"))
+        parts.append(part(oval(ex, ey - 0.010, 0.062, 0.062), [0.610, 0.470, 0.135], "crow_iris_deep"))
+        parts.append(part(oval(ex, ey - 0.012, 0.046, 0.046), EYE_PUPIL, "crow_pupil"))
+        parts.append(part(oval(ex - sx * 0.042, ey + 0.044, 0.022, 0.020), EYE_PALE, "crow_spark"))
+        # Верхнее веко нависает — от этого взгляд и становится холодным.
+        parts.append(part(stroke(arc(ex, ey + 0.030, 0.175, 0.150,
+                                     math.pi * 0.02, math.pi * 0.98, 14), 0.085),
+                          CROW_DEEP, "crow_lid"))
+        parts.append(part(stroke(arc(ex, ey - 0.02, 0.255, 0.235,
+                                     math.pi * 0.06, math.pi * 0.90, 14), 0.105),
+                          CROW, "crow_brow"))
+        parts.append(part(stroke(arc(ex, ey - 0.02, 0.245, 0.225,
+                                     math.pi * 0.20, math.pi * 0.74, 12), 0.038),
+                          CROW_SHEEN, "crow_brow_lit"))
+    return parts
+
+
+    return parts
+
+
 def crow() -> list:
     """Корпус, шея, голова, клюв, глаза, лапы. Крылья — отдельно, они позади."""
     parts: list = []
@@ -348,54 +410,6 @@ def crow() -> list:
     parts.append(part(stroke(line([(-0.90, 2.60, 0.04, 0.22), (-0.80, 2.94, 0.24, 0.12)], n=8),
                              0.048, 0.028), CROW_EDGE, "crow_body_edge_lit"))
 
-    # Шея и голова: голова опущена, поэтому шея короткая и широкая.
-    parts.append(part(stroke(line([(0.0, 2.90, 0.30, 0.0), (0.0, 3.34, 0.28, 0.0)], n=6),
-                             1.060, 1.000), CROW, "crow_neck"))
-    parts.append(part(oval(0.0, 3.52, 0.680, 0.560), CROW, "crow_head"))
-    parts.append(part(shape([(-0.42, 3.72, 0.24, 0.04), (0.16, 3.86, 0.22, -0.06),
-                             (0.40, 3.56, -0.06, -0.20), (-0.30, 3.48, -0.24, 0.10)], n=10),
-                      CROW_SHEEN, "crow_head_sheen"))
-    parts.append(part(stroke(arc(0.0, 3.60, 0.640, 0.520, math.pi * 0.08, math.pi * 0.92, 16), 0.075),
-                      CROW_EDGE, "crow_head_edge"))
-
-    # Клюв: тяжёлый клин вниз, к зрителю. Им можно ударить.
-    parts.append(part(shape([
-        (-0.36, 3.34, 0.24, 0.06),
-        (0.36, 3.34, 0.05, -0.18),
-        (0.19, 2.60, -0.12, -0.24),
-        (0.0, 2.40, -0.10, 0.0),
-        (-0.19, 2.60, -0.03, 0.24),
-    ], n=12), BEAK, "crow_beak"))
-    parts.append(part(stroke(line([(-0.06, 3.28, 0.02, -0.20), (0.0, 2.84, 0.0, -0.18),
-                                   (0.02, 2.46, 0.0, -0.08)], n=8), 0.090, 0.032),
-                      BEAK_LIT, "crow_culmen"))
-    parts.append(part(stroke(line([(-0.33, 3.24, 0.18, -0.02), (0.0, 3.17, 0.18, 0.0),
-                                   (0.33, 3.24, 0.16, 0.02)], n=10), 0.052, 0.030),
-                      CROW_DEEP, "crow_gape"))
-
-    # Ноздря и надклювье: без них клюв — просто треугольник.
-    parts.append(part(oval(-0.135, 3.20, 0.052, 0.038), CROW_DEEP, "crow_nostril"))
-    parts.append(part(oval(0.135, 3.20, 0.052, 0.038), CROW_DEEP, "crow_nostril_r"))
-
-    # Глаза: в упор. Без белка — у птицы его нет, — но с веком, иначе это
-    # пришитые кружки, а не взгляд.
-    for sx in [-1.0, 1.0]:
-        ex, ey = sx * 0.40, 3.62
-        parts.append(part(oval(ex, ey, 0.205, 0.195), CROW_DEEP, "crow_socket"))
-        parts.append(part(oval(ex, ey - 0.008, 0.118, 0.112), EYE_GOLD, "crow_iris"))
-        parts.append(part(oval(ex, ey - 0.010, 0.062, 0.062), [0.610, 0.470, 0.135], "crow_iris_deep"))
-        parts.append(part(oval(ex, ey - 0.012, 0.046, 0.046), EYE_PUPIL, "crow_pupil"))
-        parts.append(part(oval(ex - sx * 0.042, ey + 0.044, 0.022, 0.020), EYE_PALE, "crow_spark"))
-        # Верхнее веко нависает — от этого взгляд и становится холодным.
-        parts.append(part(stroke(arc(ex, ey + 0.030, 0.175, 0.150,
-                                     math.pi * 0.02, math.pi * 0.98, 14), 0.085),
-                          CROW_DEEP, "crow_lid"))
-        parts.append(part(stroke(arc(ex, ey - 0.02, 0.255, 0.235,
-                                     math.pi * 0.06, math.pi * 0.90, 14), 0.105),
-                          CROW, "crow_brow"))
-        parts.append(part(stroke(arc(ex, ey - 0.02, 0.245, 0.225,
-                                     math.pi * 0.20, math.pi * 0.74, 12), 0.038),
-                          CROW_SHEEN, "crow_brow_lit"))
     return parts
 
 
@@ -902,6 +916,11 @@ def slab(w: float, hgt: float) -> list:
     ]
 
 
+# Расхаживание ворона: медленно, с задержкой на концах. Один и тот же блок у
+# корпуса, крыльев и всадника — иначе они разъедутся.
+PACE = {"kind": "pace", "amp": [0.32, 0.0, 0.0], "rot_amp": [0.0, 0.0, 0.9], "period": 12.0}
+
+
 def stage() -> dict:
     """Кадр встречи: снизу вверх, потому что смотрит ошарашенный человек."""
     world_layers = [
@@ -945,14 +964,26 @@ def stage() -> dict:
                   for pid, parts, pos, rot in world_props],
         # Порядок по глубине: крылья позади, Шани, корпус и голова ворона
         # впереди — его клюв висит перед сложенными ногами бога, как в иконе.
+        # Мир застыл — так и должно быть (§4). Двигается только присутствие:
+        # ворон расхаживает, и с ним едет всё, что на нём. Поэтому у корпуса,
+        # крыльев и Шани одно и то же расхаживание — иначе бог съедет с птицы.
+        # Голова живёт отдельно: она поводит на вас глазом.
         "presence": [
             {"id": "trishula", "pos": [0.0, 1.15, -0.70], "layer": 2,
              "parts": [part(oval(3.62, 0.05, 0.300, 0.105), MOUND_LINE, "trishula_bed")]
                       + trishula(3.62, 0.02, 3.20, 4.62)},
             {"id": "crow_wings", "pos": [0.0, 0.85, -0.55], "layer": 2,
-             "parts": scaled(crow_wing(-1.0) + flipped(crow_wing(-1.0)), 0.78)},
-            {"id": "shani", "pos": [0.0, 1.15, -0.15], "parts": shani(), "layer": 2},
-            {"id": "crow", "pos": [0.0, 1.15, 0.30], "parts": scaled(crow(), 0.62), "layer": 2},
+             "parts": scaled(crow_wing(-1.0) + flipped(crow_wing(-1.0)), 0.78),
+             "motion": [PACE, {"kind": "sway", "amp": [0.0, 0.022, 0.0], "period": 5.6}]},
+            {"id": "shani", "pos": [0.0, 1.15, -0.15], "parts": shani(), "layer": 2,
+             "motion": PACE},
+            {"id": "crow", "pos": [0.0, 1.15, 0.30], "parts": scaled(crow(), 0.62),
+             "layer": 2, "motion": PACE},
+            {"id": "crow_head", "pos": [0.0, 1.15, 0.32], "parts": scaled(crow_head(), 0.62),
+             "layer": 2,
+             "motion": [PACE,
+                        {"kind": "sway", "amp": [0.055, 0.012, 0.0],
+                         "rot_amp": [0.0, 0.0, 2.6], "period": 5.3, "phase": 0.18}]},
         ],
     }
 

@@ -18,6 +18,7 @@ var ctx: GameContext
 var card: Dictionary = {}
 var car_id: String = ""
 var npcs: Dictionary = {}          # npc_id → NpcNode
+var motion: StageMotion = null      # вечное движение постановки
 var triggers: TriggerSystem
 var items: Dictionary = {}         # item_id → def (только те, что в вагоне сейчас)
 var custom: Node = null            # car.custom_script — уникальная механика вагона
@@ -49,7 +50,7 @@ func setup(car_card: Dictionary, context: GameContext) -> void:
 func _build_stage() -> void:
 	if DisplayServer.get_name() == "headless":
 		return   # dummy-рендер не строит меши; логика вагона от сцены не зависит
-	StageBuilder.build(card, self)
+	motion = StageBuilder.build(card, self)
 	var lit: bool = ctx.world.get_flag("car_01.lantern_lit", false) == true
 	for pool_def in card.get("stage_lantern_pools", []):
 		var pool := StageBuilder.quad(pool_def, true)

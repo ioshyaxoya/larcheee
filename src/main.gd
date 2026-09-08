@@ -230,7 +230,7 @@ func _spawn_car() -> void:
 	var card := CarLoader.load_card("car_01")
 	car.setup(card, ctx)
 	stage.add_child(car)
-	StageBuilder.apply_camera(card, camera)
+	StageBuilder.apply_camera(card, camera, car.motion)
 	palette.set_palette(str(card.get("palette", "human")))
 	_apply_palette()
 	car.custom.control_locked.connect(_lock_control)
@@ -295,10 +295,10 @@ func _enter_presence(trial: TrialRuntime) -> void:
 	trial_stage = Node3D.new()
 	trial_stage.name = "TrialStage"
 	stage.add_child(trial_stage)
-	StageBuilder.build_stage(st, trial_stage)
+	var trial_motion := StageBuilder.build_stage(st, trial_stage)
 	var frame := {"stage": st}
-	StageBuilder.apply_camera(frame, trial_camera)
-	StageBuilder.apply_camera(frame, presence_camera)
+	StageBuilder.apply_camera(frame, trial_camera, trial_motion)
+	StageBuilder.apply_camera(frame, presence_camera, trial_motion)
 	grade.set_glitch(0.55)
 
 

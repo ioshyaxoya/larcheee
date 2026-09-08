@@ -58,17 +58,21 @@ def main() -> int:
     ap.add_argument("--fps", type=int, default=12)
     args = ap.parse_args()
 
-    files = sorted(f for f in os.listdir(args.shots)
-                   if f.endswith(".png") and re.match(r"^\d+_", f))
-    if not files:
-        sys.exit("make_letsplay: в %s нет кадров прохода" % args.shots)
-
-    plan = []
-    for f in files:
-        path = os.path.join(args.shots, f)
-        load = text_load(path)
-        secs = args.min + (args.max - args.min) * min(1.0, load / 0.09)
-        plan.append((path, round(secs, 2)))
+    film = sorted(f for f in os.listdir(args.shots) if re.match(r"^film_\d+\.jpg$", f))
+    if film:
+        # Непрерывная запись: длительность кадра постоянна, движение уже в них.
+        plan = [(os.path.join(args.shots, f), round(1.0 / args.fps, 4)) for f in film]
+    else:
+        files = sorted(f for f in os.listdir(args.shots)
+                       if f.endswith(".png") and re.match(r"^\d+_", f))
+        if not files:
+            sys.exit("make_letsplay: в %s нет кадров прохода" % args.shots)
+        plan = []
+        for f in files:
+            path = os.path.join(args.shots, f)
+            load = text_load(path)
+            secs = args.min + (args.max - args.min) * min(1.0, load / 0.09)
+            plan.append((path, round(secs, 2)))
 
     total = sum(s for _, s in plan)
     with tempfile.NamedTemporaryFile("w", suffix=".txt", delete=False, encoding="utf-8") as fh:

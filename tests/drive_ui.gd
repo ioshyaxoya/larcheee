@@ -39,6 +39,10 @@ func _ready() -> void:
 		await _run_glitch_check()
 	elif scenario == "letsplay":
 		await _run_letsplay()
+	elif scenario == "motion":
+		await _run_motion()
+	elif scenario == "film":
+		await _run_film()
 	else:
 		await _run()
 	_write_log()
@@ -127,6 +131,149 @@ func _run_shani() -> void:
 		cam.rotation_degrees = Vector3(-24.0, 0.0, 0.0)
 	await _frames(6)
 	await _shot("shani_above", "И сверху: у ворона видно, на чём он стоит.")
+
+
+## Настоящая запись прохода: не по кадру на реплику, а подряд, чтобы было
+## видно движение — качку вагона, качание ламп, мигание топки, расхаживание
+## ворона и набор текста по буквам. Кадры пишутся в JPEG на 960×540, иначе
+## полутора тысячам PNG не хватит ни места, ни времени.
+var film_no := 0
+
+
+func _roll(n: int) -> void:
+	for _i in range(n):
+		await RenderingServer.frame_post_draw
+		var img: Image = get_viewport().get_texture().get_image()
+		img.resize(960, 540, Image.INTERPOLATE_LANCZOS)
+		img.save_jpg(SHOTS + "film_%05d.jpg" % film_no, 0.86)
+		film_no += 1
+
+
+## Реплика: дать машинке допечатать, дать прочесть, нажать. Всё это в кадрах.
+func _film_beat(hold: int = 30) -> bool:
+	await _roll(10)
+	for _i in range(90):
+		if not main.dialogue_ui.typing:
+			break
+		await _roll(2)
+	await _roll(hold)
+	if main.check_ui.visible:
+		await _roll(14)
+		await _dismiss_check()
+		await _roll(8)
+		return true
+	if main.dialogue_ui.option_buttons.is_empty():
+		return false
+	main.dialogue_ui.option_buttons[0].pressed.emit()
+	await _roll(4)
+	return true
+
+
+func _run_film() -> void:
+	_pick_option("Патан")
+	_pick_option("Бабу")
+	await _frames(6)
+	await _roll(24)
+	_press_text("Начать")
+	await _wait_options()
+
+	# Холодное открытие целиком.
+	for _i in range(9):
+		if main.title_card.visible or not await _film_beat(26):
+			break
+	if main.title_card.visible:
+		await _roll(40)
+		main.title_dismissed.emit()
+		await _frames(8)
+
+	# Пролог промотан без записи: эта запись про вагон.
+	for _i in range(140):
+		if main.trial_ui.visible:
+			break
+		var txt := _dialogue_text()
+		if txt.contains("силуэт") or txt.contains("Темнота") or txt.contains("Хромой"):
+			break
+		if main.check_ui.visible:
+			await _dismiss_check()
+			continue
+		if main.transition_ui.visible:
+			await _advance_transition()
+			continue
+		if not await _wait_options():
+			await _frames(4)
+			continue
+		await _click(0)
+	await _frames(8)
+	await _roll(30)
+
+	# Суд: длинные планы, тут и смотреть.
+	await _click_until(_trial_ready, 14)
+	var guard := 0
+	while main.trial_ui.visible and guard < 14:
+		guard += 1
+		await _roll(46)
+		if main.trial_ui._buttons.is_empty():
+			await _click(0)
+			continue
+		var pick := _trial_index_for([
+			"бахи", "долг", "Ничего не сказать", "Билет продали мне", "Вы говорите о себе"])
+		if pick < 0:
+			pick = 0
+		(main.trial_ui._buttons[pick] as Button).pressed.emit()
+		await _roll(10)
+		if main.check_ui.visible:
+			await _roll(16)
+			await _dismiss_check()
+		await _roll(22)
+	await _roll(36)
+
+	# Узел путей и служба.
+	await _click_until(func(): return _has_option("Отработать смену"), 10)
+	await _roll(44)
+	_click_option_text("Отработать смену")
+	for _i in range(16):
+		if main.transition_ui.visible or not await _film_beat(24):
+			break
+	await _click_until(func(): return main.transition_ui.visible, 10)
+	if main.transition_ui.visible:
+		await _roll(70)
+		await _advance_transition()
+		await _roll(30)
+	log_lines.append("film_*.jpg\n    Непрерывная запись прохода: %d кадров." % film_no)
+
+
+func _click_option_text(fragment: String) -> void:
+	for b in main.dialogue_ui.option_buttons:
+		if (b as Button).text.containsn(fragment):
+			b.pressed.emit()
+			return
+	if not main.dialogue_ui.option_buttons.is_empty():
+		main.dialogue_ui.option_buttons[0].pressed.emit()
+
+
+## Сколько в кадре движения: 90 подряд идущих кадров вагона и столько же
+## испытания. Если между ними нет разницы — двигаться в игре нечему, и это
+## измерение, а не впечатление.
+func _run_motion() -> void:
+	await _debug_press("Сразу в вагон")
+	await _wait_options()
+	main.dialogue_ui.visible = false
+	main.hud.visible = false
+	main.debug_panel.visible = false
+	await _frames(20)
+	for i in range(90):
+		await RenderingServer.frame_post_draw
+		var img: Image = get_viewport().get_texture().get_image()
+		img.save_png(SHOTS + "motion_car_%03d.png" % i)
+	await _debug_press("Спор о часах")
+	await _frames(20)
+	main.trial_ui.visible = false
+	main.debug_panel.visible = false
+	for i in range(90):
+		await RenderingServer.frame_post_draw
+		var img2: Image = get_viewport().get_texture().get_image()
+		img2.save_png(SHOTS + "motion_trial_%03d.png" % i)
+	log_lines.append("motion_*.png\n    По 90 кадров подряд: вагон и испытание.")
 
 
 ## Запись прохода вагона целиком — чтобы миссию можно было посмотреть, а не
@@ -456,7 +603,17 @@ func _frames(n: int) -> void:
 
 ## Ждёт, пока в панели диалога появятся варианты (или всплывёт панель броска,
 ## или начнётся испытание — тогда диалог уже не при делах).
+## Дождаться, пока реплика допечатается: варианты приходят только после этого.
+func _wait_typing() -> void:
+	for _i in range(240):
+		if not main.dialogue_ui.typing:
+			return
+		await get_tree().process_frame
+	main.dialogue_ui.skip_typing()
+
+
 func _wait_options() -> bool:
+	await _wait_typing()
 	for _i in range(WAIT_LIMIT):
 		if main.check_ui.visible:
 			return true

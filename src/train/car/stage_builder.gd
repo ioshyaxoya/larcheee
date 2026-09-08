@@ -12,24 +12,37 @@ extends RefCounted
 static var _pool_texture: GradientTexture2D = null
 
 
-static func build(card: Dictionary, parent: Node3D) -> void:
-	build_stage(card.get("stage", {}), parent)
+static func build(card: Dictionary, parent: Node3D) -> StageMotion:
+	return build_stage(card.get("stage", {}), parent)
 
 
 ## Постановка из данных. `layer` у кулисы, предмета или фигуры — номер слоя
 ## видимости (1 по умолчанию). Слои нужны там, где кадр собирается из двух
 ## разных: мир испытания уходит в точки, присутствие остаётся цветным, и
 ## разделяют их не оттенки в шейдере, а камеры по слоям.
-static func build_stage(stage: Dictionary, parent: Node3D) -> void:
+## Возвращает узел движения: у кулисы, предмета или лужи света может быть
+## блок `motion` (см. StageMotion). Вечное движение — часть постановки, а не
+## отдельная анимация, поэтому собирается здесь же и живёт в тех же данных.
+static func build_stage(stage: Dictionary, parent: Node3D) -> StageMotion:
+	var motion := StageMotion.new()
+	motion.name = "StageMotion"
+	parent.add_child(motion)
 	if stage.is_empty():
-		return
+		return motion
 	for layer in stage.get("layers", []):
-		parent.add_child(quad(layer, false))
+		var node := quad(layer, false)
+		parent.add_child(node)
+		motion.add(node, layer)
 	for group in ["props", "presence"]:
 		for prop in stage.get(group, []):
-			parent.add_child(polygon(prop) if prop.has("parts") else quad(prop, false))
+			var pnode: Node3D = polygon(prop) if prop.has("parts") else quad(prop, false)
+			parent.add_child(pnode)
+			motion.add(pnode, prop)
 	for pool in stage.get("pools", []):
-		parent.add_child(quad(pool, true))
+		var pool_node := quad(pool, true)
+		parent.add_child(pool_node)
+		motion.add(pool_node, pool)
+	return motion
 
 
 ## Номер слоя из данных → битовая маска Godot.
@@ -184,7 +197,7 @@ static func silhouette(def: Dictionary) -> Node3D:
 
 
 ## Камера: фиксированный театральный кадр из данных вагона.
-static func apply_camera(card: Dictionary, camera: Camera3D) -> void:
+static func apply_camera(card: Dictionary, camera: Camera3D, motion: StageMotion = null) -> void:
 	var cam: Dictionary = card.get("stage", {}).get("camera", {})
 	if cam.is_empty():
 		return
@@ -203,3 +216,7 @@ static func apply_camera(card: Dictionary, camera: Camera3D) -> void:
 		camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	camera.near = float(cam.get("near", 0.05))
 	camera.far = float(cam.get("far", 200.0))
+	# Камера тоже может дышать: поезд идёт всегда. Если у камеры в данных есть
+	# `motion`, она регистрируется в том же узле движения, что и постановка.
+	if motion != null:
+		motion.add(camera, cam)

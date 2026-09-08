@@ -8,6 +8,13 @@ var runtime: DialogueRuntime
 var speaker_label: Label
 var stage_label: Label
 var text_label: RichTextLabel
+# Реплика набирается по буквам, а варианты появляются, когда она дописана.
+# В диалоговой игре это единственное движение, которое есть в каждом кадре, и
+# оно же задаёт темп чтения: читатель не получает стену текста целиком.
+var typing := false
+var type_speed := 46.0          # знаков в секунду
+var _typed := 0.0
+var _pending_options := false
 var options_box: VBoxContainer
 var option_buttons: Array[Button] = []
 
@@ -95,7 +102,41 @@ func _on_node(_node_id: String, node: Dictionary) -> void:
 	stage_label.visible = node.has("stage")
 	var params := {"now": ctx.clock.now_string(), "late": ctx.clock.minutes_late(), "name": ctx.character.display_name if ctx.character else ""}
 	text_label.text = ctx.texts.t(str(node.get("text_key", "")), params)
-	_rebuild_options()
+	_start_typing()
+
+
+## Начать набор реплики. Варианты придут, когда текст дописан.
+func _start_typing() -> void:
+	_typed = 0.0
+	text_label.visible_characters = 0
+	typing = text_label.get_total_character_count() > 0
+	_pending_options = true
+	if not typing:
+		_finish_typing()
+
+
+## Досказать сразу: щелчок или пробел не должны ждать машинку.
+func skip_typing() -> void:
+	if typing:
+		_finish_typing()
+
+
+func _finish_typing() -> void:
+	typing = false
+	text_label.visible_characters = -1
+	if _pending_options:
+		_pending_options = false
+		_rebuild_options()
+
+
+func _process(delta: float) -> void:
+	if not typing:
+		return
+	_typed += delta * type_speed
+	var total := text_label.get_total_character_count()
+	text_label.visible_characters = int(min(_typed, float(total)))
+	if _typed >= float(total):
+		_finish_typing()
 
 
 func _rebuild_options() -> void:
