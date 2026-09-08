@@ -56,6 +56,9 @@ def main() -> int:
     ap.add_argument("--min", type=float, default=1.6, help="минимум секунд на кадр")
     ap.add_argument("--max", type=float, default=6.5, help="максимум секунд на кадр")
     ap.add_argument("--fps", type=int, default=12)
+    ap.add_argument("--crf", type=int, default=20,
+                    help="качество h264: больше — меньше файл (точечный растр сжимается плохо)")
+    ap.add_argument("--width", type=int, default=1280)
     args = ap.parse_args()
 
     film = sorted(f for f in os.listdir(args.shots) if re.match(r"^film_\d+\.jpg$", f))
@@ -84,8 +87,8 @@ def main() -> int:
     os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
     cmd = [FFMPEG, "-y", "-f", "concat", "-safe", "0", "-i", listing,
            "-fps_mode", "cfr", "-r", str(args.fps),
-           "-vf", "scale=1280:720:flags=lanczos,format=yuv420p",
-           "-c:v", "libx264", "-preset", "medium", "-crf", "20",
+           "-vf", "scale=%d:-2:flags=lanczos,format=yuv420p" % args.width,
+           "-c:v", "libx264", "-preset", "slow", "-crf", str(args.crf),
            "-movflags", "+faststart", args.output]
     res = subprocess.run(cmd, capture_output=True, text=True)
     os.unlink(listing)
