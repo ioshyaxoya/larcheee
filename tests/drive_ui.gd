@@ -43,6 +43,8 @@ func _ready() -> void:
 		await _run_motion()
 	elif scenario == "film":
 		await _run_film()
+	elif scenario == "walk":
+		await _run_walk()
 	else:
 		await _run()
 	_write_log()
@@ -131,6 +133,41 @@ func _run_shani() -> void:
 		cam.rotation_degrees = Vector3(-24.0, 0.0, 0.0)
 	await _frames(6)
 	await _shot("shani_above", "И сверху: у ворона видно, на чём он стоит.")
+
+
+## Прогулка по вагону: игрок идёт сам, камера идёт за ним и меняет кадр по
+## зонам. Ввод подаётся действиями, как от живого игрока, а не телепортом.
+func _run_walk() -> void:
+	await _debug_press("Сразу в вагон")
+	await _wait_options()
+	main.dialogue_ui.visible = false
+	main.hud.visible = false
+	main.debug_panel.visible = false
+	await _frames(10)
+	if main.player == null:
+		_note("игрока нет — движение не подключено")
+		return
+	main.player.locked = false
+	await _roll(16)
+	# Вглубь вагона: тамбур → пост → багажный корпус → глубина.
+	await _hold("ui_up", 190)
+	await _roll(20)
+	# Вправо к штурвалу, влево к печке — камера ведёт за игроком.
+	await _hold("ui_right", 46)
+	await _roll(14)
+	await _hold("ui_left", 92)
+	await _roll(14)
+	# И назад к тамбуру: кадр меняется в обратную сторону.
+	await _hold("ui_down", 150)
+	await _roll(24)
+	log_lines.append("film_*.jpg\n    Прогулка: %d кадров." % film_no)
+
+
+## Держать действие n кадров, записывая каждый: так ходит живой игрок.
+func _hold(action: String, frames: int) -> void:
+	Input.action_press(action)
+	await _roll(frames)
+	Input.action_release(action)
 
 
 ## Настоящая запись прохода: не по кадру на реплику, а подряд, чтобы было

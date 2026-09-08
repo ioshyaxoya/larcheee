@@ -29,6 +29,11 @@ var title_card: Control
 var title_label: Label
 var hint_label: Label
 var car: Car = null
+var player: PlayerNode = null
+var car_cam: CarCamera = null
+var walk_map: WalkMap = null
+var prompt_label: Label = null
+var _near_npc := ""
 var quest: QuestRuntime = null
 var control_locked: bool = false
 
@@ -129,6 +134,14 @@ func _build_ui() -> void:
 	layer.add_child(transition_ui)
 	debug_panel = DebugPanel.new()
 	layer.add_child(debug_panel)
+	prompt_label = Label.new()
+	prompt_label.theme = theme_res
+	prompt_label.add_theme_font_override("font", GameTheme.stage_font())
+	prompt_label.add_theme_color_override("font_color", GameTheme.GOLD)
+	prompt_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	prompt_label.position.y -= 176
+	prompt_label.visible = false
+	layer.add_child(prompt_label)
 	check_ui = CheckUi.new()
 	layer.add_child(check_ui)
 	credits_ui = CreditsUi.new()
@@ -203,9 +216,31 @@ func _apply_palette() -> void:
 # --- поток ------------------------------------------------------------------
 
 ## F1 — показать или спрятать панель разработчика.
+## Пока открыт диалог, суд, титры или титр — ходить нельзя, но кадр живёт.
+func _process(_delta: float) -> void:
+	if player == null:
+		return
+	player.locked = control_locked or dialogue_ui.visible or trial_ui.visible \
+		or credits_ui.visible or transition_ui.visible or title_card.visible
+	if player.locked and prompt_label != null:
+		prompt_label.visible = false
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and (event as InputEventKey).keycode == KEY_F1:
 		debug_panel.visible = not debug_panel.visible
+		return
+	if event is InputEventKey and event.pressed:
+		var key := (event as InputEventKey).keycode
+		# Подошёл — заговорил. Список людей на панели разработчика был
+		# заменой отсутствующему движению, а не способом играть.
+		if key == KEY_E and _near_npc != "" and not dialogue_ui.visible \
+				and not trial_ui.visible and not control_locked:
+			_on_talk(_near_npc)
+			return
+		# Пробел или Enter досказывают реплику, не дожидаясь машинки.
+		if (key == KEY_SPACE or key == KEY_ENTER) and dialogue_ui.visible:
+			dialogue_ui.skip_typing()
 
 
 func _on_start(origin: String, class_id: String, sex: String, tags: Array, seed_v: int) -> void:
@@ -238,6 +273,7 @@ func _spawn_car() -> void:
 	car.custom.trial_started.connect(_on_trial_started)
 	car.custom.scene_requested.connect(func(scene: String): dialogue_ui.attach(car.play_scene(scene)))
 	car.custom.exit_requested.connect(_on_exit_forward)
+	_spawn_player(card)
 	car.custom.ending_requested.connect(_on_ending)
 	car.custom.soft_reset_requested.connect(_on_soft_reset)
 	car.custom.minigame_handler = func(_id: String, _def: Dictionary): return null   # автоигра до появления UI мини-игр
@@ -357,6 +393,59 @@ func _on_enter_car() -> void:
 	debug_panel.show_car_controls(car)
 
 
+## Игрок в вагоне. До этого по вагону нельзя было ходить: были декорации и
+## диалоги, а «изометрическая RPG» с сеткой 18×46 и зонами (§2) требует, чтобы
+## персонаж двигался и чтобы к людям подходили, а не выбирали их из списка.
+func _spawn_player(card: Dictionary) -> void:
+	walk_map = WalkMap.from_card(card)
+	if player != null:
+		player.queue_free()
+	player = PlayerNode.new()
+	player.name = "Player"
+	car.add_child(player)
+	player.setup(walk_map)
+	if car_cam == null:
+		car_cam = CarCamera.new()
+		car_cam.name = "CarCamera"
+		add_child(car_cam)
+	car_cam.bind(camera, walk_map)
+	player.moved.connect(_on_player_moved)
+	player.facing_changed.connect(func(f: int): car_cam.set_facing(f))
+	_on_player_moved(player.position)
+
+
+## Фонарь светит оттуда, где стоит игрок: он его несёт (§1, первая механика).
+func _on_player_moved(pos: Vector3) -> void:
+	car_cam.set_target(pos)
+	if car != null:
+		car.move_lantern(pos)
+	_refresh_prompt(pos)
+
+
+## Подойти и заговорить: имя ближайшего человека показывается подсказкой.
+func _refresh_prompt(pos: Vector3) -> void:
+	if prompt_label == null or car == null:
+		return
+	var best := ""
+	var best_d := 1.35
+	for npc_id in car.npcs.keys():
+		var node: NpcNode = car.npcs[npc_id]
+		if not node.visible:
+			continue
+		var d := Vector2(node.position.x - pos.x, node.position.z - pos.z).length()
+		if d < best_d:
+			best_d = d
+			best = str(npc_id)
+	_near_npc = best
+	if best == "" or control_locked or dialogue_ui.visible or trial_ui.visible:
+		prompt_label.visible = false
+		return
+	var def := CarLoader.load_npc(best)
+	prompt_label.text = ctx.texts.t("ui.prompt.talk",
+		{"who": ctx.texts.t(str(def.get("name_key", "")))})
+	prompt_label.visible = true
+
+
 func _on_talk(npc_id: String) -> void:
 	if car == null:
 		return
@@ -381,10 +470,14 @@ func _on_quest_event(event_name: String) -> void:
 
 func _lock_control(seconds: float) -> void:
 	control_locked = true
+	if player != null:
+		player.locked = true
 	dialogue_ui.visible = false
 	get_tree().create_timer(seconds).timeout.connect(func():
 		control_locked = false
-		dialogue_ui.visible = true)
+		dialogue_ui.visible = true
+		if player != null:
+			player.locked = false)
 
 
 func _show_title(text_key: String, seconds: float = 3.0) -> void:

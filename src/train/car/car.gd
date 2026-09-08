@@ -24,6 +24,8 @@ var items: Dictionary = {}         # item_id → def (только те, что 
 var custom: Node = null            # car.custom_script — уникальная механика вагона
 var hours_lost: int = 0
 var lantern_pools: Array[Node3D] = []
+var lantern_base: Dictionary = {}      # имя лужи → её базовое положение
+var lantern_base_ref := 0.0            # z, от которого лужи были расставлены
 var entered: bool = false
 var active_runtime: DialogueRuntime = null
 
@@ -53,9 +55,12 @@ func _build_stage() -> void:
 	motion = StageBuilder.build(card, self)
 	var lit: bool = ctx.world.get_flag("car_01.lantern_lit", false) == true
 	for pool_def in card.get("stage_lantern_pools", []):
+		if str(pool_def.get("id", "")) == "lantern_pool":
+			lantern_base_ref = float((pool_def.get("pos", [0, 0, 0]) as Array)[2])
 		var pool := StageBuilder.quad(pool_def, true)
 		pool.visible = lit
 		lantern_pools.append(pool)
+		lantern_base[pool.name] = pool.position
 		add_child(pool)
 
 
@@ -220,6 +225,20 @@ func enter() -> void:
 	var st := ctx.world.car_state(car_id)
 	st["visited"] = true
 	triggers.fire("car_entered")
+
+
+## Фонарь идёт с игроком: лужа света переезжает туда, где он стоит.
+func move_lantern(pos: Vector3) -> void:
+	# Главная лужа едет по полу под игроком, остальные держат свой сдвиг от
+	# него: фонарь освещает пол под ногами, а стены и глубину — по мере
+	# приближения. Базовые положения записаны при сборке, поэтому лужи не
+	# уползают и не накапливают дрейф.
+	for pool in lantern_pools:
+		var base: Vector3 = lantern_base.get(pool.name, pool.position)
+		if pool.name == "lantern_pool":
+			pool.position = Vector3(pos.x, base.y, pos.z)
+		else:
+			pool.position = Vector3(base.x, base.y, pos.z + (base.z - lantern_base_ref))
 
 
 ## Выход вперёд: состояние вагона записывается, вагон уходит в хвост,

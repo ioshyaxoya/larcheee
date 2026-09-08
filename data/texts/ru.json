@@ -581,5 +581,10 @@
   "ui.debug.hint": "F1 — панель разработчика",
   "ui.debug.car_only": "Сразу в вагон 01 (без пролога)",
   "ui.debug.paths": "Узел путей",
-  "ui.debug.trial": "Спор о часах"
+  "ui.debug.trial": "Спор о часах",
+  "ui.prompt.talk": "E — заговорить: {who}",
+  "car_01.zone.tambour": "Тамбур",
+  "car_01.zone.post": "Пост кондуктора",
+  "car_01.zone.luggage": "Багажный корпус",
+  "car_01.zone.depth": "Глубина"
 }

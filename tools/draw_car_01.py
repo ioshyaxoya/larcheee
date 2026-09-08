@@ -994,6 +994,75 @@ PROP_MOTION = {
 }
 
 
+# --- проходимость ------------------------------------------------------------
+# Сетка вагона объявлена в карточке (18×46, уровни floor и gallery), зоны — в
+# docs/car_01_brake_van.md §2. Прямоугольники непроходимого считаются здесь же
+# по самим контурам предметов: иначе проходимость разъедется с рисунком, и
+# игрок будет ходить сквозь печку или спотыкаться о воздух.
+
+CELL = (0.32, 0.52)          # метры на клетку по X и по Z
+ORIGIN = (-2.72, 0.0, 1.6)   # клетка (0,0)
+
+# Через что нельзя пройти. Полки и стеллажи стоят у стен, туда и так не зайти;
+# мешки и ящики обходятся; лампы висят над головой и не мешают.
+SOLID = {"stove", "brake_wheel", "desk", "berth", "mail_sacks", "crates",
+         "trunks", "coffin", "bucket", "stove_fire"}
+PASSABLE_PREFIX = ("rib_", "lamp_", "post_", "clock", "notice", "window", "hooks", "broom")
+
+
+def prop_footprint(parts: list, pos: list, depth: float = 0.62) -> list:
+    """Прямоугольник, который предмет занимает на полу: по ширине контуров."""
+    xs = [p[0] for pt in parts for p in pt["points"]]
+    if not xs:
+        return []
+    x0, x1 = pos[0] + min(xs), pos[0] + max(xs)
+    z0, z1 = pos[2] - depth * 0.5, pos[2] + depth * 0.5
+    return [round(x0, 3), round(z0, 3), round(x1, 3), round(z1, 3)]
+
+
+def walk_block() -> dict:
+    blocked = []
+    for pid, parts, pos, _rot in PROPS:
+        if pid.startswith(PASSABLE_PREFIX):
+            continue
+        if pid not in SOLID and not pid.startswith("shelf_"):
+            continue
+        depth = 1.0 if pid.startswith("shelf_") else 0.62
+        r = prop_footprint(parts, pos, depth)
+        if r:
+            blocked.append(r)
+    # Фигуры тоже занимают место: сквозь спящего кондуктора не ходят.
+    for npc_id, (_shape, parts, pos, _rot) in FIGURES.items():
+        if npc_id == "npc_dog":
+            continue
+        blocked.append([round(pos[0] - 0.34, 3), round(pos[2] - 0.30, 3),
+                        round(pos[0] + 0.34, 3), round(pos[2] + 0.30, 3)])
+    return {
+        "_comment": ("Проходимость и зоны. Прямоугольники считаются по контурам "
+                     "предметов в tools/draw_car_01.py: рисунок и проходимость "
+                     "не должны расходиться."),
+        "cell": list(CELL),
+        "origin": list(ORIGIN),
+        "half_width": 2.46,
+        "spawn": [9, 2],
+        "levels": {"floor": 0.0, "gallery": 2.06},
+        # Зоны по §2. У каждой свой кадр: камера меняет вид, а не едет одна и
+        # та же. Тамбур тесный, пост кондуктора рабочий, багажный корпус
+        # длинный, глубина — там, где кончается свет.
+        "zones": [
+            {"id": "tambour", "from": 0, "to": 6, "name_key": "car_01.zone.tambour",
+             "camera": {"height": 1.62, "back": 4.2, "pitch": -4.0, "fov": 40.0, "lead": 0.30}},
+            {"id": "post", "from": 7, "to": 14, "name_key": "car_01.zone.post",
+             "camera": {"height": 1.70, "back": 4.6, "pitch": -5.0, "fov": 38.0, "lead": 0.42}},
+            {"id": "luggage", "from": 15, "to": 34, "name_key": "car_01.zone.luggage",
+             "camera": {"height": 1.82, "back": 5.2, "pitch": -7.0, "fov": 36.0, "lead": 0.55}},
+            {"id": "depth", "from": 35, "to": 46, "name_key": "car_01.zone.depth",
+             "camera": {"height": 1.54, "back": 3.6, "pitch": -2.0, "fov": 44.0, "lead": 0.18}},
+        ],
+        "blocked": blocked,
+    }
+
+
 # --- постановка --------------------------------------------------------------
 
 def stage() -> dict:
@@ -1115,9 +1184,13 @@ def main() -> int:
         card = json.load(fh)
     card["stage"] = stage()
     card["stage_lantern_pools"] = lantern_pools()
+    card["walk"] = walk_block()
     with open(card_path, "w", encoding="utf-8") as fh:
         json.dump(card, fh, ensure_ascii=False, indent=2)
 
+    blocked_n = len(card["walk"]["blocked"])
+    print("draw_car_01: проходимость — %d непроходимых мест, %d зон"
+          % (blocked_n, len(card["walk"]["zones"])))
     figure_parts = sum(len(f[1]) for f in FIGURES.values())
     prop_parts = sum(len(p[1]) for p in PROPS)
     print("draw_car_01: фигур %d (%d контуров), реквизита %d (%d контуров), кулис %d"

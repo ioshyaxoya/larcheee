@@ -581,5 +581,10 @@
   "ui.debug.hint": "F1 — developer panel",
   "ui.debug.car_only": "Straight to car 01 (skip prologue)",
   "ui.debug.paths": "Paths hub",
-  "ui.debug.trial": "The dispute of the clock"
+  "ui.debug.trial": "The dispute of the clock",
+  "ui.prompt.talk": "E — speak to {who}",
+  "car_01.zone.tambour": "Vestibule",
+  "car_01.zone.post": "Guard post",
+  "car_01.zone.luggage": "Luggage hold",
+  "car_01.zone.depth": "The depth"
 }
