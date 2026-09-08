@@ -80,7 +80,11 @@ func _build_trial_viewports() -> void:
 	trial_viewport = SubViewport.new()
 	trial_viewport.name = "TrialWorld"
 	trial_viewport.size = Vector2i(1280, 720)
-	trial_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	# Вне испытания эти два подвьюпорта не нужны, и держать их включёнными —
+	# втрое лишняя работа на каждый кадр всей игры. На слабом или программном
+	# рендерере (браузер без аппаратного ускорения) кадр просто не успевает, и
+	# сцена испытания приходит пустой. Включаются они на входе в испытание.
+	trial_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	trial_viewport.own_world_3d = false
 	add_child(trial_viewport)
 	trial_viewport.world_3d = world_viewport.world_3d
@@ -92,7 +96,7 @@ func _build_trial_viewports() -> void:
 	presence_viewport = SubViewport.new()
 	presence_viewport.name = "Presence"
 	presence_viewport.size = Vector2i(1280, 720)
-	presence_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	presence_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	presence_viewport.transparent_bg = true
 	presence_viewport.own_world_3d = false
 	add_child(presence_viewport)
@@ -286,6 +290,8 @@ func _enter_presence(trial: TrialRuntime) -> void:
 	var st: Dictionary = trial.def.get("stage", {})
 	if st.is_empty():
 		return
+	trial_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	presence_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 	trial_stage = Node3D.new()
 	trial_stage.name = "TrialStage"
 	stage.add_child(trial_stage)
@@ -297,6 +303,8 @@ func _enter_presence(trial: TrialRuntime) -> void:
 
 
 func _leave_presence() -> void:
+	trial_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
+	presence_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	if trial_stage != null:
 		trial_stage.queue_free()
 		trial_stage = null
