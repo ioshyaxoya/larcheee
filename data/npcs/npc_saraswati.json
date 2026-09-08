@@ -1,0 +1,12 @@
+{
+  "id": "npc_saraswati",
+  "name_key": "npc.saraswati.name",
+  "kind": "human",
+  "position": [
+    1.0,
+    0.0,
+    0.8
+  ],
+  "silhouette": "sari_tiffin",
+  "attitude_axes": {}
+}

@@ -1,0 +1,2108 @@
+{
+  "id": "quest_last_half_hour",
+  "kind": "quest",
+  "title_key": "lhh.title",
+  "target_hours": 0.6,
+  "entry": "main",
+  "clock": {
+    "start_minutes": 1200,
+    "deadline_minutes": 1230,
+    "deadline_label_key": "lhh.clock.train_departs"
+  },
+  "output_flags": [
+    "prologue.detainer_id",
+    "prologue.detainer_resolution",
+    "prologue.shrine_stopped",
+    "prologue.ferry_companion",
+    "prologue.ledger_clean",
+    "prologue.knows_sealed_crate",
+    "prologue.dog_followed",
+    "prologue.howrah_friction"
+  ],
+  "detainer_priority": [
+    "nibaron_das",
+    "shoshibhushon_mitra",
+    "ramkishen_agarwal",
+    "widow_monimala",
+    "sher_ali",
+    "gul_mohammad",
+    "ah_sun",
+    "sidi_bilal",
+    "pereira",
+    "sister_rosario",
+    "horipod"
+  ],
+  "npcs": [
+    {
+      "id": "nibaron_das",
+      "name_key": "lhh.npc.nibaron_das"
+    },
+    {
+      "id": "shoshibhushon_mitra",
+      "name_key": "lhh.npc.shoshibhushon_mitra"
+    },
+    {
+      "id": "ramkishen_agarwal",
+      "name_key": "lhh.npc.ramkishen_agarwal"
+    },
+    {
+      "id": "widow_monimala",
+      "name_key": "lhh.npc.widow_monimala"
+    },
+    {
+      "id": "sher_ali",
+      "name_key": "lhh.npc.sher_ali"
+    },
+    {
+      "id": "gul_mohammad",
+      "name_key": "lhh.npc.gul_mohammad"
+    },
+    {
+      "id": "ah_sun",
+      "name_key": "lhh.npc.ah_sun"
+    },
+    {
+      "id": "sidi_bilal",
+      "name_key": "lhh.npc.sidi_bilal"
+    },
+    {
+      "id": "pereira",
+      "name_key": "lhh.npc.pereira"
+    },
+    {
+      "id": "sister_rosario",
+      "name_key": "lhh.npc.sister_rosario"
+    },
+    {
+      "id": "horipod",
+      "name_key": "lhh.npc.horipod"
+    },
+    {
+      "id": "bhagirath",
+      "name_key": "lhh.npc.bhagirath"
+    },
+    {
+      "id": "bipin",
+      "name_key": "lhh.npc.bipin"
+    },
+    {
+      "id": "lame_man",
+      "name_key": "lhh.npc.lame_man"
+    },
+    {
+      "id": "dcruz",
+      "name_key": "lhh.npc.dcruz"
+    },
+    {
+      "id": "jumma",
+      "name_key": "lhh.npc.jumma"
+    },
+    {
+      "id": "gaskell",
+      "name_key": "lhh.npc.gaskell"
+    },
+    {
+      "id": "constable",
+      "name_key": "lhh.npc.constable"
+    },
+    {
+      "id": "acquaintance",
+      "name_key": "lhh.npc.acquaintance"
+    },
+    {
+      "id": "station_babu",
+      "name_key": "lhh.npc.station_babu"
+    }
+  ],
+  "dialogues": {
+    "main": {
+      "start": "intro",
+      "nodes": {
+        "intro": {
+          "speaker": "narrator",
+          "text_key": "lhh.intro",
+          "on_enter": [
+            {
+              "set_flag": "quest.last_half_hour.beat",
+              "value": 1
+            }
+          ],
+          "options": [
+            {
+              "text_key": "lhh.intro.go",
+              "next": "detainer"
+            }
+          ]
+        },
+        "detainer": {
+          "branches": [
+            {
+              "conditions": [
+                {
+                  "tag": "union_seed"
+                }
+              ],
+              "next": "d_nibaron_das"
+            },
+            {
+              "conditions": [
+                {
+                  "tag": "mallick_lecture"
+                }
+              ],
+              "next": "d_shoshibhushon_mitra"
+            },
+            {
+              "conditions": [
+                {
+                  "tag": "opium_touched"
+                }
+              ],
+              "next": "d_ramkishen_agarwal"
+            },
+            {
+              "conditions": [
+                {
+                  "tag": "widow_saved"
+                }
+              ],
+              "next": "d_widow_monimala"
+            },
+            {
+              "conditions": [
+                {
+                  "tag": "sepoy_met"
+                }
+              ],
+              "next": "d_sher_ali"
+            },
+            {
+              "conditions": [
+                {
+                  "tag": "kabuli_ledger"
+                }
+              ],
+              "next": "d_gul_mohammad"
+            },
+            {
+              "conditions": [
+                {
+                  "tag": "tiretta_favor"
+                }
+              ],
+              "next": "d_ah_sun"
+            },
+            {
+              "conditions": [
+                {
+                  "tag": "lascar_papers"
+                }
+              ],
+              "next": "d_sidi_bilal"
+            },
+            {
+              "conditions": [
+                {
+                  "tag": "census_answered"
+                }
+              ],
+              "next": "d_pereira"
+            },
+            {
+              "conditions": [
+                {
+                  "tag": "ice_bought"
+                }
+              ],
+              "next": "d_sister_rosario"
+            },
+            {
+              "conditions": [],
+              "next": "d_horipod"
+            }
+          ]
+        },
+        "d_nibaron_das_hide": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.nibaron_das.hide.out",
+          "next": "leg_ghat"
+        },
+        "d_nibaron_das_dodge": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.nibaron_das.dodge.out",
+          "next": "leg_ghat"
+        },
+        "d_nibaron_das_dodge_fail": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.nibaron_das.dodge.fail",
+          "next": "leg_ghat"
+        },
+        "d_nibaron_das_push": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.nibaron_das.push.out",
+          "next": "leg_ghat"
+        },
+        "d_nibaron_das_push_fail": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.nibaron_das.push.fail",
+          "next": "leg_ghat"
+        },
+        "d_nibaron_das": {
+          "speaker": "nibaron_das",
+          "text_key": "lhh.d.nibaron_das.text",
+          "stage": "lhh.d.nibaron_das.stage",
+          "on_enter": [
+            {
+              "set_flag": "prologue.detainer_id",
+              "value": "nibaron_das"
+            }
+          ],
+          "options": [
+            {
+              "text_key": "lhh.d.nibaron_das.hide",
+              "cost_minutes": 12,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "helped"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 12
+                },
+                {
+                  "set_flag": "prologue.detainer_boards",
+                  "value": true
+                }
+              ],
+              "next": "d_nibaron_das_hide"
+            },
+            {
+              "text_key": "lhh.d.nibaron_das.dodge",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "dodged"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                }
+              ],
+              "next": "d_nibaron_das_dodge",
+              "check": {
+                "skill": "deception",
+                "dc": 12,
+                "label_key": "lhh.check.deception"
+              },
+              "cost_on_fail_minutes": 12,
+              "effects_on_fail": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "dodged"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 12
+                }
+              ],
+              "next_on_fail": "d_nibaron_das_dodge_fail"
+            },
+            {
+              "text_key": "lhh.d.nibaron_das.push",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "pushed"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                }
+              ],
+              "next": "d_nibaron_das_push",
+              "check": {
+                "skill": "intimidation",
+                "dc": 10,
+                "label_key": "lhh.check.intimidation"
+              },
+              "cost_on_fail_minutes": 12,
+              "effects_on_fail": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "pushed"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 12
+                }
+              ],
+              "next_on_fail": "d_nibaron_das_push_fail"
+            }
+          ]
+        },
+        "d_shoshibhushon_mitra_take": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.shoshibhushon_mitra.take.out",
+          "next": "leg_ghat"
+        },
+        "d_shoshibhushon_mitra_refuse": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.shoshibhushon_mitra.refuse.out",
+          "next": "leg_ghat"
+        },
+        "d_shoshibhushon_mitra_force": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.shoshibhushon_mitra.force.out",
+          "next": "leg_ghat"
+        },
+        "d_shoshibhushon_mitra": {
+          "speaker": "shoshibhushon_mitra",
+          "text_key": "lhh.d.shoshibhushon_mitra.text",
+          "stage": "lhh.d.shoshibhushon_mitra.stage",
+          "on_enter": [
+            {
+              "set_flag": "prologue.detainer_id",
+              "value": "shoshibhushon_mitra"
+            }
+          ],
+          "options": [
+            {
+              "text_key": "lhh.d.shoshibhushon_mitra.take",
+              "cost_minutes": 10,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "helped"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 10
+                },
+                {
+                  "set_flag": "prologue.detainer_boards",
+                  "value": true
+                },
+                {
+                  "set_flag": "prologue.mallick_notebook_taken",
+                  "value": true
+                }
+              ],
+              "next": "d_shoshibhushon_mitra_take"
+            },
+            {
+              "text_key": "lhh.d.shoshibhushon_mitra.refuse",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "dodged"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                }
+              ],
+              "next": "d_shoshibhushon_mitra_refuse"
+            },
+            {
+              "text_key": "lhh.d.shoshibhushon_mitra.force",
+              "cost_minutes": 12,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "pushed"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 12
+                },
+                {
+                  "set_flag": "prologue.mallick_notebook_taken",
+                  "value": true
+                },
+                {
+                  "set_flag": "prologue.shoshibhushon_informed",
+                  "value": true
+                }
+              ],
+              "next": "d_shoshibhushon_mitra_force"
+            }
+          ]
+        },
+        "d_ramkishen_agarwal_blame": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.ramkishen_agarwal.blame.out",
+          "next": "leg_ghat"
+        },
+        "d_ramkishen_agarwal_see_through": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.ramkishen_agarwal.see_through.out",
+          "next": "leg_ghat"
+        },
+        "d_ramkishen_agarwal_see_through_fail": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.ramkishen_agarwal.see_through.fail",
+          "next": "leg_ghat"
+        },
+        "d_ramkishen_agarwal_push": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.ramkishen_agarwal.push.out",
+          "next": "leg_ghat"
+        },
+        "d_ramkishen_agarwal": {
+          "speaker": "ramkishen_agarwal",
+          "text_key": "lhh.d.ramkishen_agarwal.text",
+          "stage": "lhh.d.ramkishen_agarwal.stage",
+          "on_enter": [
+            {
+              "set_flag": "prologue.detainer_id",
+              "value": "ramkishen_agarwal"
+            }
+          ],
+          "options": [
+            {
+              "text_key": "lhh.d.ramkishen_agarwal.blame",
+              "cost_minutes": 12,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "helped"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 12
+                },
+                {
+                  "set_flag": "prologue.detainer_boards",
+                  "value": true
+                }
+              ],
+              "next": "d_ramkishen_agarwal_blame"
+            },
+            {
+              "text_key": "lhh.d.ramkishen_agarwal.see_through",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "dodged"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                },
+                {
+                  "set_flag": "prologue.ramkishen_debtor",
+                  "value": true
+                }
+              ],
+              "next": "d_ramkishen_agarwal_see_through",
+              "check": {
+                "skill": "insight",
+                "dc": 13,
+                "label_key": "lhh.check.insight"
+              },
+              "cost_on_fail_minutes": 12,
+              "effects_on_fail": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "dodged"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 12
+                }
+              ],
+              "next_on_fail": "d_ramkishen_agarwal_see_through_fail"
+            },
+            {
+              "text_key": "lhh.d.ramkishen_agarwal.push",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "pushed"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                },
+                {
+                  "set_flag": "prologue.opium_case_opened",
+                  "value": true
+                }
+              ],
+              "next": "d_ramkishen_agarwal_push"
+            }
+          ]
+        },
+        "d_widow_monimala_carry": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.widow_monimala.carry.out",
+          "next": "leg_ghat"
+        },
+        "d_widow_monimala_other_car": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.widow_monimala.other_car.out",
+          "next": "leg_ghat"
+        },
+        "d_widow_monimala_pass": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.widow_monimala.pass.out",
+          "next": "leg_ghat"
+        },
+        "d_widow_monimala": {
+          "speaker": "widow_monimala",
+          "text_key": "lhh.d.widow_monimala.text",
+          "stage": "lhh.d.widow_monimala.stage",
+          "on_enter": [
+            {
+              "set_flag": "prologue.detainer_id",
+              "value": "widow_monimala"
+            }
+          ],
+          "options": [
+            {
+              "text_key": "lhh.d.widow_monimala.carry",
+              "cost_minutes": 12,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "helped"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 12
+                },
+                {
+                  "set_flag": "prologue.detainer_boards",
+                  "value": true
+                }
+              ],
+              "next": "d_widow_monimala_carry"
+            },
+            {
+              "text_key": "lhh.d.widow_monimala.other_car",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "dodged"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                }
+              ],
+              "next": "d_widow_monimala_other_car"
+            },
+            {
+              "text_key": "lhh.d.widow_monimala.pass",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "pushed"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                }
+              ],
+              "next": "d_widow_monimala_pass"
+            }
+          ]
+        },
+        "d_sher_ali_listen": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.sher_ali.listen.out",
+          "next": "leg_ghat"
+        },
+        "d_sher_ali_talk": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.sher_ali.talk.out",
+          "next": "leg_ghat"
+        },
+        "d_sher_ali_talk_fail": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.sher_ali.talk.fail",
+          "next": "leg_ghat"
+        },
+        "d_sher_ali_patrol": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.sher_ali.patrol.out",
+          "next": "leg_ghat"
+        },
+        "d_sher_ali": {
+          "speaker": "sher_ali",
+          "text_key": "lhh.d.sher_ali.text",
+          "stage": "lhh.d.sher_ali.stage",
+          "on_enter": [
+            {
+              "set_flag": "prologue.detainer_id",
+              "value": "sher_ali"
+            }
+          ],
+          "options": [
+            {
+              "text_key": "lhh.d.sher_ali.listen",
+              "cost_minutes": 12,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "helped"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 12
+                },
+                {
+                  "set_flag": "prologue.detainer_boards",
+                  "value": true
+                }
+              ],
+              "next": "d_sher_ali_listen"
+            },
+            {
+              "text_key": "lhh.d.sher_ali.talk",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "dodged"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                }
+              ],
+              "next": "d_sher_ali_talk",
+              "check": {
+                "skill": "persuasion",
+                "dc": 12,
+                "label_key": "lhh.check.persuasion"
+              },
+              "cost_on_fail_minutes": 12,
+              "effects_on_fail": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "dodged"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 12
+                }
+              ],
+              "next_on_fail": "d_sher_ali_talk_fail"
+            },
+            {
+              "text_key": "lhh.d.sher_ali.patrol",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "pushed"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                },
+                {
+                  "set_flag": "prologue.sher_ali_betrayed",
+                  "value": true
+                }
+              ],
+              "next": "d_sher_ali_patrol"
+            }
+          ]
+        },
+        "d_gul_mohammad_pay": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.gul_mohammad.pay.out",
+          "next": "leg_ghat"
+        },
+        "d_gul_mohammad_acknowledge": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.gul_mohammad.acknowledge.out",
+          "next": "leg_ghat"
+        },
+        "d_gul_mohammad_refuse": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.gul_mohammad.refuse.out",
+          "next": "leg_ghat"
+        },
+        "d_gul_mohammad_refuse_fail": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.gul_mohammad.refuse.fail",
+          "next": "leg_ghat"
+        },
+        "d_gul_mohammad": {
+          "speaker": "gul_mohammad",
+          "text_key": "lhh.d.gul_mohammad.text",
+          "stage": "lhh.d.gul_mohammad.stage",
+          "on_enter": [
+            {
+              "set_flag": "prologue.detainer_id",
+              "value": "gul_mohammad"
+            }
+          ],
+          "options": [
+            {
+              "text_key": "lhh.d.gul_mohammad.pay",
+              "cost_minutes": 10,
+              "conditions": [
+                {
+                  "money_min": 192
+                }
+              ],
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "helped"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 10
+                },
+                {
+                  "set_flag": "prologue.detainer_boards",
+                  "value": true
+                },
+                {
+                  "add_money": -192
+                },
+                {
+                  "set_flag": "prologue.debt_kabuli_paid",
+                  "value": true
+                }
+              ],
+              "next": "d_gul_mohammad_pay"
+            },
+            {
+              "text_key": "lhh.d.gul_mohammad.acknowledge",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "dodged"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                },
+                {
+                  "set_flag": "prologue.debt_kabuli",
+                  "value": true
+                }
+              ],
+              "next": "d_gul_mohammad_acknowledge"
+            },
+            {
+              "text_key": "lhh.d.gul_mohammad.refuse",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "pushed"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                }
+              ],
+              "next": "d_gul_mohammad_refuse",
+              "check": {
+                "skill": "intimidation",
+                "dc": 14,
+                "label_key": "lhh.check.intimidation"
+              },
+              "cost_on_fail_minutes": 12,
+              "effects_on_fail": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "pushed"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 12
+                }
+              ],
+              "next_on_fail": "d_gul_mohammad_refuse_fail"
+            }
+          ]
+        },
+        "d_ah_sun_wait": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.ah_sun.wait.out",
+          "next": "leg_ghat"
+        },
+        "d_ah_sun_fake": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.ah_sun.fake.out",
+          "next": "leg_ghat"
+        },
+        "d_ah_sun_leave": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.ah_sun.leave.out",
+          "next": "leg_ghat"
+        },
+        "d_ah_sun": {
+          "speaker": "ah_sun",
+          "text_key": "lhh.d.ah_sun.text",
+          "stage": "lhh.d.ah_sun.stage",
+          "on_enter": [
+            {
+              "set_flag": "prologue.detainer_id",
+              "value": "ah_sun"
+            }
+          ],
+          "options": [
+            {
+              "text_key": "lhh.d.ah_sun.wait",
+              "cost_minutes": 12,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "helped"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 12
+                },
+                {
+                  "set_flag": "prologue.detainer_boards",
+                  "value": true
+                },
+                {
+                  "set_flag": "prologue.small_crystal",
+                  "value": true
+                }
+              ],
+              "next": "d_ah_sun_wait"
+            },
+            {
+              "text_key": "lhh.d.ah_sun.fake",
+              "cost_minutes": 10,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "dodged"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 10
+                },
+                {
+                  "set_flag": "prologue.fake_crystal",
+                  "value": true
+                }
+              ],
+              "next": "d_ah_sun_fake"
+            },
+            {
+              "text_key": "lhh.d.ah_sun.leave",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "pushed"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                }
+              ],
+              "next": "d_ah_sun_leave"
+            }
+          ]
+        },
+        "d_sidi_bilal_read": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.sidi_bilal.read.out",
+          "next": "leg_ghat"
+        },
+        "d_sidi_bilal_lie": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.sidi_bilal.lie.out",
+          "next": "leg_ghat"
+        },
+        "d_sidi_bilal_refuse": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.sidi_bilal.refuse.out",
+          "next": "leg_ghat"
+        },
+        "d_sidi_bilal": {
+          "speaker": "sidi_bilal",
+          "text_key": "lhh.d.sidi_bilal.text",
+          "stage": "lhh.d.sidi_bilal.stage",
+          "on_enter": [
+            {
+              "set_flag": "prologue.detainer_id",
+              "value": "sidi_bilal"
+            }
+          ],
+          "options": [
+            {
+              "text_key": "lhh.d.sidi_bilal.read",
+              "cost_minutes": 10,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "helped"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 10
+                },
+                {
+                  "set_flag": "prologue.detainer_boards",
+                  "value": true
+                }
+              ],
+              "next": "d_sidi_bilal_read"
+            },
+            {
+              "text_key": "lhh.d.sidi_bilal.lie",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "dodged"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                },
+                {
+                  "set_flag": "prologue.lied_to_bilal",
+                  "value": true
+                }
+              ],
+              "next": "d_sidi_bilal_lie"
+            },
+            {
+              "text_key": "lhh.d.sidi_bilal.refuse",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "pushed"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                }
+              ],
+              "next": "d_sidi_bilal_refuse"
+            }
+          ]
+        },
+        "d_pereira_fix": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.pereira.fix.out",
+          "next": "leg_ghat"
+        },
+        "d_pereira_fix_fail": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.pereira.fix.fail",
+          "next": "leg_ghat"
+        },
+        "d_pereira_sign": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.pereira.sign.out",
+          "next": "leg_ghat"
+        },
+        "d_pereira_tear": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.pereira.tear.out",
+          "next": "leg_ghat"
+        },
+        "d_pereira": {
+          "speaker": "pereira",
+          "text_key": "lhh.d.pereira.text",
+          "stage": "lhh.d.pereira.stage",
+          "on_enter": [
+            {
+              "set_flag": "prologue.detainer_id",
+              "value": "pereira"
+            }
+          ],
+          "options": [
+            {
+              "text_key": "lhh.d.pereira.fix",
+              "cost_minutes": 12,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "helped"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 12
+                },
+                {
+                  "set_flag": "prologue.detainer_boards",
+                  "value": true
+                },
+                {
+                  "set_flag": "prologue.ledger_clean",
+                  "value": true
+                }
+              ],
+              "next": "d_pereira_fix",
+              "check": {
+                "skill": "investigation",
+                "dc": 13,
+                "label_key": "lhh.check.investigation"
+              },
+              "cost_on_fail_minutes": 12,
+              "effects_on_fail": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "dodged"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 12
+                }
+              ],
+              "next_on_fail": "d_pereira_fix_fail"
+            },
+            {
+              "text_key": "lhh.d.pereira.sign",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "dodged"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                }
+              ],
+              "next": "d_pereira_sign"
+            },
+            {
+              "text_key": "lhh.d.pereira.tear",
+              "cost_minutes": 10,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "pushed"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 10
+                },
+                {
+                  "set_flag": "prologue.census_torn",
+                  "value": true
+                }
+              ],
+              "next": "d_pereira_tear"
+            }
+          ]
+        },
+        "d_sister_rosario_ice": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.sister_rosario.ice.out",
+          "next": "leg_ghat"
+        },
+        "d_sister_rosario_money": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.sister_rosario.money.out",
+          "next": "leg_ghat"
+        },
+        "d_sister_rosario_refuse": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.sister_rosario.refuse.out",
+          "next": "leg_ghat"
+        },
+        "d_sister_rosario": {
+          "speaker": "sister_rosario",
+          "text_key": "lhh.d.sister_rosario.text",
+          "stage": "lhh.d.sister_rosario.stage",
+          "on_enter": [
+            {
+              "set_flag": "prologue.detainer_id",
+              "value": "sister_rosario"
+            }
+          ],
+          "options": [
+            {
+              "text_key": "lhh.d.sister_rosario.ice",
+              "cost_minutes": 12,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "helped"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 12
+                },
+                {
+                  "set_flag": "prologue.detainer_boards",
+                  "value": true
+                },
+                {
+                  "set_flag": "prologue.rosario_ice",
+                  "value": true
+                }
+              ],
+              "next": "d_sister_rosario_ice"
+            },
+            {
+              "text_key": "lhh.d.sister_rosario.money",
+              "cost_minutes": 8,
+              "conditions": [
+                {
+                  "money_min": 16
+                }
+              ],
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "dodged"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                },
+                {
+                  "add_money": -16
+                }
+              ],
+              "next": "d_sister_rosario_money"
+            },
+            {
+              "text_key": "lhh.d.sister_rosario.refuse",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "pushed"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                },
+                {
+                  "set_flag": "prologue.rosario_refused",
+                  "value": true
+                }
+              ],
+              "next": "d_sister_rosario_refuse"
+            }
+          ]
+        },
+        "d_horipod_sort": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.horipod.sort.out",
+          "next": "leg_ghat"
+        },
+        "d_horipod_own": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.horipod.own.out",
+          "next": "leg_ghat"
+        },
+        "d_horipod_steal": {
+          "speaker": "narrator",
+          "text_key": "lhh.d.horipod.steal.out",
+          "next": "leg_ghat"
+        },
+        "d_horipod": {
+          "speaker": "horipod",
+          "text_key": "lhh.d.horipod.text",
+          "stage": "lhh.d.horipod.stage",
+          "on_enter": [
+            {
+              "set_flag": "prologue.detainer_id",
+              "value": "horipod"
+            }
+          ],
+          "options": [
+            {
+              "text_key": "lhh.d.horipod.sort",
+              "cost_minutes": 12,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "helped"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 12
+                },
+                {
+                  "set_flag": "prologue.detainer_boards",
+                  "value": true
+                },
+                {
+                  "set_flag": "prologue.foreign_trunk",
+                  "value": true
+                }
+              ],
+              "next": "d_horipod_sort"
+            },
+            {
+              "text_key": "lhh.d.horipod.own",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "dodged"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                }
+              ],
+              "next": "d_horipod_own"
+            },
+            {
+              "text_key": "lhh.d.horipod.steal",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.detainer_resolution",
+                  "value": "pushed"
+                },
+                {
+                  "set_flag": "quest.last_half_hour.bit1_minutes",
+                  "value": 8
+                },
+                {
+                  "set_flag": "prologue.stole_luggage",
+                  "value": true
+                }
+              ],
+              "next": "d_horipod_steal"
+            }
+          ]
+        },
+        "leg_ghat": {
+          "speaker": "narrator",
+          "text_key": "lhh.leg.ghat",
+          "on_enter": [
+            {
+              "add_minutes": 3,
+              "reason_key": "lhh.reason.road_ghat"
+            },
+            {
+              "set_flag": "quest.last_half_hour.beat",
+              "value": 2
+            }
+          ],
+          "next": "crossing"
+        },
+        "crossing": {
+          "speaker": "narrator",
+          "text_key": "lhh.crossing.text",
+          "options": [
+            {
+              "text_key": "lhh.crossing.bridge",
+              "cost_minutes": 6,
+              "cost_note_key": "lhh.crossing.bridge.note",
+              "chance": {
+                "provider": "bridge_raised",
+                "label_key": "lhh.chance.bridge",
+                "on_hit": "bridge_raised",
+                "on_miss": "bridge_open",
+                "hit_minutes": 4
+              }
+            },
+            {
+              "text_key": "lhh.crossing.ferry",
+              "cost_minutes": 8,
+              "effects": [
+                {
+                  "set_flag": "prologue.crossing",
+                  "value": "ferry"
+                },
+                {
+                  "set_flag": "prologue.ferry_companion",
+                  "value": "bipin"
+                }
+              ],
+              "next": "ferry"
+            },
+            {
+              "text_key": "lhh.crossing.boat_marwari",
+              "cost_minutes": 6,
+              "conditions": [
+                {
+                  "origin": "marwari"
+                },
+                {
+                  "money_min": 2
+                }
+              ],
+              "effects": [
+                {
+                  "add_money": -2
+                },
+                {
+                  "set_flag": "prologue.crossing",
+                  "value": "boat"
+                },
+                {
+                  "set_flag": "prologue.ferry_companion",
+                  "value": "bipin"
+                },
+                {
+                  "set_flag": "prologue.met_bhagirath",
+                  "value": true
+                }
+              ],
+              "next": "boat"
+            },
+            {
+              "text_key": "lhh.crossing.boat_armenian",
+              "cost_minutes": 6,
+              "conditions": [
+                {
+                  "origin": "armenian"
+                },
+                {
+                  "money_min": 6
+                }
+              ],
+              "effects": [
+                {
+                  "add_money": -6
+                },
+                {
+                  "set_flag": "prologue.crossing",
+                  "value": "boat"
+                },
+                {
+                  "set_flag": "prologue.ferry_companion",
+                  "value": "bipin"
+                },
+                {
+                  "set_flag": "prologue.met_bhagirath",
+                  "value": true
+                }
+              ],
+              "next": "boat"
+            },
+            {
+              "text_key": "lhh.crossing.boat_stowaway",
+              "cost_minutes": 6,
+              "cost_on_fail_minutes": 10,
+              "conditions": [
+                {
+                  "origin": "loafer"
+                }
+              ],
+              "check": {
+                "skill": "stealth",
+                "dc": 10,
+                "label_key": "lhh.check.stealth"
+              },
+              "effects": [
+                {
+                  "set_flag": "prologue.crossing",
+                  "value": "boat_stowaway"
+                },
+                {
+                  "set_flag": "prologue.ferry_companion",
+                  "value": "bipin"
+                },
+                {
+                  "set_flag": "prologue.met_bhagirath",
+                  "value": true
+                }
+              ],
+              "next": "boat",
+              "effects_on_fail": [
+                {
+                  "set_flag": "prologue.crossing",
+                  "value": "boat_stowaway"
+                },
+                {
+                  "set_flag": "prologue.ferry_companion",
+                  "value": "none"
+                },
+                {
+                  "set_flag": "prologue.met_bhagirath",
+                  "value": true
+                }
+              ],
+              "next_on_fail": "boat_caught"
+            },
+            {
+              "text_key": "lhh.crossing.boat_pay",
+              "cost_minutes": 6,
+              "conditions": [
+                {
+                  "not": {
+                    "origin_in": [
+                      "marwari",
+                      "armenian",
+                      "loafer"
+                    ]
+                  }
+                },
+                {
+                  "money_min": 4
+                }
+              ],
+              "effects": [
+                {
+                  "add_money": -4
+                },
+                {
+                  "set_flag": "prologue.crossing",
+                  "value": "boat"
+                },
+                {
+                  "set_flag": "prologue.ferry_companion",
+                  "value": "bipin"
+                },
+                {
+                  "set_flag": "prologue.met_bhagirath",
+                  "value": true
+                }
+              ],
+              "next": "boat"
+            }
+          ]
+        },
+        "bridge_open": {
+          "speaker": "narrator",
+          "text_key": "lhh.bridge.open",
+          "on_enter": [
+            {
+              "set_flag": "prologue.crossing",
+              "value": "bridge"
+            },
+            {
+              "set_flag": "prologue.ferry_companion",
+              "value": "none"
+            }
+          ],
+          "next": "leg_shrine"
+        },
+        "bridge_raised": {
+          "speaker": "narrator",
+          "text_key": "lhh.bridge.raised",
+          "on_enter": [
+            {
+              "set_flag": "prologue.crossing",
+              "value": "bridge_waited"
+            },
+            {
+              "set_flag": "prologue.ferry_companion",
+              "value": "none"
+            }
+          ],
+          "next": "leg_shrine"
+        },
+        "ferry": {
+          "speaker": "bipin",
+          "text_key": "lhh.ferry.bipin",
+          "stage": "lhh.ferry.stage",
+          "next": "leg_shrine"
+        },
+        "boat": {
+          "speaker": "narrator",
+          "text_key": "lhh.boat.text",
+          "next": "boat_bipin"
+        },
+        "boat_bipin": {
+          "speaker": "bipin",
+          "text_key": "lhh.boat.bipin",
+          "next": "leg_shrine"
+        },
+        "boat_caught": {
+          "speaker": "bhagirath",
+          "text_key": "lhh.boat.caught",
+          "next": "leg_shrine"
+        },
+        "leg_shrine": {
+          "speaker": "narrator",
+          "text_key": "lhh.leg.shrine",
+          "on_enter": [
+            {
+              "add_minutes": 2,
+              "reason_key": "lhh.reason.road_shrine"
+            },
+            {
+              "set_flag": "quest.last_half_hour.beat",
+              "value": 3
+            }
+          ],
+          "next": "shrine"
+        },
+        "shrine": {
+          "speaker": "narrator",
+          "text_key": "lhh.shrine.text",
+          "stage": "lhh.shrine.stage",
+          "options": [
+            {
+              "text_key": "lhh.shrine.stop_oil",
+              "cost_minutes": 7,
+              "effects": [
+                {
+                  "set_flag": "prologue.shrine_stopped",
+                  "value": true
+                }
+              ],
+              "next": "shrine_stopped"
+            },
+            {
+              "text_key": "lhh.shrine.pass_by",
+              "cost_minutes": 3,
+              "cost_note_key": "lhh.shrine.pass_by.note",
+              "next": "shrine_dog"
+            },
+            {
+              "text_key": "lhh.shrine.speak_leave",
+              "cost_minutes": 5,
+              "effects": [
+                {
+                  "set_flag": "prologue.shrine_spoke",
+                  "value": true
+                }
+              ],
+              "next": "shrine_spoke"
+            }
+          ]
+        },
+        "shrine_stopped": {
+          "speaker": "lame_man",
+          "text_key": "lhh.shrine.stopped",
+          "next": "leg_station"
+        },
+        "shrine_dog": {
+          "speaker": "narrator",
+          "text_key": "lhh.shrine.dog",
+          "on_enter": [
+            {
+              "add_minutes": 4,
+              "reason_key": "lhh.reason.dog"
+            },
+            {
+              "set_flag": "prologue.dog_followed",
+              "value": true
+            }
+          ],
+          "next": "leg_station"
+        },
+        "shrine_spoke": {
+          "speaker": "lame_man",
+          "text_key": "lhh.shrine.spoke",
+          "next": "leg_station"
+        },
+        "leg_station": {
+          "speaker": "narrator",
+          "text_key": "lhh.leg.station",
+          "on_enter": [
+            {
+              "add_minutes": 2,
+              "reason_key": "lhh.reason.road_station"
+            },
+            {
+              "set_flag": "quest.last_half_hour.beat",
+              "value": 4
+            }
+          ],
+          "next": "howrah"
+        },
+        "howrah": {
+          "branches": [
+            {
+              "conditions": [
+                {
+                  "sex": "f"
+                }
+              ],
+              "next": "h_ladies"
+            },
+            {
+              "conditions": [
+                {
+                  "origin": "officer"
+                }
+              ],
+              "next": "h_officer"
+            },
+            {
+              "conditions": [
+                {
+                  "origin": "loafer"
+                }
+              ],
+              "next": "h_loafer"
+            },
+            {
+              "conditions": [
+                {
+                  "origin": "chinese"
+                }
+              ],
+              "next": "h_chinese"
+            },
+            {
+              "conditions": [
+                {
+                  "origin_in": [
+                    "habshi",
+                    "pathan"
+                  ]
+                }
+              ],
+              "next": "h_search"
+            },
+            {
+              "conditions": [
+                {
+                  "origin": "bengali"
+                }
+              ],
+              "next": "h_babu"
+            },
+            {
+              "conditions": [
+                {
+                  "origin": "marwari"
+                }
+              ],
+              "next": "h_marwari"
+            },
+            {
+              "conditions": [
+                {
+                  "origin": "armenian"
+                }
+              ],
+              "next": "h_armenian"
+            },
+            {
+              "conditions": [
+                {
+                  "origin": "anglo_indian"
+                }
+              ],
+              "next": "h_anglo"
+            },
+            {
+              "conditions": [
+                {
+                  "origin": "baghdadi_jew"
+                }
+              ],
+              "next": "h_baghdadi"
+            },
+            {
+              "conditions": [
+                {
+                  "origin": "dutch"
+                }
+              ],
+              "next": "h_dutch"
+            },
+            {
+              "conditions": [],
+              "next": "h_queue"
+            }
+          ]
+        },
+        "h_ladies": {
+          "speaker": "narrator",
+          "text_key": "lhh.howrah.ladies",
+          "on_enter": [
+            {
+              "add_minutes": 7,
+              "reason_key": "lhh.reason.ladies_entrance"
+            },
+            {
+              "set_flag": "prologue.howrah_friction",
+              "value": "ladies_entrance"
+            }
+          ],
+          "next": "dcruz"
+        },
+        "h_officer": {
+          "speaker": "acquaintance",
+          "text_key": "lhh.howrah.officer",
+          "on_enter": [
+            {
+              "add_minutes": 8,
+              "reason_key": "lhh.reason.acquaintance"
+            },
+            {
+              "set_flag": "prologue.howrah_friction",
+              "value": "acquaintance"
+            }
+          ],
+          "next": "dcruz"
+        },
+        "h_chinese": {
+          "speaker": "narrator",
+          "text_key": "lhh.howrah.chinese",
+          "on_enter": [
+            {
+              "add_minutes": 5,
+              "reason_key": "lhh.reason.unrecorded"
+            },
+            {
+              "set_flag": "prologue.howrah_friction",
+              "value": "unrecorded"
+            }
+          ],
+          "next": "dcruz"
+        },
+        "h_search": {
+          "speaker": "constable",
+          "text_key": "lhh.howrah.search",
+          "on_enter": [
+            {
+              "add_minutes": 7,
+              "reason_key": "lhh.reason.luggage_search"
+            },
+            {
+              "set_flag": "prologue.howrah_friction",
+              "value": "luggage_search"
+            }
+          ],
+          "next": "dcruz"
+        },
+        "h_babu": {
+          "speaker": "station_babu",
+          "text_key": "lhh.howrah.babu",
+          "on_enter": [
+            {
+              "add_minutes": 6,
+              "reason_key": "lhh.reason.babu_channel"
+            },
+            {
+              "set_flag": "prologue.howrah_friction",
+              "value": "babu_channel"
+            }
+          ],
+          "next": "dcruz"
+        },
+        "h_marwari": {
+          "speaker": "narrator",
+          "text_key": "lhh.howrah.marwari",
+          "on_enter": [
+            {
+              "add_minutes": 6,
+              "reason_key": "lhh.reason.ledger_haggle"
+            },
+            {
+              "set_flag": "prologue.howrah_friction",
+              "value": "ledger_haggle"
+            }
+          ],
+          "next": "dcruz"
+        },
+        "h_armenian": {
+          "speaker": "narrator",
+          "text_key": "lhh.howrah.armenian",
+          "on_enter": [
+            {
+              "add_minutes": 6,
+              "reason_key": "lhh.reason.old_account"
+            },
+            {
+              "set_flag": "prologue.howrah_friction",
+              "value": "old_account"
+            }
+          ],
+          "next": "dcruz"
+        },
+        "h_anglo": {
+          "speaker": "narrator",
+          "text_key": "lhh.howrah.anglo",
+          "on_enter": [
+            {
+              "add_minutes": 6,
+              "reason_key": "lhh.reason.wires_caste"
+            },
+            {
+              "set_flag": "prologue.howrah_friction",
+              "value": "wires_caste"
+            }
+          ],
+          "next": "dcruz"
+        },
+        "h_baghdadi": {
+          "speaker": "narrator",
+          "text_key": "lhh.howrah.baghdadi",
+          "on_enter": [
+            {
+              "add_minutes": 6,
+              "reason_key": "lhh.reason.manifest"
+            },
+            {
+              "set_flag": "prologue.howrah_friction",
+              "value": "manifest"
+            }
+          ],
+          "next": "dcruz"
+        },
+        "h_dutch": {
+          "speaker": "narrator",
+          "text_key": "lhh.howrah.dutch",
+          "on_enter": [
+            {
+              "add_minutes": 7,
+              "reason_key": "lhh.reason.company_ghost"
+            },
+            {
+              "set_flag": "prologue.howrah_friction",
+              "value": "company_ghost"
+            }
+          ],
+          "next": "dcruz"
+        },
+        "h_queue": {
+          "speaker": "narrator",
+          "text_key": "lhh.howrah.queue",
+          "on_enter": [
+            {
+              "add_minutes": 6,
+              "reason_key": "lhh.reason.queue"
+            },
+            {
+              "set_flag": "prologue.howrah_friction",
+              "value": "babu_channel"
+            }
+          ],
+          "next": "dcruz"
+        },
+        "h_loafer": {
+          "branches": [
+            {
+              "conditions": [
+                {
+                  "tag": "has_papers"
+                }
+              ],
+              "next": "h_loafer_papers"
+            },
+            {
+              "conditions": [],
+              "next": "h_loafer_talk"
+            }
+          ]
+        },
+        "h_loafer_papers": {
+          "speaker": "constable",
+          "text_key": "lhh.howrah.loafer_papers",
+          "on_enter": [
+            {
+              "add_minutes": 8,
+              "reason_key": "lhh.reason.act_1869"
+            },
+            {
+              "set_flag": "prologue.howrah_friction",
+              "value": "act_1869"
+            }
+          ],
+          "next": "dcruz"
+        },
+        "h_loafer_talk": {
+          "speaker": "constable",
+          "text_key": "lhh.howrah.loafer_talk",
+          "options": [
+            {
+              "text_key": "lhh.howrah.loafer_talk.try",
+              "cost_minutes": 8,
+              "cost_on_fail_minutes": 8,
+              "check": {
+                "skills_any": [
+                  "persuasion",
+                  "deception"
+                ],
+                "dc": 12,
+                "label_key": "lhh.check.talk_out"
+              },
+              "effects": [
+                {
+                  "set_flag": "prologue.howrah_friction",
+                  "value": "act_1869"
+                }
+              ],
+              "next": "h_loafer_talk_ok",
+              "effects_on_fail": [
+                {
+                  "set_flag": "prologue.howrah_friction",
+                  "value": "act_1869"
+                }
+              ],
+              "next_on_fail": "h_loafer_talk_fail"
+            }
+          ]
+        },
+        "h_loafer_talk_ok": {
+          "speaker": "constable",
+          "text_key": "lhh.howrah.loafer_talk.ok",
+          "next": "dcruz"
+        },
+        "h_loafer_talk_fail": {
+          "speaker": "constable",
+          "text_key": "lhh.howrah.loafer_talk.fail",
+          "next": "dcruz"
+        },
+        "dcruz": {
+          "speaker": "dcruz",
+          "text_key": "lhh.howrah.dcruz",
+          "stage": "lhh.howrah.dcruz.stage",
+          "next": "jumma"
+        },
+        "jumma": {
+          "speaker": "jumma",
+          "text_key": "lhh.howrah.jumma",
+          "options": [
+            {
+              "text_key": "lhh.howrah.jumma.hire",
+              "conditions": [
+                {
+                  "money_min": 2
+                }
+              ],
+              "effects": [
+                {
+                  "add_money": -2
+                }
+              ],
+              "next": "jumma_hired"
+            },
+            {
+              "text_key": "lhh.howrah.jumma.extra",
+              "conditions": [
+                {
+                  "money_min": 3
+                }
+              ],
+              "effects": [
+                {
+                  "add_money": -3
+                },
+                {
+                  "set_flag": "prologue.knows_sealed_crate",
+                  "value": true
+                }
+              ],
+              "next": "jumma_crate"
+            },
+            {
+              "text_key": "lhh.howrah.jumma.decline",
+              "next": "platform"
+            }
+          ]
+        },
+        "jumma_hired": {
+          "speaker": "narrator",
+          "text_key": "lhh.howrah.jumma.hired",
+          "next": "platform"
+        },
+        "jumma_crate": {
+          "speaker": "jumma",
+          "text_key": "lhh.howrah.jumma.crate",
+          "next": "platform"
+        },
+        "platform": {
+          "speaker": "narrator",
+          "text_key": "lhh.platform.text",
+          "stage": "lhh.platform.stage",
+          "on_enter": [
+            {
+              "set_flag": "quest.last_half_hour.beat",
+              "value": 5
+            },
+            {
+              "record_minutes_flag": "prologue.minutes_late"
+            }
+          ],
+          "next": "gaskell"
+        },
+        "gaskell": {
+          "speaker": "gaskell",
+          "text_key": "lhh.platform.gaskell",
+          "options": [
+            {
+              "text_key": "lhh.platform.run",
+              "next": "run_straight"
+            },
+            {
+              "text_key": "lhh.platform.barrow",
+              "check": {
+                "skill": "athletics",
+                "dc": 10,
+                "label_key": "lhh.check.athletics"
+              },
+              "next": "run_barrow",
+              "next_on_fail": "run_barrow_fail"
+            },
+            {
+              "text_key": "lhh.platform.climb",
+              "check": {
+                "skill": "acrobatics",
+                "dc": 12,
+                "label_key": "lhh.check.acrobatics"
+              },
+              "next": "run_climb",
+              "next_on_fail": "run_climb_fail"
+            }
+          ]
+        },
+        "run_straight": {
+          "speaker": "narrator",
+          "text_key": "lhh.platform.run_straight",
+          "next": "jump"
+        },
+        "run_barrow": {
+          "speaker": "narrator",
+          "text_key": "lhh.platform.run_barrow",
+          "next": "jump"
+        },
+        "run_barrow_fail": {
+          "speaker": "narrator",
+          "text_key": "lhh.platform.run_barrow_fail",
+          "next": "jump"
+        },
+        "run_climb": {
+          "speaker": "narrator",
+          "text_key": "lhh.platform.run_climb",
+          "next": "jump"
+        },
+        "run_climb_fail": {
+          "speaker": "narrator",
+          "text_key": "lhh.platform.run_climb_fail",
+          "next": "jump"
+        },
+        "jump": {
+          "speaker": "narrator",
+          "text_key": "lhh.platform.jump",
+          "on_enter": [
+            {
+              "emit": "jump_cutscene"
+            }
+          ],
+          "next": "dark"
+        },
+        "dark": {
+          "speaker": "narrator",
+          "text_key": "lhh.platform.dark",
+          "on_enter": [
+            {
+              "set_flag": "prologue.completed",
+              "value": true
+            }
+          ],
+          "end": true
+        }
+      }
+    }
+  }
+}

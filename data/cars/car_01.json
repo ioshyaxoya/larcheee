@@ -1,0 +1,205 @@
+{
+  "id": "car_01",
+  "title": "Тормозной вагон",
+  "chapter": 1,
+  "kind": "world",
+  "is_god": true,
+  "target_hours": 3.5,
+  "palette": "bollywood_dark",
+  "settlement": "none",
+  "magic_dead": false,
+  "musical_number": true,
+  "map": "maps/car_01.tscn",
+  "grid": {
+    "w": 18,
+    "h": 46,
+    "levels": [
+      "floor",
+      "gallery"
+    ]
+  },
+  "boss": "god_shani",
+  "entry_conditions": {},
+  "spawned_from_prologue_tag": null,
+  "reacts_to_prologue_tag": null,
+  "reacts_to_car": null,
+  "god_data": {
+    "id": "god_shani",
+    "name_key": "god.shani.name",
+    "locality": "придорожное святилище у Хауры",
+    "unkillable": true,
+    "respawn_after_cars": 3,
+    "trial": {
+      "type": "debate_clock",
+      "start_time": "20:30",
+      "loss_per_round_hours": 1,
+      "soft_reset_at_hours_lost": 6,
+      "rounds": [
+        "name",
+        "lateness",
+        "haste"
+      ],
+      "critical_argument_requires_flag": "car_01.journal_seen"
+    },
+    "performance": {
+      "style": "debate_to_wheelbeat",
+      "music_track": "amb_shani_regulator",
+      "audience_meter": false,
+      "gold_flash_on": "clock_turn"
+    },
+    "vahana": {
+      "item": "vahana_crow_feather",
+      "effect": "see_tunnel_timer",
+      "penalty": "initiative_minus_2"
+    },
+    "gift": {
+      "id": "gift_hour_ago",
+      "vow": "no_haste",
+      "inverted_effect": "scene_repeats_against_will"
+    },
+    "lie_about_exit": {
+      "claims": [
+        1,
+        5
+      ],
+      "true_subset": [
+        1,
+        5
+      ],
+      "note": "лжёт умолчанием: не говорит, что терпение = занять его место"
+    },
+    "knows_truth": true,
+    "silent_about_truth": true
+  },
+  "paths": {
+    "force": {
+      "check": {
+        "skill": "athletics",
+        "dc": 16
+      },
+      "alt_item": "crystal_cutter",
+      "sets": {
+        "forced_door": true,
+        "shani_attitude": "offended"
+      }
+    },
+    "deceit": {
+      "check": {
+        "skill": "deception",
+        "dc": 15
+      },
+      "dc_with_item": {
+        "conductor_uniform": 12
+      },
+      "sets": {
+        "shani_attitude": "amused"
+      }
+    },
+    "service": {
+      "minigames": [
+        "mg_brake_wheel",
+        "mg_signal_lamps",
+        "mg_ledger"
+      ],
+      "sets": {
+        "shift_worked": true,
+        "shani_attitude": "respectful"
+      }
+    },
+    "stay": {
+      "ending": 5,
+      "item": "conductor_lantern",
+      "confirm_line_key": "shani.stay.confirm"
+    }
+  },
+  "window_progress_delta": {
+    "force": 1,
+    "deceit": 1,
+    "service": 2,
+    "stay": -99
+  },
+  "state_schema": {
+    "lantern_taken": "bool",
+    "clock_hours_lost": "int",
+    "journal_seen": "bool",
+    "shift_worked": "bool",
+    "shani_attitude": "enum[cold,amused,respectful,offended]",
+    "forced_door": "bool"
+  },
+  "sets_flags": [
+    "car_01.journal_seen",
+    "car_01.lantern_taken",
+    "car_01.shift_worked",
+    "car_01.forced_door",
+    "ticket.smear_noticed"
+  ],
+  "npcs": [
+    "god_shani",
+    "npc_bir_singh",
+    "npc_kanu",
+    "npc_ratan",
+    "npc_saraswati",
+    "npc_hafiz",
+    "npc_dog",
+    "npc_monimala"
+  ],
+  "environment_objects": [
+    "obj_regulator_clock",
+    "obj_brake_wheel",
+    "obj_luggage_racks",
+    "obj_stove",
+    "obj_coffin"
+  ],
+  "seed_items": [
+    "seed_mail_sack",
+    "seed_music_stand",
+    "seed_opium_crate",
+    "seed_shackle_lock",
+    "seed_child_shoe",
+    "seed_wire_spool",
+    "seed_regiment_drum",
+    "seed_calipers_box",
+    "seed_census_forms",
+    "seed_ice_box",
+    "seed_zenana_shawl",
+    "seed_mallick_notebook"
+  ],
+  "exclusive_facts": [
+    "berth_ledger_overwritten",
+    "clock_stopped_at_departure",
+    "stowaway_three_months"
+  ],
+  "minigames": [
+    "mg_brake_wheel",
+    "mg_signal_lamps",
+    "mg_ledger"
+  ],
+  "encounters": [
+    "enc_01_bir_singh_woken"
+  ],
+  "dialogue_nodes": 124,
+  "items_present": [
+    "conductor_lantern",
+    "conductor_uniform",
+    "morse_key",
+    "lamp_oil",
+    "matches",
+    "chagul",
+    "lathi"
+  ],
+  "tremor_reaction": "Лязг сцепок прокатывается с головы состава до хвоста, вагон дёргает, багаж на верхних ярусах едет вперёд. Шани придерживает часы рукой — единственное быстрое движение, которое он делает.",
+  "tail_variant": "maps/car_01_tail.tscn",
+  "tail_rules": {
+    "forced_door": "выломанная дверь, ветер, разбросанный багаж, Шани не появляется",
+    "shift_worked": "фонари горят как положено, опись дописана вашим почерком, на конторке чай",
+    "lantern_taken": "хвоста нет — концовка",
+    "clock_hours_lost>0": "часы показывают время, до которого доспорились; свет соответствует"
+  },
+  "notes": "Эталонный вагон. Играется до пролога (холодное открытие), поэтому не имеет реакций на флаг пролога и на другие вагоны — взамен несёт 12 семян вперёд. Последний вагон в концовке 6: сцепка размыкается только с хвоста.",
+  "conditional_npcs": {
+    "npc_monimala": "prologue.detainer_id == widow_monimala AND resolution == helped",
+    "npc_dog": "prologue.dog_followed",
+    "detainer_cameo": "prologue.detainer_resolution == helped"
+  },
+  "hours_note": "Поднято с 2.5 после расширения населения (8 NPC, 124 узла). Объём контента 3.75; одно прохождение ~2.9. Бюджет A4 сдвигается на +1 ч."
+}

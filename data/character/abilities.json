@@ -1,0 +1,11 @@
+{
+  "_comment": "Шесть характеристик SRD 5.2. Модификатор = floor((score - 10) / 2).",
+  "abilities": {
+    "str": {"name_key": "ability.str"},
+    "dex": {"name_key": "ability.dex"},
+    "con": {"name_key": "ability.con"},
+    "int": {"name_key": "ability.int"},
+    "wis": {"name_key": "ability.wis"},
+    "cha": {"name_key": "ability.cha"}
+  }
+}

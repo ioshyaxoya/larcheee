@@ -1,0 +1,12 @@
+{
+  "id": "npc_bir_singh",
+  "name_key": "npc.bir_singh.name",
+  "kind": "human",
+  "position": [
+    -1.0,
+    0.0,
+    1.5
+  ],
+  "silhouette": "conductor_asleep",
+  "attitude_axes": {}
+}

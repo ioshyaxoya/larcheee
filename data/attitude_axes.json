@@ -1,0 +1,10 @@
+{
+  "_comment": "Оси отношения NPC. Реакции пишутся по полюсам осей, не по клеткам происхождение×класс×пол.",
+  "axes": {
+    "skin":     {"poles": ["white", "nonwhite"],        "description": "белый / небелый"},
+    "record":   {"poles": ["recorded", "unrecorded"],   "description": "записанный / незаписанный (есть ли в бумагах Империи)"},
+    "credit":   {"poles": ["solvent", "insolvent"],     "description": "кредитоспособный / нет"},
+    "sex":      {"poles": ["man", "woman"],             "description": "мужчина / женщина"},
+    "dress":    {"poles": ["uniform", "rags"],          "description": "мундир / лохмотья"}
+  }
+}

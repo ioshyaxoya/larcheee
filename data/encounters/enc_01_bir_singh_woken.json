@@ -1,0 +1,10 @@
+{
+  "id": "enc_01_bir_singh_woken",
+  "car": "car_01",
+  "event": "npc_approached",
+  "npc": "npc_bir_singh",
+  "once": true,
+  "conditions": [{"flag": "car_01.forced_door", "is": false}],
+  "effects": [{"emit": "bir_singh_stirs"}],
+  "_note": "Заглушка под задачу 3: настоящий кондуктор просыпается только силовым путём (docs/car_01_brake_van.md §3.1). Пока — сигнал для custom_script."
+}

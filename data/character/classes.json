@@ -1,0 +1,14 @@
+{
+  "_comment": "Девять классов по docs/appendix_2_characters.md §2: восемь подклассов на шасси SRD 5.2 и Телеграфист (собственный класс). Кости хитов и спасброски — по шасси SRD; фичи уровней — контент модулей позже. Ярлыки по полу — label_f_key.",
+  "classes": {
+    "babu":         {"name_key": "class.babu",         "srd_base": "bard",     "hit_die": 8,  "primary": "cha", "saves": ["dex", "cha"], "skills": ["persuasion", "deception"],      "caster": "full"},
+    "sepoy":        {"name_key": "class.sepoy",        "srd_base": "fighter",  "hit_die": 10, "primary": "str", "saves": ["str", "con"], "skills": ["athletics", "intimidation"],    "caster": "none", "label_f_key": "class.sepoy.f"},
+    "shikari":      {"name_key": "class.shikari",      "srd_base": "ranger",   "hit_die": 10, "primary": "dex", "saves": ["str", "dex"], "skills": ["survival", "perception"],       "caster": "half"},
+    "munshi":       {"name_key": "class.munshi",       "srd_base": "wizard",   "hit_die": 6,  "primary": "int", "saves": ["int", "wis"], "skills": ["history", "arcana"],            "caster": "full", "label_f_key": "class.munshi.f"},
+    "sadhu":        {"name_key": "class.sadhu",        "srd_base": "monk",     "hit_die": 8,  "primary": "dex", "saves": ["str", "dex"], "skills": ["acrobatics", "religion"],       "caster": "none", "label_f_key": "class.sadhu.f"},
+    "tantrik":      {"name_key": "class.tantrik",      "srd_base": "warlock",  "hit_die": 8,  "primary": "cha", "saves": ["wis", "cha"], "skills": ["religion", "intimidation"],     "caster": "pact", "label_f_key": "class.tantrik.f"},
+    "opium_eater":  {"name_key": "class.opium_eater",  "srd_base": "sorcerer", "hit_die": 6,  "primary": "cha", "saves": ["con", "cha"], "skills": ["insight", "medicine"],          "caster": "full"},
+    "thug":         {"name_key": "class.thug",         "srd_base": "rogue",    "hit_die": 8,  "primary": "dex", "saves": ["dex", "int"], "skills": ["stealth", "sleight_of_hand"],   "caster": "none"},
+    "telegraphist": {"name_key": "class.telegraphist", "srd_base": null,       "hit_die": 8,  "primary": "int", "saves": ["con", "int"], "skills": ["investigation", "arcana"],      "caster": "half"}
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "god_shani",
+  "name_key": "npc.god_shani.name",
+  "kind": "presence",
+  "dialogue": "car_01_shani_first",
+  "position": [
+    0.0,
+    0.0,
+    -3.6
+  ],
+  "silhouette": "dark_lame",
+  "attitude_axes": {
+    "record": {
+      "recorded": "npc.god_shani.axis.recorded",
+      "unrecorded": "npc.god_shani.axis.unrecorded"
+    },
+    "dress": {
+      "uniform": "npc.god_shani.axis.uniform",
+      "rags": "npc.god_shani.axis.rags"
+    },
+    "sex": {
+      "man": "npc.god_shani.axis.man",
+      "woman": "npc.god_shani.axis.woman"
+    }
+  }
+}

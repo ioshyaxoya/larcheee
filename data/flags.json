@@ -1,0 +1,272 @@
+{
+  "car_01.journal_seen": {
+    "description": "Игрок прочёл журнал кондуктора и видел ведомость коек",
+    "type": "bool"
+  },
+  "car_01.lantern_taken": {
+    "description": "Фонарь снят с крюка — концовка 5",
+    "type": "bool"
+  },
+  "car_01.shift_worked": {
+    "description": "Отработана смена в тормозном вагоне",
+    "type": "bool"
+  },
+  "car_01.forced_door": {
+    "description": "Передняя дверь выломана силой",
+    "type": "bool"
+  },
+  "ticket.smear_noticed": {
+    "description": "Игрок заметил, что имя не отсутствует, а затёрто",
+    "type": "bool"
+  },
+  "prologue.mallick_lecture": {
+    "description": "Игрок был на лекции Маллика в Ассоциации",
+    "type": "bool"
+  },
+  "prologue.union_seed": {
+    "description": "Игрок столкнулся со стачкой у центрифуг в Салкии",
+    "type": "bool"
+  },
+  "prologue.ticket_bought": {
+    "description": "Билет куплен у барышника",
+    "type": "bool"
+  },
+  "prologue.ticket_stolen": {
+    "description": "Билет украден у курьера Общества",
+    "type": "bool"
+  },
+  "prologue.ticket_given": {
+    "description": "Билет получен из рук Маллика",
+    "type": "bool"
+  },
+  "prologue.detainer_id": {
+    "description": "Кто именно задержал игрока в последние полчаса",
+    "type": "enum",
+    "values": [
+      "nibaron_das",
+      "shoshibhushon_mitra",
+      "ramkishen_agarwal",
+      "widow_monimala",
+      "sher_ali",
+      "gul_mohammad",
+      "ah_sun",
+      "sidi_bilal",
+      "pereira",
+      "sister_rosario",
+      "horipod"
+    ]
+  },
+  "prologue.shrine_stopped": {
+    "description": "Игрок остановился у придорожного святилища Шани",
+    "type": "bool"
+  },
+  "prologue.opium_touched": {
+    "description": "Ящик без накладной в Салкии: игрок прикасался к ящику",
+    "type": "bool"
+  },
+  "prologue.widow_saved": {
+    "description": "Вдова на гхате спасена",
+    "type": "bool"
+  },
+  "prologue.sepoy_met": {
+    "description": "Драка на Боубазаре: сипай Шер Али",
+    "type": "bool"
+  },
+  "prologue.kabuli_ledger": {
+    "description": "Тетрадь кабуливалы: долг записан на игрока",
+    "type": "bool"
+  },
+  "prologue.tiretta_favor": {
+    "description": "Мастерская А Суня на Тиретта-базаре: заказ",
+    "type": "bool"
+  },
+  "prologue.lascar_papers": {
+    "description": "Ласкар Сиди Билал просил прочесть бумагу",
+    "type": "bool"
+  },
+  "prologue.census_answered": {
+    "description": "Игрок ответил переписчику Перейре",
+    "type": "bool"
+  },
+  "prologue.ice_bought": {
+    "description": "Лёд для больницы Хауры куплен",
+    "type": "bool"
+  },
+  "prologue.clerk_fate": {
+    "description": "Пропавший клерк в Далхаузи",
+    "type": "bool"
+  },
+  "prologue.resident_favor": {
+    "description": "Ужин у резидента",
+    "type": "bool"
+  },
+  "prologue.kali_vow": {
+    "description": "Заказ на Калигхате",
+    "type": "bool"
+  },
+  "prologue.thibaw_court": {
+    "description": "Проводить бирманца",
+    "type": "bool"
+  },
+  "prologue.telegram_sent": {
+    "description": "Телеграмма в Бомбей",
+    "type": "bool"
+  },
+  "prologue.has_papers": {
+    "description": "У персонажа есть документ, годный под Акт 1869",
+    "type": "bool"
+  },
+  "prologue.detainer_resolution": {
+    "description": "Как игрок разобрался с задерживающим: помог / отвязался / оттолкнул",
+    "type": "enum",
+    "values": [
+      "helped",
+      "dodged",
+      "pushed"
+    ]
+  },
+  "prologue.detainer_boards": {
+    "description": "Задерживающий сядет в поезд и раз зайдёт в тормозной вагон (helped)",
+    "type": "bool"
+  },
+  "prologue.ferry_companion": {
+    "description": "Бипин Чондро встречен на пароме или в лодке — первый знакомый в вагоне 2",
+    "type": "enum",
+    "values": [
+      "bipin",
+      "none"
+    ]
+  },
+  "prologue.met_bhagirath": {
+    "description": "Лодочник Бхагиратх вёз игрока через Хугли; игрок видел, что молитва не работает",
+    "type": "bool"
+  },
+  "prologue.crossing": {
+    "description": "Каким путём игрок пересёк Хугли",
+    "type": "enum",
+    "values": [
+      "bridge",
+      "bridge_waited",
+      "ferry",
+      "boat",
+      "boat_stowaway"
+    ]
+  },
+  "prologue.shrine_spoke": {
+    "description": "Игрок заговорил с хромым у святилища и ушёл: тот запомнил лицо",
+    "type": "bool"
+  },
+  "prologue.dog_followed": {
+    "description": "Пёс от святилища приблудился к поезду и появится в тормозном вагоне",
+    "type": "bool"
+  },
+  "prologue.ledger_clean": {
+    "description": "Запись в переписи верна: концовка 3 доступна без доработки",
+    "type": "bool"
+  },
+  "prologue.census_torn": {
+    "description": "Игрок порвал переписную бумагу: его нет в переписи",
+    "type": "bool"
+  },
+  "prologue.knows_sealed_crate": {
+    "description": "Кули Джумма рассказал об опечатанном ящике с четырьмя охранниками",
+    "type": "bool"
+  },
+  "prologue.howrah_friction": {
+    "description": "Как именно Империя тормозила игрока на воротах Хауры: тон контролёров всю игру",
+    "type": "enum",
+    "values": [
+      "acquaintance",
+      "act_1869",
+      "unrecorded",
+      "luggage_search",
+      "babu_channel",
+      "ledger_haggle",
+      "old_account",
+      "wires_caste",
+      "manifest",
+      "company_ghost",
+      "ladies_entrance"
+    ]
+  },
+  "prologue.minutes_late": {
+    "description": "На сколько минут игрок опоздал к отправлению 20:30",
+    "type": "int"
+  },
+  "prologue.completed": {
+    "description": "Пролог завершён: прыжок в тормозной вагон",
+    "type": "bool"
+  },
+  "prologue.mallick_notebook_taken": {
+    "description": "Тетрадь Маллика взята у Шошибхушона в прологе (иначе — на стеллаже тормозного)",
+    "type": "bool"
+  },
+  "prologue.shoshibhushon_informed": {
+    "description": "Тетрадь отобрана силой: Шошибхушон донесёт, в вагоне 31 ждёт Эшуорт",
+    "type": "bool"
+  },
+  "prologue.ramkishen_debtor": {
+    "description": "Приказчик Рамкишен пойман на лжи: должник игрока до конца игры",
+    "type": "bool"
+  },
+  "prologue.opium_case_opened": {
+    "description": "В опиумном вагоне заведено дело: досмотр при каждом входе",
+    "type": "bool"
+  },
+  "prologue.sher_ali_betrayed": {
+    "description": "Шер Али сдан патрулю: в полковом его помнят выданным",
+    "type": "bool"
+  },
+  "prologue.debt_kabuli": {
+    "description": "Долг кабуливале признан: всплывает в вагонах 9 и 25",
+    "type": "bool"
+  },
+  "prologue.debt_kabuli_paid": {
+    "description": "Долг кабуливале оплачен: Гуль Мохаммад ставит за игрока в вагоне 9",
+    "type": "bool"
+  },
+  "prologue.fake_crystal": {
+    "description": "Стеклянная подделка прана-кристалла от А Суня: один раз обманывает детектор",
+    "type": "bool"
+  },
+  "prologue.small_crystal": {
+    "description": "Настоящий малый кристалл (3 заряда) от А Суня; он запомнил терпение",
+    "type": "bool"
+  },
+  "prologue.lied_to_bilal": {
+    "description": "Игрок соврал Сиди Билалу о бумаге. Флаг доживает до эпилога",
+    "type": "bool"
+  },
+  "prologue.rosario_ice": {
+    "description": "Сестре Розарио отдан лёд: лечение в лазарете бесплатно всю игру",
+    "type": "bool"
+  },
+  "prologue.rosario_refused": {
+    "description": "Сестре Розарио отказано: в лазарете при холере откажут в очереди",
+    "type": "bool"
+  },
+  "prologue.stole_luggage": {
+    "description": "Забран чужой сундук: в багажном вагоне игрок — вор",
+    "type": "bool"
+  },
+  "prologue.foreign_trunk": {
+    "description": "Чужой сундук едет с игроком: владелец найдёт его в багажном",
+    "type": "bool"
+  },
+  "quest.last_half_hour.beat": {
+    "description": "Текущий бит квеста «Последние полчаса» (1–5)",
+    "type": "int"
+  },
+  "quest.last_half_hour.bit1_minutes": {
+    "description": "Сколько минут стоил бит 1: от него зависит вероятность разведённого моста",
+    "type": "int"
+  },
+  "car_01.lantern_lit": {
+    "description": "Фонарь в тормозном вагоне зажжён (холодное открытие, второе действие)",
+    "type": "bool"
+  },
+  "car_01.shani_greeted": {
+    "description": "Шани Хаурского святилища поздоровался с игроком",
+    "type": "bool"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "npc_dog",
+  "name_key": "npc.dog.name",
+  "kind": "animal",
+  "position": [
+    0.6,
+    0.0,
+    2.4
+  ],
+  "silhouette": "dog",
+  "attitude_axes": {},
+  "conditions": [
+    {
+      "flag": "prologue.dog_followed",
+      "is": true
+    }
+  ]
+}

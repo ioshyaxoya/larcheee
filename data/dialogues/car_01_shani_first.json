@@ -1,0 +1,86 @@
+{
+  "id": "car_01_shani_first",
+  "car": "car_01",
+  "speaker_default": "god_shani",
+  "start": "greet",
+  "nodes": {
+    "greet": {
+      "branches": [
+        {
+          "conditions": [
+            {
+              "flag": "prologue.shrine_stopped",
+              "is": true
+            }
+          ],
+          "next": "greet_known"
+        },
+        {
+          "conditions": [],
+          "next": "greet_stranger"
+        }
+      ]
+    },
+    "greet_known": {
+      "speaker": "god_shani",
+      "text_key": "car_01.shani.greet_known",
+      "stage": "car_01.shani.stage.crate",
+      "pearl": true,
+      "pearl_id": "shani_car01_known_face",
+      "on_enter": [
+        {
+          "set_flag": "car_01.shani_greeted",
+          "value": true
+        }
+      ],
+      "next": "who"
+    },
+    "greet_stranger": {
+      "speaker": "god_shani",
+      "text_key": "car_01.shani.greet_stranger",
+      "stage": "car_01.shani.stage.crate",
+      "on_enter": [
+        {
+          "set_flag": "car_01.shani_greeted",
+          "value": true
+        }
+      ],
+      "next": "who"
+    },
+    "who": {
+      "speaker": "narrator",
+      "text_key": "car_01.shani.who",
+      "options": [
+        {
+          "text_key": "car_01.shani.opt_look",
+          "check": {
+            "skill": "insight",
+            "dc": 12,
+            "label_key": "car_01.check.insight"
+          },
+          "next": "look_ok",
+          "next_on_fail": "look_fail"
+        },
+        {
+          "text_key": "car_01.shani.opt_silent",
+          "next": "silent"
+        }
+      ]
+    },
+    "look_ok": {
+      "speaker": "narrator",
+      "text_key": "car_01.shani.look_ok",
+      "end": true
+    },
+    "look_fail": {
+      "speaker": "narrator",
+      "text_key": "car_01.shani.look_fail",
+      "end": true
+    },
+    "silent": {
+      "speaker": "god_shani",
+      "text_key": "car_01.shani.silent",
+      "end": true
+    }
+  }
+}

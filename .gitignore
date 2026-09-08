@@ -1,0 +1,11 @@
+# Godot
+.godot/
+*.import
+export_presets.cfg
+# Python
+__pycache__/
+*.pyc
+# Local
+world_state.json
+/godot
+/godot.zip

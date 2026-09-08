@@ -1,0 +1,57 @@
+name: checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  term-lint:
+    name: term_lint (блокирует мёрж)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python tools/term_lint.py .
+
+  car-validator:
+    name: car_validator + dialogue_validator (блокируют мёрж)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python tools/car_validator.py data/cars/
+      - run: python tools/dialogue_validator.py
+
+  hours-estimator:
+    name: hours_estimator (предупреждает)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python tools/hours_estimator.py data/cars/
+
+  godot-smoke:
+    name: godot smoke (блокирует мёрж)
+    runs-on: ubuntu-latest
+    env:
+      GODOT_VERSION: "4.3"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Godot
+        run: |
+          curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 godot
+          chmod +x godot
+      - name: Import project
+        run: ./godot --headless --import --path . || true
+      - name: Smoke test
+        run: ./godot --headless --path . -s tests/smoke.gd

@@ -1,0 +1,22 @@
+{
+  "id": "npc_monimala",
+  "name_key": "npc.monimala.name",
+  "kind": "human",
+  "position": [
+    0.4,
+    0.0,
+    2.8
+  ],
+  "silhouette": "widow_urn",
+  "attitude_axes": {},
+  "conditions": [
+    {
+      "flag": "prologue.detainer_id",
+      "equals": "widow_monimala"
+    },
+    {
+      "flag": "prologue.detainer_resolution",
+      "equals": "helped"
+    }
+  ]
+}

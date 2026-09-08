@@ -1,0 +1,12 @@
+{
+  "id": "npc_ratan",
+  "name_key": "npc.ratan.name",
+  "kind": "human",
+  "position": [
+    -1.2,
+    0.0,
+    0.0
+  ],
+  "silhouette": "old_conductor",
+  "attitude_axes": {}
+}

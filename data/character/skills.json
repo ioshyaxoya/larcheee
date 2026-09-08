@@ -1,0 +1,23 @@
+{
+  "_comment": "Навыки SRD 5.2 и их характеристики.",
+  "skills": {
+    "acrobatics":      {"ability": "dex", "name_key": "skill.acrobatics"},
+    "animal_handling": {"ability": "wis", "name_key": "skill.animal_handling"},
+    "arcana":          {"ability": "int", "name_key": "skill.arcana"},
+    "athletics":       {"ability": "str", "name_key": "skill.athletics"},
+    "deception":       {"ability": "cha", "name_key": "skill.deception"},
+    "history":         {"ability": "int", "name_key": "skill.history"},
+    "insight":         {"ability": "wis", "name_key": "skill.insight"},
+    "intimidation":    {"ability": "cha", "name_key": "skill.intimidation"},
+    "investigation":   {"ability": "int", "name_key": "skill.investigation"},
+    "medicine":        {"ability": "wis", "name_key": "skill.medicine"},
+    "nature":          {"ability": "int", "name_key": "skill.nature"},
+    "perception":      {"ability": "wis", "name_key": "skill.perception"},
+    "performance":     {"ability": "cha", "name_key": "skill.performance"},
+    "persuasion":      {"ability": "cha", "name_key": "skill.persuasion"},
+    "religion":        {"ability": "int", "name_key": "skill.religion"},
+    "sleight_of_hand": {"ability": "dex", "name_key": "skill.sleight_of_hand"},
+    "stealth":         {"ability": "dex", "name_key": "skill.stealth"},
+    "survival":        {"ability": "wis", "name_key": "skill.survival"}
+  }
+}

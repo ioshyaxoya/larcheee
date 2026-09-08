@@ -1,0 +1,12 @@
+{
+  "id": "npc_kanu",
+  "name_key": "npc.kanu.name",
+  "kind": "human",
+  "position": [
+    1.2,
+    0.0,
+    -2.0
+  ],
+  "silhouette": "boy",
+  "attitude_axes": {}
+}

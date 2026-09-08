@@ -1,0 +1,20 @@
+{
+  "_comment": "B6: тег пролога → вагон, который он засевает. Несработавший тег не удаляет вагон: вагон живёт в variant unseeded. Теги хранятся флагами prologue.<tag> (bool) в data/flags.json.",
+  "tags": {
+    "clerk_fate":      {"car": "car_07", "quest_key": "prologue.quest.clerk_fate"},
+    "widow_saved":     {"car": "car_05", "quest_key": "prologue.quest.widow_saved"},
+    "opium_touched":   {"car": "car_11", "quest_key": "prologue.quest.opium_touched"},
+    "resident_favor":  {"car": "car_19", "quest_key": "prologue.quest.resident_favor"},
+    "sepoy_met":       {"car": "car_17", "quest_key": "prologue.quest.sepoy_met"},
+    "kali_vow":        {"car": "car_05", "quest_key": "prologue.quest.kali_vow"},
+    "thibaw_court":    {"car": "car_27", "quest_key": "prologue.quest.thibaw_court"},
+    "telegram_sent":   {"car": "car_20", "quest_key": "prologue.quest.telegram_sent"},
+    "ice_bought":      {"car": "car_34", "quest_key": "prologue.quest.ice_bought"},
+    "census_answered": {"car": "car_22", "quest_key": "prologue.quest.census_answered"},
+    "mallick_lecture": {"car": "car_31", "quest_key": "prologue.quest.mallick_lecture"},
+    "union_seed":      {"car": "car_30", "quest_key": "prologue.quest.union_seed"},
+    "kabuli_ledger":   {"car": "car_09", "quest_key": "prologue.quest.kabuli_ledger"},
+    "tiretta_favor":   {"car": "car_11", "quest_key": "prologue.quest.tiretta_favor"},
+    "lascar_papers":   {"car": "car_15", "quest_key": "prologue.quest.lascar_papers"}
+  }
+}

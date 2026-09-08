@@ -1,0 +1,12 @@
+{
+  "id": "npc_hafiz",
+  "name_key": "npc.hafiz.name",
+  "kind": "human",
+  "position": [
+    -0.8,
+    0.0,
+    -1.2
+  ],
+  "silhouette": "pilgrim_seated",
+  "attitude_axes": {}
+}

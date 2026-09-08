@@ -1,0 +1,12 @@
+{
+  "_comment": "Реестр уникальных комбо-реплик (жемчужин). Только у присутствий и ~10 ключевых NPC. Всё остальное пишется по осям attitude_axes.",
+  "pearls": [
+    {
+      "id": "shani_car01_known_face",
+      "owner": "shani_howrah",
+      "car": "car_01",
+      "condition": "prologue.shrine_stopped = true",
+      "description": "Шани здоровается как со знакомым; испытание начинается на раунд позже."
+    }
+  ]
+}
