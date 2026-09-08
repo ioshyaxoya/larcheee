@@ -453,6 +453,31 @@ func test_palette_and_transition() -> void:
 		if (pr as Dictionary).has("parts"):
 			drawn_props += 1
 	check(drawn_props >= 15, "реквизит нарисован контурами: %d предметов" % drawn_props)
+	# Встреча с присутствием: мир и бог живут на разных слоях видимости, иначе
+	# монохром съедает бога, а бог светится сквозь скалы.
+	var trial_def := TrialRuntime.load_def("trial_shani")
+	var tst: Dictionary = trial_def.get("stage", {})
+	check(tst.has("camera") and String(tst["camera"].get("projection", "")) == "perspective",
+		"встреча снята длинным объективом снизу вверх")
+	check(float(tst["camera"]["pos"][1]) < 1.2 and float(tst["camera"]["rot"][0]) > 5.0,
+		"камера ниже человеческого роста и смотрит вверх: на присутствие смотрят снизу")
+	var presence: Array = tst.get("presence", [])
+	check(presence.size() >= 2, "присутствие — ворон и Шани: %d фигуры" % presence.size())
+	var presence_parts := 0
+	var presence_top := 0.0
+	for pdef in presence:
+		presence_parts += ((pdef as Dictionary).get("parts", []) as Array).size()
+		check(StageBuilder.layer_mask(pdef) == 2, "присутствие на слое 2 (в цвете): %s" % pdef.get("id", "?"))
+		for pt in (pdef as Dictionary).get("parts", []):
+			var pts: PackedVector2Array = StageBuilder.points_of(pt)
+			presence_top = maxf(presence_top, pts[pts.size() / 2].y)
+	check(presence_parts >= 100, "присутствие нарисовано подробно: %d контуров" % presence_parts)
+	check(presence_top > 5.2, "Шани выше трёх человеческих ростов: %.1f м" % presence_top)
+	var world_layers := 0
+	for wl in tst.get("layers", []) + tst.get("props", []):
+		if StageBuilder.layer_mask(wl) == 4:
+			world_layers += 1
+	check(world_layers >= 15, "мир Шани на слое 3 (в точках): %d планов" % world_layers)
 	var ctx := _make_ctx(29, "armenian", "babu", "m", [])
 	var tr := TransitionRuntime.new(ctx)
 	var steps: Array[String] = []

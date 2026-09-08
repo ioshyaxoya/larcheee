@@ -7,8 +7,13 @@ signal title_dismissed
 
 var ctx: GameContext
 var world_viewport: SubViewport
+var trial_viewport: SubViewport
+var presence_viewport: SubViewport
 var stage: Node3D
+var trial_stage: Node3D = null
 var camera: Camera3D
+var trial_camera: Camera3D
+var presence_camera: Camera3D
 var world_env: WorldEnvironment
 var palette: Palette
 var grade: GradeLayer
@@ -53,6 +58,7 @@ func _build_stage() -> void:
 	camera.size = 9.0
 	camera.position = Vector3(0, 6, 9)
 	camera.rotation_degrees = Vector3(-30, 0, 0)
+	camera.cull_mask = 1          # слой 1: вагон
 	stage.add_child(camera)
 	camera.current = true
 	world_env = WorldEnvironment.new()
@@ -63,12 +69,45 @@ func _build_stage() -> void:
 	e.ambient_light_color = Color(0.12, 0.12, 0.18)
 	world_env.environment = e
 	stage.add_child(world_env)
+	_build_trial_viewports()
+
+
+## Встреча с присутствием собирается из двух кадров одного мира: мир испытания
+## (слой 3) уходит в точки, присутствие (слой 2) остаётся цветным. Поэтому две
+## отдельные камеры на общем `world_3d`, а не один кадр и маска по цвету:
+## монохром не должен «съедать» бога, а бог не должен светиться сквозь скалы.
+func _build_trial_viewports() -> void:
+	trial_viewport = SubViewport.new()
+	trial_viewport.name = "TrialWorld"
+	trial_viewport.size = Vector2i(1280, 720)
+	trial_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	trial_viewport.own_world_3d = false
+	add_child(trial_viewport)
+	trial_viewport.world_3d = world_viewport.world_3d
+	trial_camera = Camera3D.new()
+	trial_camera.cull_mask = 4    # слой 3: мир Шани
+	trial_viewport.add_child(trial_camera)
+	trial_camera.current = true
+
+	presence_viewport = SubViewport.new()
+	presence_viewport.name = "Presence"
+	presence_viewport.size = Vector2i(1280, 720)
+	presence_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	presence_viewport.transparent_bg = true
+	presence_viewport.own_world_3d = false
+	add_child(presence_viewport)
+	presence_viewport.world_3d = world_viewport.world_3d
+	presence_camera = Camera3D.new()
+	presence_camera.cull_mask = 2  # слой 2: присутствие
+	presence_viewport.add_child(presence_camera)
+	presence_camera.current = true
 
 
 func _build_grade() -> void:
 	grade = GradeLayer.new()
 	add_child(grade)
 	grade.set_source(world_viewport.get_texture())
+	grade.set_trial_source(trial_viewport.get_texture(), presence_viewport.get_texture())
 	grade.bind(palette)
 
 
@@ -221,21 +260,51 @@ func _return_to_car(_snap: Dictionary) -> void:
 
 func _on_trial_started(trial: TrialRuntime) -> void:
 	palette.enter_trial()
+	_enter_presence(trial)
 	_apply_palette()
 	trial.round_won.connect(func(_rd: Dictionary, _k: String):
 		palette.set_colour_return(float(trial.streak) / float(trial.wins_needed()))
+		# Мир Шани держится тем крепче, чем меньше он в вас сомневается.
+		grade.set_glitch(clampf(0.55 - 0.16 * float(trial.streak), 0.0, 1.0))
 		_apply_palette())
 	trial.round_lost.connect(func(_rd: Dictionary, _k: String):
 		palette.set_colour_return(0.0)
+		grade.set_glitch(0.78)
 		_apply_palette())
 	trial.trial_won.connect(func(_k: String):
+		_leave_presence()
 		palette.exit_trial()
 		_apply_palette()
 		dialogue_ui.attach(car.play_scene("paths_hub")))
 	trial_ui.attach(trial)
 
 
+## Встреча с присутствием: собрать мир испытания и поставить обе камеры.
+## Постановка живёт в данных испытания (`trial.stage`), как и постановка вагона.
+func _enter_presence(trial: TrialRuntime) -> void:
+	_leave_presence()
+	var st: Dictionary = trial.def.get("stage", {})
+	if st.is_empty():
+		return
+	trial_stage = Node3D.new()
+	trial_stage.name = "TrialStage"
+	stage.add_child(trial_stage)
+	StageBuilder.build_stage(st, trial_stage)
+	var frame := {"stage": st}
+	StageBuilder.apply_camera(frame, trial_camera)
+	StageBuilder.apply_camera(frame, presence_camera)
+	grade.set_glitch(0.55)
+
+
+func _leave_presence() -> void:
+	if trial_stage != null:
+		trial_stage.queue_free()
+		trial_stage = null
+	grade.set_glitch(0.0)
+
+
 func _on_soft_reset(_text_key: String) -> void:
+	_leave_presence()
 	palette.exit_trial()
 	_apply_palette()
 	car.visible = false

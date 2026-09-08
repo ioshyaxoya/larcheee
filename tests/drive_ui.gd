@@ -33,6 +33,8 @@ func _ready() -> void:
 		await _run_paths()
 	elif scenario == "scene":
 		await _run_scene()
+	elif scenario == "shani":
+		await _run_shani()
 	else:
 		await _run()
 	_write_log()
@@ -73,6 +75,48 @@ func _run_scene() -> void:
 	main._apply_palette()
 	await _frames(6)
 	await _shot("scene_trial_colour", "Два выигранных раунда: цвет возвращается.")
+
+
+## Четвёртый сценарий: встреча с присутствием. Смотреть на удар, без интерфейса.
+func _run_shani() -> void:
+	await _debug_press("Сразу в вагон")
+	await _wait_options()
+	await _debug_press("Спор о часах")
+	await _frames(12)
+	main.dialogue_ui.visible = false
+	main.trial_ui.visible = false
+	main.hud.visible = false
+	main.debug_panel.visible = false
+	main.check_ui.visible = false
+	await _frames(8)
+	await _shot("shani_meeting", "Встреча: присутствие в три роста на вороне, мир в точках.")
+	main.grade.set_glitch(0.0)
+	main._apply_palette()
+	await _frames(6)
+	await _shot("shani_no_glitch", "Тот же кадр без сбоя: мир Шани держится.")
+	main.grade.set_glitch(1.0)
+	main._apply_palette()
+	await _frames(6)
+	await _shot("shani_glitch", "Сбой: сквозь мир полосами проступают стены вагона.")
+	main.palette.set_colour_return(0.66)
+	main.grade.set_glitch(0.2)
+	main._apply_palette()
+	await _frames(6)
+	await _shot("shani_colour", "Два выигранных раунда: цвет возвращается в мир.")
+	# Обойти сцену: присутствие видно и сбоку, как и обещает §5.
+	main.grade.set_glitch(0.35)
+	main.palette.set_colour_return(0.0)
+	main._apply_palette()
+	for cam in [main.trial_camera, main.presence_camera]:
+		cam.position = Vector3(-6.6, 1.5, 6.4)
+		cam.rotation_degrees = Vector3(8.0, -46.0, 0.0)
+	await _frames(6)
+	await _shot("shani_side", "Сцена застыла: её можно обойти. Тот же миг с другого угла.")
+	for cam in [main.trial_camera, main.presence_camera]:
+		cam.position = Vector3(0.0, 7.6, 7.2)
+		cam.rotation_degrees = Vector3(-24.0, 0.0, 0.0)
+	await _frames(6)
+	await _shot("shani_above", "И сверху: у ворона видно, на чём он стоит.")
 
 
 ## Второй сценарий: пути тормозного вагона и концовка 5 — через прямой вход.

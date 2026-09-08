@@ -9,8 +9,12 @@ const DITHER := "res://assets/shaders/dither_1bit.gdshader"
 
 var palette: Palette
 var rect: TextureRect
+var presence_rect: TextureRect
 var theatrical_mat: ShaderMaterial
 var dither_mat: ShaderMaterial
+var world_tex: Texture2D          # кадр вагона: он же — то, что видно в глитче
+var trial_tex: Texture2D          # кадр мира испытания
+var glitch: float = 0.0
 
 
 func _init() -> void:
@@ -26,6 +30,15 @@ func _init() -> void:
 	dither_mat = ShaderMaterial.new()
 	dither_mat.shader = load(DITHER)
 	rect.material = theatrical_mat
+	# Присутствие идёт вторым кадром поверх дизеренного мира и не грейдится:
+	# мир — точки, бог — цвет. Прозрачный фон подвьюпорта делает остальное.
+	presence_rect = TextureRect.new()
+	presence_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	presence_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	presence_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	presence_rect.stretch_mode = TextureRect.STRETCH_SCALE
+	presence_rect.visible = false
+	add_child(presence_rect)
 
 
 func bind(p: Palette) -> void:
@@ -35,7 +48,22 @@ func bind(p: Palette) -> void:
 
 ## Кадр мира: текстура подвьюпорта, в котором живёт сцена.
 func set_source(tex: Texture2D) -> void:
+	world_tex = tex
 	rect.texture = tex
+
+
+## Кадры испытания: мир Шани (в точки) и присутствие (в цвете, поверх).
+func set_trial_source(world: Texture2D, presence: Texture2D) -> void:
+	trial_tex = world
+	presence_rect.texture = presence
+
+
+## Сбой мира: Шани сомневается во всём вокруг, и сквозь его мир проступают
+## стены вагона — тоже точками. 0 — мир держится, 1 — рвётся полосами.
+func set_glitch(v: float) -> void:
+	glitch = clampf(v, 0.0, 1.0)
+	if palette != null and palette.in_trial:
+		dither_mat.set_shader_parameter("glitch", glitch)
 
 
 ## Переносит параметры палитры в шейдер. Вызывается на смене палитры и на
@@ -48,12 +76,18 @@ func refresh() -> void:
 	var tint_v := Vector3(float(tint[0]), float(tint[1]), float(tint[2]))
 	var mat: ShaderMaterial = dither_mat if palette.in_trial else theatrical_mat
 	rect.material = mat
+	# В испытании основной кадр — мир Шани, а кадр вагона уходит в глитч.
+	rect.texture = trial_tex if (palette.in_trial and trial_tex != null) else world_tex
+	presence_rect.visible = palette.in_trial
 	mat.set_shader_parameter("tint", tint_v)
 	mat.set_shader_parameter("saturation", float(p.get("saturation", 1.0)))
 	mat.set_shader_parameter("vignette", float(p.get("vignette", 0.3)))
 	if palette.in_trial:
 		mat.set_shader_parameter("colour_return", palette.colour_return)
 		mat.set_shader_parameter("pixel_size", 2.0)
+		mat.set_shader_parameter("glitch", glitch)
+		if world_tex != null:
+			mat.set_shader_parameter("alt_tex", world_tex)
 	else:
 		mat.set_shader_parameter("contrast", float(p.get("contrast", 1.0)))
 		mat.set_shader_parameter("brightness", float(p.get("brightness", 1.0)))
@@ -62,5 +96,9 @@ func refresh() -> void:
 
 
 func _process(_delta: float) -> void:
+	var t := float(Time.get_ticks_msec() % 100000) * 0.001
 	if not palette.in_trial and rect.material == theatrical_mat:
-		theatrical_mat.set_shader_parameter("seed", float(Time.get_ticks_msec() % 10000) * 0.001)
+		theatrical_mat.set_shader_parameter("seed", t)
+		return
+	if palette.in_trial:
+		dither_mat.set_shader_parameter("time", t)

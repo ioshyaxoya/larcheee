@@ -13,15 +13,28 @@ static var _pool_texture: GradientTexture2D = null
 
 
 static func build(card: Dictionary, parent: Node3D) -> void:
-	var stage: Dictionary = card.get("stage", {})
+	build_stage(card.get("stage", {}), parent)
+
+
+## Постановка из данных. `layer` у кулисы, предмета или фигуры — номер слоя
+## видимости (1 по умолчанию). Слои нужны там, где кадр собирается из двух
+## разных: мир испытания уходит в точки, присутствие остаётся цветным, и
+## разделяют их не оттенки в шейдере, а камеры по слоям.
+static func build_stage(stage: Dictionary, parent: Node3D) -> void:
 	if stage.is_empty():
 		return
 	for layer in stage.get("layers", []):
 		parent.add_child(quad(layer, false))
-	for prop in stage.get("props", []):
-		parent.add_child(polygon(prop) if prop.has("parts") else quad(prop, false))
+	for group in ["props", "presence"]:
+		for prop in stage.get(group, []):
+			parent.add_child(polygon(prop) if prop.has("parts") else quad(prop, false))
 	for pool in stage.get("pools", []):
 		parent.add_child(quad(pool, true))
+
+
+## Номер слоя из данных → битовая маска Godot.
+static func layer_mask(def: Dictionary, fallback: int = 1) -> int:
+	return 1 << (int(def.get("layer", fallback)) - 1)
 
 
 ## Полигон: настоящая фигура, а не прямоугольник. Контур задан точками в
@@ -46,6 +59,7 @@ static func polygon(def: Dictionary) -> Node3D:
 		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 		mesh_node.material_override = mat
+		mesh_node.layers = layer_mask(def)
 		mesh_node.position.z = float(i) * 0.002
 		root.add_child(mesh_node)
 	return root
@@ -98,6 +112,7 @@ static func quad(def: Dictionary, is_pool: bool) -> MeshInstance3D:
 	var rot: Array = def.get("rot", [0.0, 0.0, 0.0])
 	node.rotation_degrees = Vector3(float(rot[0]), float(rot[1]), float(rot[2]))
 	node.material_override = pool_material(def) if is_pool else flat_material(def)
+	node.layers = layer_mask(def)
 	node.visible = bool(def.get("visible", true))
 	return node
 
