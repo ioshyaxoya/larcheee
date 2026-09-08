@@ -35,6 +35,8 @@ func _ready() -> void:
 		await _run_scene()
 	elif scenario == "shani":
 		await _run_shani()
+	elif scenario == "glitchcheck":
+		await _run_glitch_check()
 	else:
 		await _run()
 	_write_log()
@@ -90,6 +92,12 @@ func _run_shani() -> void:
 	main.check_ui.visible = false
 	await _frames(8)
 	await _shot("shani_meeting", "Встреча: присутствие в три роста на вороне, мир в точках.")
+	# Кадр одного присутствия с альфой: это же и есть «референс на сплошном
+	# фоне», с которым работает трассировщик (tools/trace_to_contours.py).
+	await RenderingServer.frame_post_draw
+	var pres: Image = main.presence_viewport.get_texture().get_image()
+	pres.save_png(SHOTS + "presence_alpha.png")
+	log_lines.append("presence_alpha.png\n    Присутствие отдельно, с альфой — вход для трассировщика.")
 	main.grade.set_glitch(0.0)
 	main._apply_palette()
 	await _frames(6)
@@ -117,6 +125,39 @@ func _run_shani() -> void:
 		cam.rotation_degrees = Vector3(-24.0, 0.0, 0.0)
 	await _frames(6)
 	await _shot("shani_above", "И сверху: у ворона видно, на чём он стоит.")
+
+
+## Проверка послойности: присутствие не должно дизериться вместе с миром.
+## Кадр со сбоем и кадр без сбоя обязаны совпасть пиксель в пиксель внутри
+## силуэта присутствия. Разбор — в tools/check_presence_layer.py.
+func _run_glitch_check() -> void:
+	await _debug_press("Сразу в вагон")
+	await _wait_options()
+	await _debug_press("Спор о часах")
+	await _frames(12)
+	main.dialogue_ui.visible = false
+	main.trial_ui.visible = false
+	main.hud.visible = false
+	main.debug_panel.visible = false
+	main.check_ui.visible = false
+	main.palette.set_colour_return(0.0)
+	await _frames(8)
+	await RenderingServer.frame_post_draw
+	var chk_pres: Image = main.presence_viewport.get_texture().get_image()
+	chk_pres.save_png(SHOTS + "chk_presence_alpha.png")
+	main.grade.set_glitch(0.0)
+	main._apply_palette()
+	await _frames(8)
+	await RenderingServer.frame_post_draw
+	var chk_a: Image = get_viewport().get_texture().get_image()
+	chk_a.save_png(SHOTS + "chk_no_glitch.png")
+	main.grade.set_glitch(1.0)
+	main._apply_palette()
+	await _frames(8)
+	await RenderingServer.frame_post_draw
+	var chk_b: Image = get_viewport().get_texture().get_image()
+	chk_b.save_png(SHOTS + "chk_glitch.png")
+	log_lines.append("chk_presence_alpha.png / chk_no_glitch.png / chk_glitch.png\n    Проверка послойности присутствия.")
 
 
 ## Второй сценарий: пути тормозного вагона и концовка 5 — через прямой вход.

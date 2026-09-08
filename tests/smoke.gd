@@ -490,6 +490,51 @@ func test_palette_and_transition() -> void:
 		deity_pts += (StageBuilder.points_of(pt)).size()
 	check(deity_pts >= 1200, "фигура присутствия из %d точек кривых" % deity_pts)
 	# Масштаб задают собака и человек: без них три роста не читаются.
+	# Стилевой префикс генератора: он один держит сорок вагонов в одном стиле,
+	# поэтому его наличие и содержание — тест, а не договорённость на словах.
+	var tpl_path := "res://docs/asset_prompt_template.md"
+	check(FileAccess.file_exists(tpl_path), "шаблон промпта генератора на месте")
+	if FileAccess.file_exists(tpl_path):
+		# Переносы строк в блоке промпта рвут фразы, поэтому сверяем по склеенному
+		# тексту — так же, как их склеивает tools/asset_gen.py перед вызовом.
+		var tpl := FileAccess.get_file_as_string(tpl_path).replace("\n", " ")
+		check(tpl.contains("<!-- style-prefix -->"), "у шаблона есть якорь стилевого префикса")
+		var flat_rules := 0
+		for rule in ["no gradients", "no textures", "Flat vector illustration",
+					 "no 3D render look", "Limited palette"]:
+			if tpl.contains(rule):
+				flat_rules += 1
+		check(flat_rules == 5, "префикс запрещает градиенты, текстуры и объём: %d/5 правил" % flat_rules)
+		check(tpl.contains("kind: presence") and tpl.contains("kind: person")
+			and tpl.contains("kind: prop") and tpl.contains("kind: backdrop"),
+			"в шаблоне описаны присутствие, человек, реквизит и задник")
+		check(tpl.contains("Never a transparent") or tpl.contains("прозрачный фон не просить")
+			or tpl.contains("Никогда не просить прозрачный фон"),
+			"записано правило про прозрачный фон: генератор впечатает шахматку")
+
+	# Контуры, полученные трассировкой референса, обязаны триангулироваться —
+	# иначе движок молча не нарисует ничего (StageBuilder.polygon_mesh).
+	var traced_dir := DirAccess.open("res://data/traced")
+	if traced_dir != null:
+		var traced_files := 0
+		var traced_parts := 0
+		var bad := 0
+		for fname in traced_dir.get_files():
+			if not fname.ends_with(".json"):
+				continue
+			traced_files += 1
+			var parsed = JSON.parse_string(
+				FileAccess.get_file_as_string("res://data/traced/" + fname))
+			for pt in (parsed as Dictionary).get("parts", []):
+				traced_parts += 1
+				var pts: PackedVector2Array = StageBuilder.points_of(pt)
+				if pts.size() < 3 or StageBuilder.polygon_mesh(pts).get_surface_count() == 0:
+					bad += 1
+		if traced_files > 0:
+			check(bad == 0, "трассированные контуры триангулируются: %d из %d негодных"
+				% [bad, traced_parts])
+			check(traced_parts >= 40, "в трассировке есть чем рисовать: %d контуров" % traced_parts)
+
 	var scale_cues := 0
 	for pr in tst.get("props", []):
 		var pid := String((pr as Dictionary).get("id", ""))
