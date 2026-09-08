@@ -23,8 +23,13 @@ func _init() -> void:
 	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	panel.custom_minimum_size = Vector2(360, 240)
 	add_child(panel)
+	var margin := MarginContainer.new()
+	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		margin.add_theme_constant_override(side, 20)
+	panel.add_child(margin)
 	var box := VBoxContainer.new()
-	panel.add_child(box)
+	box.add_theme_constant_override("separation", 6)
+	margin.add_child(box)
 	title_label = Label.new()
 	box.add_child(title_label)
 	die_label = Label.new()
@@ -39,6 +44,7 @@ func _init() -> void:
 	outcome_label.add_theme_font_size_override("font_size", 28)
 	box.add_child(outcome_label)
 	continue_button = Button.new()
+	continue_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	continue_button.pressed.connect(hide_result)
 	box.add_child(continue_button)
 	visible = false

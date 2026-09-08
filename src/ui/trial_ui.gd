@@ -24,12 +24,21 @@ func _init() -> void:
 	flash.color = Color(1.0, 0.8, 0.2, 0.0)
 	flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(flash)
+	var column := VBoxContainer.new()
+	column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.alignment = BoxContainer.ALIGNMENT_END
+	add_child(column)
 	var panel := PanelContainer.new()
-	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	panel.offset_top = -320
-	add_child(panel)
+	panel.size_flags_vertical = Control.SIZE_SHRINK_END
+	column.add_child(panel)
+	var margin := MarginContainer.new()
+	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		margin.add_theme_constant_override(side, 24)
+	panel.add_child(margin)
 	var box := VBoxContainer.new()
-	panel.add_child(box)
+	box.add_theme_constant_override("separation", 6)
+	margin.add_child(box)
 	title_label = Label.new()
 	box.add_child(title_label)
 	hours_label = Label.new()
@@ -40,7 +49,7 @@ func _init() -> void:
 	box.add_child(stage_label)
 	argument_label = RichTextLabel.new()
 	argument_label.fit_content = true
-	argument_label.custom_minimum_size = Vector2(0, 60)
+	argument_label.custom_minimum_size = Vector2(0, 52)
 	box.add_child(argument_label)
 	rhythm_bar = ProgressBar.new()
 	rhythm_bar.max_value = 1.0
@@ -56,6 +65,8 @@ func bind(context: GameContext) -> void:
 
 
 func attach(t: TrialRuntime) -> void:
+	if t == null:
+		return
 	trial = t
 	trial.round_started.connect(_on_round)
 	trial.round_won.connect(func(_rd: Dictionary, k: String): _note(k))
@@ -73,7 +84,7 @@ func _process(_delta: float) -> void:
 	if visible and trial != null:
 		rhythm_bar.value = trial.rhythm.phase(Time.get_ticks_msec())
 		if flash.color.a > 0.0:
-			flash.color.a = maxf(0.0, flash.color.a - _delta * 2.0)
+			flash.color.a = maxf(0.0, flash.color.a - _delta * 1.6)
 
 
 func _on_round(rd: Dictionary, _index: int) -> void:
@@ -86,6 +97,7 @@ func _on_round(rd: Dictionary, _index: int) -> void:
 	for view in trial.options():
 		var b := Button.new()
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		var text := ctx.texts.t(view["text_key"])
 		if not (view["check"] as Dictionary).is_empty():
 			text += "  [%s %s · %s]" % [ctx.texts.t(str(view["check"].get("label_key", ""))), ctx.texts.t("ui.check.dc", {"dc": view["check"].get("dc", 10)}), ctx.texts.t("ui.trial.beat")]
@@ -106,5 +118,6 @@ func _note(key: String) -> void:
 		argument_label.text = ctx.texts.t(key)
 
 
+## Одна золотая вспышка на такт — не заливка экрана (A10, car_01 §5).
 func _gold() -> void:
-	flash.color.a = 0.9
+	flash.color.a = 0.5

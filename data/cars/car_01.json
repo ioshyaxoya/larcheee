@@ -238,5 +238,7 @@
     "lantern_taken": "car_01.tail.lantern_taken",
     "clock_hours_lost>0": "car_01.tail.clock_hours_lost",
     "default": "car_01.tail.default"
-  }
+  },
+  "dark_until_lantern": true,
+  "_dark_note": "Холодное открытие: до зажжённого фонаря в вагоне не видно никого (docs/car_01_brake_van.md §4, docs/visual_direction.md §3 — свет делает всю работу)."
 }

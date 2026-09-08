@@ -127,6 +127,7 @@ godot --headless --import --path . && godot --headless --path . -s tests/smoke.g
 ```
 
 Godot 4.3: `Godot_v4.3-stable_linux.x86_64` с releases.godotengine.org; CI скачивает сам.
+Как запустить игру и снять кадры — `docs/run.md`.
 
 ## Предметы, мини-игры, испытания, концовки, переходы (задача 3)
 

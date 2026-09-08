@@ -33,6 +33,8 @@ func attach(car_node: Car, context: GameContext) -> void:
 
 func _on_event(event_name: String) -> void:
 	match event_name:
+		"lantern_lit":
+			car.reveal()
 		"door_glimpse":
 			control_locked.emit(3.0)   # три секунды приоткрытой двери
 		"title_card":

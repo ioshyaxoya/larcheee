@@ -7,6 +7,7 @@ var npc_id: String = ""
 var def: Dictionary = {}
 var label: Label3D
 var state: String = "default"
+var hidden_by_dark: bool = false
 
 
 func setup(npc_def: Dictionary, ctx: GameContext) -> void:
@@ -22,14 +23,16 @@ func setup(npc_def: Dictionary, ctx: GameContext) -> void:
 		body.mesh = quad
 		body.position.y = 0.9
 		var mat := StandardMaterial3D.new()
-		mat.albedo_color = Color(0.08, 0.07, 0.1)
-		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.albedo_color = Color(0.22, 0.2, 0.24)
+		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		mat.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
 		body.material_override = mat
 		add_child(body)
 		label = Label3D.new()
 		label.text = ctx.texts.t(str(npc_def.get("name_key", "")))
 		label.position.y = 2.0
-		label.font_size = 24
+		label.font_size = 20
+		label.modulate = Color(0.8, 0.78, 0.72)
 		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		add_child(label)
 
@@ -37,7 +40,16 @@ func setup(npc_def: Dictionary, ctx: GameContext) -> void:
 ## Состояние NPC (данные npc.states): patrol, hidden, crying… Скрытые не видны.
 func set_state(new_state: String) -> void:
 	state = new_state
-	visible = new_state != "hidden"
+	_refresh_visibility()
+
+
+func set_hidden_by_dark(hidden: bool) -> void:
+	hidden_by_dark = hidden
+	_refresh_visibility()
+
+
+func _refresh_visibility() -> void:
+	visible = state != "hidden" and not hidden_by_dark
 
 
 ## Реплика по оси отношения: полюс персонажа → text_key (B4 attitude_axes).

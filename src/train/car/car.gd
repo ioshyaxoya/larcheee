@@ -84,6 +84,25 @@ func _spawn_npcs() -> void:
 		node.setup(def, ctx)
 		add_child(node)
 		npcs[str(npc_id)] = node
+	_apply_darkness()
+
+
+## Свет делает всю работу: пока фонарь не зажжён, в вагоне не видно никого.
+func _apply_darkness() -> void:
+	if not card.get("dark_until_lantern", false):
+		return
+	var lit: bool = ctx.world.get_flag("car_01.lantern_lit", false) == true
+	for npc_id in npcs.keys():
+		(npcs[npc_id] as NpcNode).set_hidden_by_dark(not lit)
+
+
+## Фонарь зажжён: вагон становится виден.
+func reveal() -> void:
+	for npc_id in npcs.keys():
+		(npcs[npc_id] as NpcNode).set_hidden_by_dark(false)
+	var lantern := get_node_or_null("Lantern")
+	if lantern != null:
+		lantern.visible = true
 
 
 func _load_items() -> void:

@@ -15,12 +15,22 @@ var option_buttons: Array[Button] = []
 func _init() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# Панель прижата к низу и растёт по содержимому: сколько вариантов, столько высоты.
+	var column := VBoxContainer.new()
+	column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.alignment = BoxContainer.ALIGNMENT_END
+	add_child(column)
 	var panel := PanelContainer.new()
-	panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	panel.offset_top = -260
-	add_child(panel)
+	panel.size_flags_vertical = Control.SIZE_SHRINK_END
+	column.add_child(panel)
+	var margin := MarginContainer.new()
+	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
+		margin.add_theme_constant_override(side, 24)
+	panel.add_child(margin)
 	var box := VBoxContainer.new()
-	panel.add_child(box)
+	box.add_theme_constant_override("separation", 6)
+	margin.add_child(box)
 	speaker_label = Label.new()
 	speaker_label.add_theme_font_size_override("font_size", 20)
 	box.add_child(speaker_label)
@@ -30,9 +40,10 @@ func _init() -> void:
 	text_label = RichTextLabel.new()
 	text_label.bbcode_enabled = false
 	text_label.fit_content = true
-	text_label.custom_minimum_size = Vector2(0, 70)
+	text_label.custom_minimum_size = Vector2(0, 56)
 	box.add_child(text_label)
 	options_box = VBoxContainer.new()
+	options_box.add_theme_constant_override("separation", 4)
 	box.add_child(options_box)
 	visible = false
 
@@ -41,16 +52,36 @@ func bind(context: GameContext) -> void:
 	ctx = context
 
 
+## Прицепить граф. Сигналы предыдущего отцепляются: иначе его `ended`
+## погасит панель уже после того, как показан новый граф.
 func attach(rt: DialogueRuntime) -> void:
+	if rt == null:
+		return
+	detach()
 	runtime = rt
 	rt.node_entered.connect(_on_node)
-	rt.ended.connect(_on_ended)
+	rt.ended.connect(_on_ended.bind(rt))
 	visible = true
 	if not rt.current.is_empty():
 		_on_node(rt.current_id, rt.current)
+	elif rt.finished:
+		_on_ended(rt)
+
+
+func detach() -> void:
+	if runtime == null:
+		return
+	if runtime.node_entered.is_connected(_on_node):
+		runtime.node_entered.disconnect(_on_node)
+	var bound := _on_ended.bind(runtime)
+	if runtime.ended.is_connected(bound):
+		runtime.ended.disconnect(bound)
+	runtime = null
 
 
 func _on_node(_node_id: String, node: Dictionary) -> void:
+	if runtime == null:
+		return
 	var speaker_key := runtime.speaker_name_key(node)
 	speaker_label.text = ctx.texts.t(speaker_key) if speaker_key != "" else ""
 	stage_label.text = ctx.texts.t(str(node["stage"])) if node.has("stage") else ""
@@ -71,6 +102,7 @@ func _rebuild_options() -> void:
 			var b := Button.new()
 			b.text = option_caption(view)
 			b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 			var idx: int = view["index"]
 			b.pressed.connect(func(): runtime.choose(idx))
 			options_box.add_child(b)
@@ -78,6 +110,7 @@ func _rebuild_options() -> void:
 	else:
 		var b := Button.new()
 		b.text = ctx.texts.t("ui.check.continue")
+		b.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 		b.pressed.connect(func(): runtime.advance())
 		options_box.add_child(b)
 		option_buttons.append(b)
@@ -105,7 +138,9 @@ func option_caption(view: Dictionary) -> String:
 	return "  ".join(parts)
 
 
-func _on_ended() -> void:
+func _on_ended(which: DialogueRuntime) -> void:
+	if which != runtime:
+		return   # граф уже сменился: панель принадлежит новому
 	for b in option_buttons:
 		b.queue_free()
 	option_buttons.clear()

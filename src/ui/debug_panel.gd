@@ -7,6 +7,9 @@ signal start_requested(origin: String, class_id: String, sex: String, tags: Arra
 signal enter_car_requested
 signal talk_requested(npc_id: String)
 signal take_requested(item_id: String)
+signal car_only_requested(origin: String, class_id: String, sex: String, seed_v: int)
+signal scene_requested(scene: String)
+signal trial_requested
 signal save_requested
 signal load_requested
 
@@ -96,6 +99,21 @@ func bind(context: GameContext) -> void:
 		start_b.pressed.connect(_on_start)
 		box.add_child(start_b)
 		box.move_child(start_b, 6)
+		var car_b := Button.new()
+		car_b.text = t.t("ui.debug.car_only")
+		car_b.pressed.connect(func(): car_only_requested.emit(str(_origin_ids[origin_btn.selected]), str(_class_ids[class_btn.selected]), "f" if sex_btn.selected == 1 else "m", int(seed_spin.value)))
+		box.add_child(car_b)
+		box.move_child(car_b, 7)
+		var paths_b := Button.new()
+		paths_b.text = t.t("ui.debug.paths")
+		paths_b.pressed.connect(func(): scene_requested.emit("paths_hub"))
+		box.add_child(paths_b)
+		box.move_child(paths_b, 8)
+		var trial_b := Button.new()
+		trial_b.text = t.t("ui.debug.trial")
+		trial_b.pressed.connect(func(): trial_requested.emit())
+		box.add_child(trial_b)
+		box.move_child(trial_b, 9)
 	enter_button.text = t.t("ui.debug.enter_car")
 	(get_meta("save_b") as Button).text = t.t("ui.debug.save")
 	(get_meta("load_b") as Button).text = t.t("ui.debug.load")

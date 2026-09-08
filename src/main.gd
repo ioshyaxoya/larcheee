@@ -3,6 +3,8 @@ extends Node
 ## возврат в вагон 01 (часть 2): спор о часах, четыре пути, концовка 5.
 ## Сцена театральная: ортокамера на рельсах, плоскости в объёме, грейдинг по палитре.
 
+signal title_dismissed
+
 var ctx: GameContext
 var stage: Node3D
 var camera: Camera3D
@@ -15,7 +17,9 @@ var trial_ui: TrialUi
 var credits_ui: CreditsUi
 var transition_ui: TransitionUi
 var debug_panel: DebugPanel
+var title_card: Control
 var title_label: Label
+var hint_label: Label
 var car: Car = null
 var quest: QuestRuntime = null
 var control_locked: bool = false
@@ -67,17 +71,45 @@ func _build_ui() -> void:
 	layer.add_child(check_ui)
 	credits_ui = CreditsUi.new()
 	layer.add_child(credits_ui)
+	var title_layer := CanvasLayer.new()
+	title_layer.layer = 10
+	add_child(title_layer)
+	title_card = Control.new()
+	title_card.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	title_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	title_card.visible = false
+	title_layer.add_child(title_card)
+	var backdrop := ColorRect.new()
+	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	backdrop.color = Color(0, 0, 0, 0.92)
+	title_card.add_child(backdrop)
 	title_label = Label.new()
-	title_label.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	title_label.add_theme_font_size_override("font_size", 48)
-	title_label.visible = false
-	layer.add_child(title_label)
+	title_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	title_label.add_theme_font_size_override("font_size", 44)
+	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title_card.add_child(title_label)
+	hint_label = Label.new()
+	hint_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	hint_label.offset_left = -260
+	hint_label.offset_top = -32
+	hint_label.modulate = Color(0.6, 0.6, 0.65)
+	layer.add_child(hint_label)
 	debug_panel.start_requested.connect(_on_start)
 	debug_panel.enter_car_requested.connect(_on_enter_car)
 	debug_panel.talk_requested.connect(_on_talk)
 	debug_panel.take_requested.connect(func(item_id: String):
 		if car != null and car.take_item(item_id):
 			debug_panel.show_car_controls(car))
+	debug_panel.car_only_requested.connect(_on_car_only)
+	debug_panel.scene_requested.connect(func(scene: String):
+		if car == null:
+			return
+		dialogue_ui.attach(car.play_scene(scene)))
+	debug_panel.trial_requested.connect(func():
+		if car != null:
+			_on_trial_started(car.custom.start_trial()))
 	debug_panel.save_requested.connect(func(): ctx.save())
 	debug_panel.load_requested.connect(_on_load)
 	credits_ui.closed.connect(func(): debug_panel.visible = true)
@@ -87,6 +119,7 @@ func _bind(context: GameContext) -> void:
 	ctx = context
 	for ui in [hud, dialogue_ui, check_ui, trial_ui, credits_ui, transition_ui, debug_panel]:
 		ui.bind(ctx)
+	hint_label.text = ctx.texts.t("ui.debug.hint")
 
 
 func _apply_palette() -> void:
@@ -95,8 +128,15 @@ func _apply_palette() -> void:
 
 # --- поток ------------------------------------------------------------------
 
+## F1 — показать или спрятать панель разработчика.
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and (event as InputEventKey).keycode == KEY_F1:
+		debug_panel.visible = not debug_panel.visible
+
+
 func _on_start(origin: String, class_id: String, sex: String, tags: Array, seed_v: int) -> void:
 	_bind(Game.new_game(seed_v))
+	debug_panel.visible = false
 	var ch := ctx.char_data.build(origin, class_id, sex)
 	ctx.set_character(ch)
 	for tag in tags:
@@ -129,6 +169,8 @@ func _spawn_car() -> void:
 
 
 func _start_prologue() -> void:
+	if title_card.visible:
+		await title_dismissed   # пролог начинается после титра, не под ним
 	car.visible = false
 	quest = QuestRuntime.new(ctx)
 	var rt := quest.start("quest_last_half_hour")
@@ -173,10 +215,7 @@ func _on_soft_reset(_text_key: String) -> void:
 
 func _on_exit_forward(_direction: String) -> void:
 	var tr := TransitionRuntime.new(ctx)
-	tr.finished.connect(func(_v: String):
-		title_label.text = ctx.texts.t("ui.car02.stub")
-		title_label.visible = true
-		get_tree().create_timer(3.0).timeout.connect(func(): title_label.visible = false))
+	tr.finished.connect(func(_v: String): _show_title("ui.car02.stub"))
 	transition_ui.attach(tr)
 	tr.play(str(car.card.get("transition_variant", "night_bengal")))
 
@@ -186,6 +225,17 @@ func _on_ending(ending_id: String) -> void:
 	var def := endings.play(ending_id)
 	debug_panel.visible = false
 	credits_ui.show_ending(def, endings)
+
+
+## Отладочный вход: сразу в тормозной вагон, минуя пролог. Пути и спор — оттуда.
+func _on_car_only(origin: String, class_id: String, sex: String, seed_v: int) -> void:
+	_bind(Game.new_game(seed_v))
+	ctx.set_character(ctx.char_data.build(origin, class_id, sex))
+	ctx.world.set_flag("car_01.lantern_lit", true)
+	ctx.world.set_flag("prologue.completed", true)
+	_spawn_car()
+	debug_panel.show_car_controls(car)
+	dialogue_ui.attach(car.play_scene("paths_hub"))
 
 
 func _on_enter_car() -> void:
@@ -224,7 +274,9 @@ func _lock_control(seconds: float) -> void:
 		dialogue_ui.visible = true)
 
 
-func _show_title(text_key: String) -> void:
+func _show_title(text_key: String, seconds: float = 3.0) -> void:
 	title_label.text = ctx.texts.t(text_key)
-	title_label.visible = true
-	get_tree().create_timer(3.0).timeout.connect(func(): title_label.visible = false)
+	title_card.visible = true
+	await get_tree().create_timer(seconds).timeout
+	title_card.visible = false
+	title_dismissed.emit()

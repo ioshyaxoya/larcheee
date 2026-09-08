@@ -577,5 +577,9 @@
   "item.small_prana_crystal.name": "Малый прана-кристалл",
   "item.small_prana_crystal.desc": "Три заряда. Настоящий, от А Суня.",
   "item.fake_prana_crystal.name": "Стеклянная подделка",
-  "item.fake_prana_crystal.desc": "Один раз обманет детектор. Второй — нет."
+  "item.fake_prana_crystal.desc": "Один раз обманет детектор. Второй — нет.",
+  "ui.debug.hint": "F1 — панель разработчика",
+  "ui.debug.car_only": "Сразу в вагон 01 (без пролога)",
+  "ui.debug.paths": "Узел путей",
+  "ui.debug.trial": "Спор о часах"
 }

@@ -577,5 +577,9 @@
   "item.small_prana_crystal.name": "Small prana crystal",
   "item.small_prana_crystal.desc": "Three charges. Real, from Ah Sun.",
   "item.fake_prana_crystal.name": "Glass fake",
-  "item.fake_prana_crystal.desc": "Fools a detector once. Not twice."
+  "item.fake_prana_crystal.desc": "Fools a detector once. Not twice.",
+  "ui.debug.hint": "F1 — developer panel",
+  "ui.debug.car_only": "Straight to car 01 (skip prologue)",
+  "ui.debug.paths": "Paths hub",
+  "ui.debug.trial": "The dispute of the clock"
 }

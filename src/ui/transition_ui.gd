@@ -16,17 +16,25 @@ func _init() -> void:
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	bg.color = Color(0.02, 0.02, 0.05, 0.92)
 	add_child(bg)
+	var margin := MarginContainer.new()
+	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	for side in ["margin_left", "margin_right"]:
+		margin.add_theme_constant_override(side, 160)
+	for side in ["margin_top", "margin_bottom"]:
+		margin.add_theme_constant_override(side, 200)
+	add_child(margin)
 	var box := VBoxContainer.new()
-	box.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	add_child(box)
+	box.add_theme_constant_override("separation", 16)
+	margin.add_child(box)
 	label = RichTextLabel.new()
 	label.fit_content = true
-	label.custom_minimum_size = Vector2(700, 120)
 	box.add_child(label)
 	next_button = Button.new()
+	next_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	next_button.pressed.connect(func(): if runtime: runtime.next_step())
 	box.add_child(next_button)
 	skip_button = Button.new()
+	skip_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	skip_button.pressed.connect(func(): if runtime: runtime.skip())
 	box.add_child(skip_button)
 	visible = false
