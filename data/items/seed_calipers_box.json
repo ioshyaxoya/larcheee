@@ -1,0 +1,14 @@
+{
+  "id": "seed_calipers_box",
+  "name_key": "item.seed_calipers_box.name",
+  "desc_key": "item.seed_calipers_box.desc",
+  "kind": "seed",
+  "seed_for": "car_22",
+  "takeable": true,
+  "position": [
+    2.0,
+    0.6,
+    -9.0
+  ],
+  "conditions": []
+}

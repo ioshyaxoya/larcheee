@@ -1,0 +1,33 @@
+{
+  "id": "mg_ledger",
+  "type": "reading",
+  "title_key": "mg.ledger.title",
+  "intro_key": "mg.ledger.intro",
+  "entries": [
+    "mg.ledger.entry_1",
+    "mg.ledger.entry_2",
+    "mg.ledger.entry_3",
+    "mg.ledger.entry_berths"
+  ],
+  "on_complete": [
+    {
+      "set_flag": "car_01.journal_seen",
+      "value": true
+    }
+  ],
+  "notice": {
+    "check": {
+      "skill": "perception",
+      "dc": 12,
+      "label_key": "car_01.check.perception"
+    },
+    "effects": [
+      {
+        "set_flag": "ticket.smear_noticed",
+        "value": true
+      }
+    ],
+    "text_key": "mg.ledger.smear",
+    "fail_key": "mg.ledger.smear_fail"
+  }
+}

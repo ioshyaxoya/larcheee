@@ -8,5 +8,10 @@
     1.5
   ],
   "silhouette": "conductor_asleep",
-  "attitude_axes": {}
+  "attitude_axes": {},
+  "dialogue": "car_01_bir_singh",
+  "states": {
+    "asleep": "npc.bir_singh.state.asleep",
+    "patrol": "npc.bir_singh.state.patrol"
+  }
 }

@@ -1,0 +1,14 @@
+{
+  "id": "seed_mail_sack",
+  "name_key": "item.seed_mail_sack.name",
+  "desc_key": "item.seed_mail_sack.desc",
+  "kind": "seed",
+  "seed_for": "car_03",
+  "takeable": true,
+  "position": [
+    -2.0,
+    0.6,
+    -4.0
+  ],
+  "conditions": []
+}

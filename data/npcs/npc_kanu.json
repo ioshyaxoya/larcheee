@@ -8,5 +8,11 @@
     -2.0
   ],
   "silhouette": "boy",
-  "attitude_axes": {}
+  "attitude_axes": {},
+  "dialogue": "car_01_kanu",
+  "states": {
+    "default": "npc.kanu.state.default",
+    "hidden": "npc.kanu.state.hidden",
+    "crying": "npc.kanu.state.crying"
+  }
 }

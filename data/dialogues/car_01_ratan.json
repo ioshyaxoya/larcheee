@@ -1,0 +1,46 @@
+{
+  "id": "car_01_ratan",
+  "car": "car_01",
+  "start": "stove",
+  "nodes": {
+    "stove": {
+      "speaker": "npc_ratan",
+      "text_key": "ratan.stove",
+      "stage": "ratan.stage",
+      "options": [
+        {
+          "text_key": "ratan.ask_work",
+          "next": "teach"
+        },
+        {
+          "text_key": "ratan.ask_burdwan",
+          "next": "burdwan"
+        },
+        {
+          "text_key": "ratan.leave",
+          "effects": [
+            {
+              "end": true
+            }
+          ]
+        }
+      ]
+    },
+    "teach": {
+      "speaker": "npc_ratan",
+      "text_key": "ratan.teach",
+      "on_enter": [
+        {
+          "set_flag": "car_01.ratan_taught",
+          "value": true
+        }
+      ],
+      "next": "stove"
+    },
+    "burdwan": {
+      "speaker": "npc_ratan",
+      "text_key": "ratan.burdwan",
+      "next": "stove"
+    }
+  }
+}

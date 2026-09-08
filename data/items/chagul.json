@@ -1,0 +1,13 @@
+{
+  "id": "chagul",
+  "name_key": "item.chagul.name",
+  "desc_key": "item.chagul.desc",
+  "kind": "consumable",
+  "takeable": true,
+  "position": [
+    1.4,
+    0.3,
+    0.2
+  ],
+  "conditions": []
+}

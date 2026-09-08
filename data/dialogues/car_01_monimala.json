@@ -1,0 +1,46 @@
+{
+  "id": "car_01_monimala",
+  "car": "car_01",
+  "start": "urn",
+  "nodes": {
+    "urn": {
+      "speaker": "npc_monimala",
+      "text_key": "monimala.urn",
+      "stage": "monimala.stage",
+      "options": [
+        {
+          "text_key": "monimala.door",
+          "next": "door"
+        },
+        {
+          "text_key": "monimala.clock",
+          "next": "clock"
+        },
+        {
+          "text_key": "monimala.leave",
+          "effects": [
+            {
+              "end": true
+            }
+          ]
+        }
+      ]
+    },
+    "door": {
+      "speaker": "npc_monimala",
+      "text_key": "monimala.door.out",
+      "next": "urn"
+    },
+    "clock": {
+      "speaker": "npc_monimala",
+      "text_key": "monimala.clock.out",
+      "on_enter": [
+        {
+          "set_flag": "car_01.clock_fact",
+          "value": true
+        }
+      ],
+      "next": "urn"
+    }
+  }
+}

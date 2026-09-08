@@ -1,0 +1,8 @@
+{
+  "id": "crystal_cutter",
+  "name_key": "item.crystal_cutter.name",
+  "desc_key": "item.crystal_cutter.desc",
+  "kind": "tool",
+  "takeable": false,
+  "in_car": false
+}

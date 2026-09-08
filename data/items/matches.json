@@ -1,0 +1,13 @@
+{
+  "id": "matches",
+  "name_key": "item.matches.name",
+  "desc_key": "item.matches.desc",
+  "kind": "consumable",
+  "takeable": true,
+  "position": [
+    -0.4,
+    0.9,
+    0.6
+  ],
+  "conditions": []
+}

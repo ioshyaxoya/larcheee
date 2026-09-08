@@ -2,7 +2,7 @@
   "id": "god_shani",
   "name_key": "npc.god_shani.name",
   "kind": "presence",
-  "dialogue": "car_01_shani_first",
+  "dialogue": "car_01_paths",
   "position": [
     0.0,
     0.0,

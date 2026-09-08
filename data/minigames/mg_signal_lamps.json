@@ -1,0 +1,26 @@
+{
+  "id": "mg_signal_lamps",
+  "type": "choice",
+  "title_key": "mg.signal_lamps.title",
+  "intro_key": "mg.signal_lamps.intro",
+  "slots": [
+    {
+      "id": "rear",
+      "label_key": "mg.signal_lamps.rear",
+      "correct": "red"
+    },
+    {
+      "id": "side",
+      "label_key": "mg.signal_lamps.side",
+      "correct": "green"
+    }
+  ],
+  "colors": {
+    "red": "mg.signal_lamps.red",
+    "green": "mg.signal_lamps.green",
+    "white": "mg.signal_lamps.white"
+  },
+  "hint_flag": "car_01.ratan_taught",
+  "error_flag": "car_01.signal_error",
+  "_note": "Ошибка — встречный через два вагона увидит не тот сигнал; всплывёт в главе II."
+}

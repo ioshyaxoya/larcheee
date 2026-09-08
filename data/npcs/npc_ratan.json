@@ -8,5 +8,6 @@
     0.0
   ],
   "silhouette": "old_conductor",
-  "attitude_axes": {}
+  "attitude_axes": {},
+  "dialogue": "car_01_ratan"
 }

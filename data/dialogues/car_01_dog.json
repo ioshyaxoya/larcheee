@@ -1,0 +1,13 @@
+{
+  "id": "car_01_dog",
+  "car": "car_01",
+  "start": "dog",
+  "nodes": {
+    "dog": {
+      "speaker": "narrator",
+      "text_key": "dog.seals",
+      "stage": "dog.stage",
+      "end": true
+    }
+  }
+}

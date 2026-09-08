@@ -1,0 +1,175 @@
+{
+  "id": "car_01_service",
+  "car": "car_01",
+  "start": "offer",
+  "nodes": {
+    "offer": {
+      "branches": [
+        {
+          "conditions": [
+            {
+              "flag": "car_01.ratan_taught",
+              "is": true
+            }
+          ],
+          "next": "offer_taught"
+        },
+        {
+          "conditions": [],
+          "next": "offer_raw"
+        }
+      ]
+    },
+    "offer_taught": {
+      "speaker": "narrator",
+      "text_key": "service.offer_taught",
+      "next": "brake"
+    },
+    "offer_raw": {
+      "speaker": "narrator",
+      "text_key": "service.offer_raw",
+      "next": "brake"
+    },
+    "brake": {
+      "speaker": "narrator",
+      "text_key": "service.brake",
+      "options": [
+        {
+          "text_key": "service.brake.go",
+          "minigame": "mg_brake_wheel",
+          "next": "brake_ok",
+          "next_on_fail": "brake_fail"
+        },
+        {
+          "text_key": "service.leave",
+          "effects": [
+            {
+              "end": true
+            }
+          ]
+        }
+      ]
+    },
+    "brake_fail": {
+      "speaker": "narrator",
+      "text_key": "service.brake.fail",
+      "next": "brake"
+    },
+    "brake_ok": {
+      "speaker": "narrator",
+      "text_key": "service.brake.ok",
+      "on_enter": [
+        {
+          "set_flag": "car_01.svc_brake",
+          "value": true
+        }
+      ],
+      "next": "lamps"
+    },
+    "lamps": {
+      "speaker": "narrator",
+      "text_key": "service.lamps",
+      "options": [
+        {
+          "text_key": "service.lamps.go",
+          "minigame": "mg_signal_lamps",
+          "next": "lamps_ok",
+          "next_on_fail": "lamps_wrong"
+        }
+      ]
+    },
+    "lamps_wrong": {
+      "speaker": "narrator",
+      "text_key": "service.lamps.wrong",
+      "on_enter": [
+        {
+          "set_flag": "car_01.svc_lamps",
+          "value": true
+        }
+      ],
+      "next": "ledger"
+    },
+    "lamps_ok": {
+      "speaker": "narrator",
+      "text_key": "service.lamps.ok",
+      "on_enter": [
+        {
+          "set_flag": "car_01.svc_lamps",
+          "value": true
+        }
+      ],
+      "next": "ledger"
+    },
+    "ledger": {
+      "speaker": "narrator",
+      "text_key": "service.ledger",
+      "options": [
+        {
+          "text_key": "service.ledger.go",
+          "minigame": "mg_ledger",
+          "next": "ledger_ok",
+          "next_on_fail": "ledger_ok"
+        }
+      ]
+    },
+    "ledger_ok": {
+      "speaker": "narrator",
+      "text_key": "service.ledger.ok",
+      "on_enter": [
+        {
+          "set_flag": "car_01.svc_ledger",
+          "value": true
+        },
+        {
+          "set_flag": "car_01.journal_seen",
+          "value": true
+        }
+      ],
+      "next": "complete"
+    },
+    "complete": {
+      "speaker": "god_shani",
+      "text_key": "service.complete",
+      "stage": "service.complete.stage",
+      "on_enter": [
+        {
+          "set_flag": "car_01.shift_worked",
+          "value": true
+        },
+        {
+          "set_flag": "car_01.shani_attitude",
+          "value": "respectful"
+        },
+        {
+          "set_flag": "car_01.gift_hour_ago",
+          "value": true
+        },
+        {
+          "add_item": "gift_hour_ago"
+        },
+        {
+          "set_flag": "car_01.vahana_crow_feather",
+          "value": true
+        },
+        {
+          "add_item": "vahana_crow_feather"
+        },
+        {
+          "set_flag": "car_01.path",
+          "value": "service"
+        }
+      ],
+      "next": "opens"
+    },
+    "opens": {
+      "speaker": "narrator",
+      "text_key": "service.opens",
+      "on_enter": [
+        {
+          "emit": "exit_forward"
+        }
+      ],
+      "end": true
+    }
+  }
+}

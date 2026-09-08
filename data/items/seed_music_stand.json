@@ -1,0 +1,14 @@
+{
+  "id": "seed_music_stand",
+  "name_key": "item.seed_music_stand.name",
+  "desc_key": "item.seed_music_stand.desc",
+  "kind": "seed",
+  "seed_for": "car_28",
+  "takeable": true,
+  "position": [
+    -2.0,
+    1.4,
+    -5.0
+  ],
+  "conditions": []
+}

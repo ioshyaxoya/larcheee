@@ -268,5 +268,97 @@
   "car_01.shani_greeted": {
     "description": "Шани Хаурского святилища поздоровался с игроком",
     "type": "bool"
+  },
+  "car_01.trial_won": {
+    "description": "Спор о часах выигран: Шани признал вас пассажиром",
+    "type": "bool"
+  },
+  "car_01.clock_hours_lost": {
+    "description": "На сколько часов назад доспорились с Шани (шкала испытания)",
+    "type": "int"
+  },
+  "car_01.shani_attitude": {
+    "description": "Отношение Шани по пути выхода",
+    "type": "enum",
+    "values": [
+      "cold",
+      "amused",
+      "respectful",
+      "offended"
+    ]
+  },
+  "car_01.gift_hour_ago": {
+    "description": "Дар «Час назад» получен (обет: не спешить)",
+    "type": "bool"
+  },
+  "car_01.vahana_crow_feather": {
+    "description": "Вороново перо (вахана Шани) получено без кражи",
+    "type": "bool"
+  },
+  "car_01.ratan_taught": {
+    "description": "Ратан Мондол показал работу тормозного вагона: мини-игры службы легче",
+    "type": "bool"
+  },
+  "car_01.signal_error": {
+    "description": "Сигнальные стёкла поставлены неверно: встречный увидит не тот сигнал (глава II)",
+    "type": "bool"
+  },
+  "car_01.hafiz_named": {
+    "description": "Сказано вслух, что Хафиз-сахиб мёртв: Кану плачет, Шани встаёт",
+    "type": "bool"
+  },
+  "car_01.clock_fact": {
+    "description": "Замечено: часы стоят ровно на 20:30 — поезд уходил в момент бега",
+    "type": "bool"
+  },
+  "car_01.seeds_taken": {
+    "description": "Сколько семян взято со стеллажей (не больше трёх)",
+    "type": "int"
+  },
+  "car_01.cold_open_done": {
+    "description": "Холодное открытие сыграно",
+    "type": "bool"
+  },
+  "car_01.soft_resets": {
+    "description": "Сколько раз игрок доспорился до мягкого отката",
+    "type": "int"
+  },
+  "car_01.path": {
+    "description": "Путь, которым пройден тормозной вагон",
+    "type": "enum",
+    "values": [
+      "force",
+      "deceit",
+      "service",
+      "stay"
+    ]
+  },
+  "ending.reached": {
+    "description": "Достигнутая концовка (номер)",
+    "type": "int"
+  },
+  "window.progress": {
+    "description": "Прогресс окна (пейзаж как прогресс-бар, A8)",
+    "type": "int"
+  },
+  "car_01.svc_brake": {
+    "description": "Служба: тормоз на спуске отработан",
+    "type": "bool"
+  },
+  "car_01.svc_lamps": {
+    "description": "Служба: сигнальные стёкла заменены",
+    "type": "bool"
+  },
+  "car_01.svc_ledger": {
+    "description": "Служба: опись багажа внесена",
+    "type": "bool"
+  },
+  "car_01.hafiz_spoken": {
+    "description": "С Хафиз-сахибом заговорили один раз",
+    "type": "bool"
+  },
+  "car_01.kanu_shelves": {
+    "description": "Кану рассказал про стеллажи: поиск семян вдвое короче",
+    "type": "bool"
   }
 }

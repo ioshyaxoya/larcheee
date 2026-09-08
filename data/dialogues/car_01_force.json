@@ -1,0 +1,78 @@
+{
+  "id": "car_01_force",
+  "car": "car_01",
+  "start": "door",
+  "nodes": {
+    "door": {
+      "speaker": "narrator",
+      "text_key": "force.door",
+      "stage": "force.door.stage",
+      "options": [
+        {
+          "text_key": "force.shoulder",
+          "check": {
+            "skill": "athletics",
+            "dc": 16,
+            "label_key": "car_01.check.athletics"
+          },
+          "next": "forced",
+          "next_on_fail": "strain"
+        },
+        {
+          "text_key": "force.cutter",
+          "conditions": [
+            {
+              "has_item": "crystal_cutter"
+            }
+          ],
+          "effects": [
+            {
+              "remove_item": "crystal_cutter"
+            }
+          ],
+          "next": "forced"
+        },
+        {
+          "text_key": "force.back_off",
+          "effects": [
+            {
+              "end": true
+            }
+          ]
+        }
+      ]
+    },
+    "strain": {
+      "speaker": "narrator",
+      "text_key": "force.strain",
+      "on_enter": [
+        {
+          "emit": "force_round"
+        }
+      ],
+      "next": "door"
+    },
+    "forced": {
+      "speaker": "narrator",
+      "text_key": "force.forced",
+      "on_enter": [
+        {
+          "set_flag": "car_01.forced_door",
+          "value": true
+        },
+        {
+          "set_flag": "car_01.shani_attitude",
+          "value": "offended"
+        },
+        {
+          "set_flag": "car_01.path",
+          "value": "force"
+        },
+        {
+          "emit": "exit_forward"
+        }
+      ],
+      "end": true
+    }
+  }
+}

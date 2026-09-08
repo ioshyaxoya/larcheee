@@ -1,0 +1,14 @@
+{
+  "id": "seed_census_forms",
+  "name_key": "item.seed_census_forms.name",
+  "desc_key": "item.seed_census_forms.desc",
+  "kind": "seed",
+  "seed_for": "car_22",
+  "takeable": true,
+  "position": [
+    -2.0,
+    1.4,
+    -10.0
+  ],
+  "conditions": []
+}

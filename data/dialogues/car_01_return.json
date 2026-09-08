@@ -1,0 +1,97 @@
+{
+  "id": "car_01_return",
+  "car": "car_01",
+  "start": "turn",
+  "nodes": {
+    "turn": {
+      "speaker": "narrator",
+      "text_key": "ret.turn",
+      "next": "greet"
+    },
+    "greet": {
+      "branches": [
+        {
+          "conditions": [
+            {
+              "flag": "prologue.shrine_stopped",
+              "is": true
+            }
+          ],
+          "next": "greet_known"
+        },
+        {
+          "conditions": [],
+          "next": "greet_stranger"
+        }
+      ]
+    },
+    "greet_known": {
+      "speaker": "god_shani",
+      "text_key": "car_01.shani.greet_known",
+      "stage": "car_01.shani.stage.crate",
+      "pearl": true,
+      "pearl_id": "shani_car01_known_face",
+      "on_enter": [
+        {
+          "set_flag": "car_01.shani_greeted",
+          "value": true
+        }
+      ],
+      "next": "company"
+    },
+    "greet_stranger": {
+      "speaker": "god_shani",
+      "text_key": "car_01.shani.greet_stranger",
+      "stage": "car_01.shani.stage.crate",
+      "on_enter": [
+        {
+          "set_flag": "car_01.shani_greeted",
+          "value": true
+        }
+      ],
+      "next": "company"
+    },
+    "company": {
+      "branches": [
+        {
+          "conditions": [
+            {
+              "flag": "prologue.detainer_id",
+              "equals": "widow_monimala"
+            },
+            {
+              "flag": "prologue.detainer_resolution",
+              "equals": "helped"
+            }
+          ],
+          "next": "with_monimala"
+        },
+        {
+          "conditions": [],
+          "next": "alone"
+        }
+      ]
+    },
+    "with_monimala": {
+      "speaker": "narrator",
+      "text_key": "ret.with_monimala",
+      "next": "start_trial"
+    },
+    "alone": {
+      "speaker": "narrator",
+      "text_key": "ret.alone",
+      "next": "start_trial"
+    },
+    "start_trial": {
+      "speaker": "god_shani",
+      "text_key": "ret.not_passenger",
+      "stage": "ret.not_passenger.stage",
+      "on_enter": [
+        {
+          "emit": "start_trial"
+        }
+      ],
+      "end": true
+    }
+  }
+}

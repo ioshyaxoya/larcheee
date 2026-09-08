@@ -1,0 +1,14 @@
+{
+  "id": "conductor_uniform",
+  "name_key": "item.conductor_uniform.name",
+  "desc_key": "item.conductor_uniform.desc",
+  "kind": "clothing",
+  "takeable": true,
+  "position": [
+    -1.3,
+    0.4,
+    1.4
+  ],
+  "conditions": [],
+  "_note": "Форма Бира Сингха. Для пути «обман»: DC 15 → 12."
+}

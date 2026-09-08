@@ -1,0 +1,14 @@
+{
+  "id": "seed_shackle_lock",
+  "name_key": "item.seed_shackle_lock.name",
+  "desc_key": "item.seed_shackle_lock.desc",
+  "kind": "seed",
+  "seed_for": "car_15",
+  "takeable": true,
+  "position": [
+    2.0,
+    1.4,
+    -6.0
+  ],
+  "conditions": []
+}

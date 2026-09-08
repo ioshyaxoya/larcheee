@@ -18,5 +18,6 @@
       "flag": "prologue.detainer_resolution",
       "equals": "helped"
     }
-  ]
+  ],
+  "dialogue": "car_01_monimala"
 }

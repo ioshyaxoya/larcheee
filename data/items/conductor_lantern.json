@@ -1,0 +1,14 @@
+{
+  "id": "conductor_lantern",
+  "name_key": "item.conductor_lantern.name",
+  "desc_key": "item.conductor_lantern.desc",
+  "kind": "tool",
+  "takeable": false,
+  "position": [
+    0.0,
+    1.6,
+    1.2
+  ],
+  "conditions": [],
+  "_note": "Фонарь на крюке. Снять и повесить на пояс = концовка 5 (только через диалог остаться)."
+}

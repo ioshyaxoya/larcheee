@@ -1,0 +1,76 @@
+{
+  "id": "car_01_cold_open",
+  "car": "car_01",
+  "start": "dark",
+  "nodes": {
+    "dark": {
+      "speaker": "narrator",
+      "text_key": "co.dark",
+      "stage": "co.dark.stage",
+      "options": [
+        {
+          "text_key": "co.stand",
+          "next": "stand"
+        }
+      ]
+    },
+    "stand": {
+      "speaker": "narrator",
+      "text_key": "co.stand.out",
+      "options": [
+        {
+          "text_key": "co.lantern",
+          "effects": [
+            {
+              "set_flag": "car_01.lantern_lit",
+              "value": true
+            },
+            {
+              "emit": "lantern_lit"
+            }
+          ],
+          "next": "lit"
+        }
+      ]
+    },
+    "lit": {
+      "speaker": "narrator",
+      "text_key": "co.lit",
+      "next": "silhouette"
+    },
+    "silhouette": {
+      "speaker": "narrator",
+      "text_key": "co.silhouette",
+      "next": "door"
+    },
+    "door": {
+      "speaker": "narrator",
+      "text_key": "co.door",
+      "on_enter": [
+        {
+          "emit": "door_glimpse"
+        }
+      ],
+      "next": "slam"
+    },
+    "slam": {
+      "speaker": "narrator",
+      "text_key": "co.slam",
+      "next": "title"
+    },
+    "title": {
+      "speaker": "narrator",
+      "text_key": "co.title",
+      "on_enter": [
+        {
+          "emit": "title_card"
+        },
+        {
+          "set_flag": "car_01.cold_open_done",
+          "value": true
+        }
+      ],
+      "end": true
+    }
+  }
+}

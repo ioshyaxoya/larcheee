@@ -1,0 +1,117 @@
+{
+  "id": "car_01_deceit",
+  "car": "car_01",
+  "start": "pick",
+  "nodes": {
+    "pick": {
+      "speaker": "narrator",
+      "text_key": "deceit.pick",
+      "options": [
+        {
+          "text_key": "deceit.relief_uniform",
+          "conditions": [
+            {
+              "has_item": "conductor_uniform"
+            }
+          ],
+          "check": {
+            "skill": "deception",
+            "dc": 12,
+            "label_key": "car_01.check.deception"
+          },
+          "next": "ok",
+          "next_on_fail": "fail"
+        },
+        {
+          "text_key": "deceit.relief",
+          "conditions": [
+            {
+              "not": {
+                "has_item": "conductor_uniform"
+              }
+            }
+          ],
+          "check": {
+            "skill": "deception",
+            "dc": 15,
+            "label_key": "car_01.check.deception"
+          },
+          "next": "ok",
+          "next_on_fail": "fail"
+        },
+        {
+          "text_key": "deceit.inspector",
+          "check": {
+            "skill": "deception",
+            "dc": 15,
+            "label_key": "car_01.check.deception"
+          },
+          "next": "ok",
+          "next_on_fail": "fail"
+        },
+        {
+          "text_key": "deceit.relative",
+          "check": {
+            "skill": "deception",
+            "dc": 15,
+            "label_key": "car_01.check.deception"
+          },
+          "next": "ok",
+          "next_on_fail": "fail"
+        },
+        {
+          "text_key": "deceit.back_off",
+          "effects": [
+            {
+              "end": true
+            }
+          ]
+        }
+      ]
+    },
+    "ok": {
+      "speaker": "god_shani",
+      "text_key": "deceit.ok",
+      "stage": "deceit.ok.stage",
+      "on_enter": [
+        {
+          "set_flag": "car_01.shani_attitude",
+          "value": "amused"
+        },
+        {
+          "set_flag": "car_01.gift_hour_ago",
+          "value": true
+        },
+        {
+          "add_item": "gift_hour_ago"
+        },
+        {
+          "set_flag": "car_01.path",
+          "value": "deceit"
+        }
+      ],
+      "next": "gift"
+    },
+    "gift": {
+      "speaker": "god_shani",
+      "text_key": "deceit.gift",
+      "on_enter": [
+        {
+          "emit": "exit_forward"
+        }
+      ],
+      "end": true
+    },
+    "fail": {
+      "speaker": "god_shani",
+      "text_key": "deceit.fail",
+      "stage": "deceit.fail.stage",
+      "on_enter": [
+        {
+          "emit": "clock_turn"
+        }
+      ],
+      "next": "pick"
+    }
+  }
+}

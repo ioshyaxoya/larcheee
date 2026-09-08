@@ -1,0 +1,14 @@
+{
+  "id": "seed_ice_box",
+  "name_key": "item.seed_ice_box.name",
+  "desc_key": "item.seed_ice_box.desc",
+  "kind": "seed",
+  "seed_for": "car_34",
+  "takeable": true,
+  "position": [
+    2.0,
+    1.4,
+    -11.0
+  ],
+  "conditions": []
+}

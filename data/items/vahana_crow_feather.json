@@ -1,0 +1,8 @@
+{
+  "id": "vahana_crow_feather",
+  "name_key": "item.vahana_crow_feather.name",
+  "desc_key": "item.vahana_crow_feather.desc",
+  "kind": "vahana",
+  "takeable": false,
+  "in_car": false
+}

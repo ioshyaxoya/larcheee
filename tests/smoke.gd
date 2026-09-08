@@ -23,6 +23,11 @@ func _init() -> void:
 	test_checks_visible()
 	test_car()
 	test_quest_three_routes()
+	test_cold_open()
+	test_trial_soft_reset_and_win()
+	test_four_paths()
+	test_seeds_and_tail()
+	test_palette_and_transition()
 	print("\nsmoke: %d проверок пройдено, %d провалено" % [passed, failures.size()])
 	for f in failures:
 		print("  - " + f)
@@ -104,11 +109,14 @@ func test_car() -> void:
 	check(ctx.world.location["car"] == "car_01" and ctx.world.cars["car_01"]["visited"], "вход в вагон записан в состояние")
 	var events: Array[String] = []
 	car.custom_event.connect(func(n: String): events.append(n))
-	var rt := car.talk_to("god_shani")
+	var rt := car.play_scene("return")
+	rt.advance()
 	check(rt != null and rt.current_id == "greet_stranger", "Шани говорит: незнакомцу — «вы опоздали»")
 	check(events.has("bir_singh_stirs") == false, "столкновение Бира Сингха не срабатывает на Шани")
 	car.talk_to("npc_bir_singh")
 	check(events.has("bir_singh_stirs"), "столкновение из data/encounters срабатывает на npc_approached")
+	rt = DialogueRuntime.new(ctx)
+	rt.start(DialogueLoader.load_dialogue("car_01_shani_first"))
 	rt.advance()
 	check(rt.current_id == "who" and rt.has_options(), "диалог дошёл до выбора")
 	rt.choose(0)
@@ -121,7 +129,8 @@ func test_car() -> void:
 	var car2 := Car.new()
 	root.add_child(car2)
 	car2.setup(card, ctx2)
-	var rt2 := car2.talk_to("god_shani")
+	var rt2 := car2.play_scene("return")
+	rt2.advance()
 	check(rt2.current_id == "greet_known", "при shrine_stopped Шани здоровается как со знакомым")
 	# Монимала едет в тормозном только при helped
 	var ctx3 := _make_ctx(5, "loafer", "thug", "f", [])
@@ -196,3 +205,229 @@ func test_quest_three_routes() -> void:
 	check(a_flags != b_flags, "разница не только в минутах, но и в поезде")
 	# Приоритет задерживающих: при двух тегах берётся первый в таблице
 	check(b["prologue.detainer_id"] == "widow_monimala", "при widow_saved + census_answered приходит Монимала (порядок таблицы)")
+
+
+func _car_for(ctx: GameContext) -> Car:
+	var car := Car.new()
+	root.add_child(car)
+	car.setup(CarLoader.load_card("car_01"), ctx)
+	car.enter()
+	return car
+
+
+## Гонит диалог по предпочтениям (см. _run_route), но на сцене вагона.
+func _drive(rt: DialogueRuntime, prefs: Array, max_steps: int = 60) -> void:
+	var steps := 0
+	while not rt.finished and steps < max_steps:
+		steps += 1
+		if not rt.has_options():
+			rt.advance()
+			continue
+		var opts := rt.available_options()
+		var pick: int = opts[0]["index"]
+		for view in opts:
+			if prefs.has(view["text_key"]):
+				pick = view["index"]
+				break
+		rt.choose(pick)
+
+
+func test_cold_open() -> void:
+	var ctx := _make_ctx(21, "bengali", "munshi", "m", [])
+	var car := _car_for(ctx)
+	check(car.custom != null, "custom_script вагона подключён")
+	var events: Array[String] = []
+	car.custom_event.connect(func(n: String): events.append(n))
+	var locks: Array[float] = []
+	car.custom.control_locked.connect(func(s: float): locks.append(s))
+	var titles: Array[String] = []
+	car.custom.title_card.connect(func(k: String): titles.append(k))
+	var rt := car.play_scene("cold_open")
+	check(rt.available_options().size() == 1 and rt.available_options()[0]["text_key"] == "co.stand", "холодное открытие: первое действие — встать")
+	rt.choose(0)
+	check(rt.available_options()[0]["text_key"] == "co.lantern", "второе действие — зажечь фонарь")
+	rt.choose(0)
+	check(ctx.world.get_flag("car_01.lantern_lit") == true, "фонарь зажжён (флаг)")
+	_drive(rt, [])
+	check(locks.size() == 1 and is_equal_approx(locks[0], 3.0), "три секунды приоткрытой двери — управление отобрано на 3 с")
+	check(titles == ["co.title"] and ctx.texts.t("co.title") == "ДЕСЯТЬЮ ЧАСАМИ РАНЬШЕ", "титр «ДЕСЯТЬЮ ЧАСАМИ РАНЬШЕ»")
+	check(rt.finished and ctx.world.get_flag("car_01.cold_open_done") == true, "холодное открытие завершено")
+	car.free()
+
+
+func test_trial_soft_reset_and_win() -> void:
+	# Проигрыш: шесть проигранных раундов → мягкий откат, вагон на час раньше за каждый.
+	var ctx := _make_ctx(22, "officer", "sepoy", "m", [])
+	var car := _car_for(ctx)
+	var resets: Array[String] = []
+	car.custom.soft_reset_requested.connect(func(k: String): resets.append(k))
+	var rt := car.play_scene("return")
+	_drive(rt, [])
+	check(car.custom.trial != null, "возврат в вагон запускает спор о часах")
+	var trial: TrialRuntime = car.custom.trial
+	var golds: Array[int] = []
+	trial.gold_flash.connect(func(): golds.append(1))
+	check(trial.current_round()["id"] == "name", "первый раунд — «имя»")
+	trial.choose(2)   # крик — автоматический проигрыш
+	check(trial.hours_lost == 1 and car.hours_lost == 1 and ctx.world.get_flag("car_01.clock_hours_lost") == 1, "проигранный раунд: стрелка на час назад, вагон на час раньше")
+	check(golds.size() == 1, "золотая вспышка на повороте стрелки")
+	check(trial.current_round()["id"] == "lateness", "второй раунд — «опоздание»")
+	trial.choose(2)   # «на минуту!» — проигрыш
+	check(trial.current_round()["id"] == "haste", "третий раунд — «спешка»")
+	trial.choose(1)   # спорить — автоматический проигрыш
+	check(trial.hours_lost == 3 and (car.npcs["npc_bir_singh"] as NpcNode).state == "patrol", "минус три часа: Бир Сингх делает обход")
+	trial.choose(2); trial.choose(2); trial.choose(2)
+	check(trial.finished and trial.outcome == "soft_reset", "минус шесть часов — мягкий откат, не смерть и не загрузка")
+	check(resets.size() == 1 and car.hours_lost == 0 and ctx.world.get_flag("car_01.soft_resets") == 1, "откат сброшен: вагон снова на 20:30, счётчик откатов 1")
+	check((car.npcs["npc_bir_singh"] as NpcNode).state == "default", "после отката NPC вернулись в исходное состояние")
+	# Выигрыш: уступка в «спешке» побеждает; спор — проигрывает; критический аргумент — сразу.
+	var t2: TrialRuntime = car.custom.start_trial()
+	t2.choose(2)  # имя — проигрыш
+	t2.choose(2)  # опоздание — проигрыш
+	var s0 := t2.streak
+	t2.choose(0)  # спешка — уступить
+	check(t2.streak == s0 + 1 and t2.hours_lost == 2, "раунд «спешка» выигрывается только уступкой")
+	ctx.world.set_flag("car_01.journal_seen", true)
+	ctx.world.set_flag("ticket.smear_noticed", true)
+	var opts := t2.options()
+	check(opts[opts.size() - 1]["auto"] == "critical", "критический аргумент появляется при прочитанном журнале и замеченном затирании")
+	t2.choose(-1)
+	check(t2.finished and t2.outcome == "won" and ctx.world.get_flag("car_01.trial_won") == true, "критический аргумент обходит всё: испытание выиграно")
+	# Ритм: попадание в такт — видимый модификатор проверки.
+	var t3: TrialRuntime = car.custom.start_trial()
+	t3.choose(0, 2)
+	check(t3.last_check != null and t3.last_check.modifiers.size() >= 2 and int(t3.last_check.modifiers[t3.last_check.modifiers.size() - 1]["value"]) == 2, "модификатор такта раскрыт в разборе броска")
+	var track := RhythmTrack.new()
+	track.configure({"bpm": 60, "window_ms": 200})
+	track.start(0)
+	check(track.judge(1000)["hit"] and not track.judge(1400)["hit"], "ритм: попадание в окно и мимо")
+	car.free()
+
+
+func test_four_paths() -> void:
+	var card := CarLoader.load_card("car_01")
+	# Сила: кристальный резак, дверь выломана, Шани обижен, выход вперёд.
+	var ctx := _make_ctx(23, "habshi", "sepoy", "m", [])
+	var car := _car_for(ctx)
+	var exits: Array[String] = []
+	car.custom.exit_requested.connect(func(d: String): exits.append(d))
+	car.custom._on_event("force_round"); car.custom._on_event("force_round")
+	check(car.hours_lost == 1, "сила: по часу за каждые два раунда взлома")
+	ctx.world.add_item("crystal_cutter")
+	_drive(car.play_scene("force"), ["force.cutter"])
+	check(ctx.world.get_flag("car_01.forced_door") == true and ctx.world.get_flag("car_01.shani_attitude") == "offended" and exits == ["forward"], "путь «сила»: дверь выломана, Шани обижен, выход вперёд")
+	check(ctx.world.tail_order == ["car_01"] and ctx.world.progress == 1, "вагон ушёл в хвост, окно +1")
+	car.free()
+	# Обман: форма Бира Сингха снижает СЛ до 12; провал переводит часы; успех даёт дар.
+	var ctx2 := _make_ctx(24, "loafer", "thug", "f", [])
+	var car2 := _car_for(ctx2)
+	_drive(car2.talk_to("npc_bir_singh"), ["bir_singh.uniform"])
+	check(ctx2.world.has_item("conductor_uniform"), "форма кондуктора снята со спящего")
+	var rt := car2.play_scene("deceit")
+	var first := rt.available_options()[0]
+	check(first["text_key"] == "deceit.relief_uniform" and int(first["check"]["dc"]) == 12, "с формой — СЛ 12")
+	var tries := 0
+	while not rt.finished and tries < 12:
+		if rt.has_options():
+			tries += 1
+			rt.choose(0)
+		else:
+			rt.advance()
+	check(rt.finished and ctx2.world.get_flag("car_01.shani_attitude") == "amused" and ctx2.world.has_item("gift_hour_ago"), "путь «обман»: Шани позабавлен, дар «Час назад» (попыток: %d, часов назад: %d)" % [tries, car2.hours_lost])
+	check(car2.hours_lost == tries - 1, "каждый провал обмана — стрелка на час назад")
+	car2.free()
+	# Служба: три задачи, Ратан облегчает, журнал прочитан, вахана и дар без кражи.
+	var ctx3 := _make_ctx(25, "anglo_indian", "telegraphist", "m", [])
+	var car3 := _car_for(ctx3)
+	_drive(car3.talk_to("npc_ratan"), ["ratan.ask_work", "ratan.leave"], 4)
+	check(ctx3.world.get_flag("car_01.ratan_taught") == true, "Ратан научил работе вагона")
+	car3.custom.simulated_inputs = {"mg_brake_wheel": [0.0, 0.1, 0.9], "mg_signal_lamps": {"rear": "red", "side": "green"}, "mg_ledger": {"notice": true}}
+	_drive(car3.play_scene("service"), ["service.brake.go", "service.lamps.go", "service.ledger.go"])
+	check(ctx3.world.get_flag("car_01.shift_worked") == true and ctx3.world.get_flag("car_01.journal_seen") == true, "путь «служба»: смена отработана, журнал прочитан")
+	check(ctx3.world.has_item("vahana_crow_feather") and ctx3.world.has_item("gift_hour_ago") and ctx3.world.get_flag("car_01.shani_attitude") == "respectful", "служба: вахана и дар без кражи, Шани уважает")
+	check(ctx3.world.get_flag("car_01.signal_error", false) == false, "стёкла поставлены верно")
+	var ctx3b := _make_ctx(26, "dutch", "scholar" if false else "munshi", "m", [])
+	var car3b := _car_for(ctx3b)
+	car3b.custom.simulated_inputs = {"mg_brake_wheel": [0.0, 0.0, 0.0], "mg_signal_lamps": {"rear": "green", "side": "red"}, "mg_ledger": {"notice": false}}
+	_drive(car3b.play_scene("service"), ["service.brake.go", "service.lamps.go", "service.ledger.go"])
+	check(ctx3b.world.get_flag("car_01.signal_error") == true and ctx3b.world.get_flag("car_01.shift_worked") == true, "ошибка со стёклами записана флагом, смена всё равно отработана")
+	car3.free(); car3b.free()
+	# Остаться: фонарь = концовка 5, титры настоящие.
+	var ctx4 := _make_ctx(27, "marwari", "babu", "f", [])
+	var car4 := _car_for(ctx4)
+	var endings_seen: Array[String] = []
+	car4.custom.ending_requested.connect(func(e: String): endings_seen.append(e))
+	_drive(car4.play_scene("stay"), ["stay.take", "stay.yes"])
+	check(endings_seen == ["ending_5"], "путь «остаться»: снять фонарь — концовка 5")
+	var endings := Endings.new(ctx4)
+	var def := endings.play("ending_5")
+	check(ctx4.world.get_flag("ending.reached") == 5 and ctx4.world.get_flag("car_01.lantern_taken") == true, "концовка 5 записана, фонарь снят")
+	var lines := endings.credits_lines(def)
+	check(lines.size() == 8 and lines[6].contains("Wizards of the Coast") and lines[6].contains("Creative Commons Attribution 4.0"), "титры: атрибуция SRD 5.2 (CC-BY-4.0)")
+	check(def.get("detonation", true) == false, "концовка 5 — без детонации")
+	check(car4.tail_scene_keys() == ["car_01.tail.lantern_taken"], "хвоста после фонаря нет")
+	car4.free()
+
+
+func test_seeds_and_tail() -> void:
+	var ctx := _make_ctx(28, "chinese", "thug", "m", [])
+	var car := _car_for(ctx)
+	check(car.seed_items_present().size() == 12 and car.items.has("seed_mallick_notebook"), "12 семян на стеллажах, включая тетрадь Маллика")
+	check(car.take_item("seed_mail_sack") and car.take_item("seed_child_shoe") and car.take_item("seed_mallick_notebook"), "три семени взяты")
+	check(not car.take_item("seed_ice_box") and ctx.world.get_flag("car_01.seeds_taken") == 3, "четвёртое семя не берётся")
+	check(not car.take_item("conductor_lantern"), "фонарь не берётся как предмет — только через «остаться»")
+	var ctx2 := _make_ctx(28, "chinese", "thug", "m", [])
+	ctx2.world.set_flag("prologue.mallick_notebook_taken", true)
+	var car2 := _car_for(ctx2)
+	check(car2.seed_items_present().size() == 11 and not car2.items.has("seed_mallick_notebook"), "тетрадь взята в прологе — на стеллаже её нет")
+	ctx2.world.set_flag("car_01.forced_door", true)
+	car2.apply_hour_state(2, {})
+	check(car2.tail_scene_keys() == ["car_01.tail.forced_door", "car_01.tail.clock_hours_lost"], "хвостовой вариант по tail_rules: выломанная дверь + часы")
+	ctx2.world.set_flag("car_01.forced_door", false)
+	ctx2.world.set_flag("car_01.shift_worked", true)
+	car2.apply_hour_state(0, {})
+	check(car2.tail_scene_keys() == ["car_01.tail.shift_worked"], "хвостовой вариант: отработанная смена")
+	# Хафиз: сказать вслух — вагон меняется.
+	var rt := car2.talk_to("npc_hafiz")
+	_drive(rt, ["hafiz.leave"], 3)
+	rt = car2.talk_to("npc_hafiz")
+	rt.advance()
+	check(rt.current_id == "dead", "вторая попытка заговорить с Хафизом открывает правду")
+	_drive(rt, ["hafiz.say"])
+	check(ctx2.world.get_flag("car_01.hafiz_named") == true and (car2.npcs["npc_kanu"] as NpcNode).state == "crying", "сказано вслух: Кану плачет")
+	var saved := ctx2.save("user://smoke_car_state.json")
+	var loaded := GameContext.create(0, "ru")
+	check(saved and loaded.load_from("user://smoke_car_state.json") and loaded.world.has_item("seed_mail_sack") == false and loaded.world.get_flag("car_01.hafiz_named") == true, "состояние вагона и инвентарь переживают сейв")
+	car.free(); car2.free()
+
+
+func test_palette_and_transition() -> void:
+	var pal := Palette.new()
+	check(pal.has("bollywood_dark") and pal.has("void") and pal.has("raj"), "палитры A10 зарегистрированы")
+	pal.set_palette("bollywood_dark")
+	check(is_equal_approx(float(pal.effective()["saturation"]), 1.3), "bollywood_dark: насыщенность 1.3")
+	pal.enter_trial()
+	check(is_equal_approx(float(pal.effective()["saturation"]), 0.0) and pal.effective()["dither"] == "1bit", "испытание: время стоит — цвета нет, дизеринг")
+	pal.set_colour_return(0.5)
+	check(is_equal_approx(float(pal.effective()["saturation"]), 0.65), "выигранные раунды возвращают цвет по шкале")
+	pal.exit_trial()
+	var env := Environment.new()
+	pal.apply(env)
+	check(env.adjustment_enabled and is_equal_approx(env.adjustment_saturation, 1.3), "грейдинг применяется к Environment")
+	var ctx := _make_ctx(29, "armenian", "babu", "m", [])
+	var tr := TransitionRuntime.new(ctx)
+	var steps: Array[String] = []
+	tr.step.connect(func(k: String, _s: float, _i: int): steps.append(k))
+	var done: Array[String] = []
+	tr.finished.connect(func(v: String): done.append(v))
+	var rolls_before := ctx.checks.history.size()
+	tr.play("night_bengal")
+	check(not tr.can_skip(), "первый просмотр ритуала не пропускается")
+	while done.is_empty():
+		tr.next_step()
+	check(steps.size() == 5 and done == ["night_bengal"] and ctx.checks.history.size() == rolls_before, "ритуал перелезания: 5 шагов, без единого броска")
+	check(tr.total_seconds() >= 20.0 and tr.total_seconds() <= 40.0, "ритуал 20–40 секунд")
+	tr.play("night_bengal")
+	check(tr.can_skip(), "после первого просмотра вариант можно пропустить")
+	ctx.world.set_flag("car_01.forced_door", true)
+	check(tr.pick_variant("night_bengal") == "night_bengal_forced", "выломанная дверь меняет вариант ритуала")

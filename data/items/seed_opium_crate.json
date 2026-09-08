@@ -1,0 +1,14 @@
+{
+  "id": "seed_opium_crate",
+  "name_key": "item.seed_opium_crate.name",
+  "desc_key": "item.seed_opium_crate.desc",
+  "kind": "seed",
+  "seed_for": "car_11",
+  "takeable": true,
+  "position": [
+    2.0,
+    0.6,
+    -4.5
+  ],
+  "conditions": []
+}

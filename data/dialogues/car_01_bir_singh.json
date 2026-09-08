@@ -1,0 +1,52 @@
+{
+  "id": "car_01_bir_singh",
+  "car": "car_01",
+  "start": "asleep",
+  "nodes": {
+    "asleep": {
+      "speaker": "narrator",
+      "text_key": "bir_singh.asleep",
+      "stage": "bir_singh.stage",
+      "options": [
+        {
+          "text_key": "bir_singh.shake",
+          "next": "no_wake"
+        },
+        {
+          "text_key": "bir_singh.uniform",
+          "conditions": [
+            {
+              "not": {
+                "has_item": "conductor_uniform"
+              }
+            }
+          ],
+          "effects": [
+            {
+              "add_item": "conductor_uniform"
+            }
+          ],
+          "next": "took_uniform"
+        },
+        {
+          "text_key": "bir_singh.leave",
+          "effects": [
+            {
+              "end": true
+            }
+          ]
+        }
+      ]
+    },
+    "no_wake": {
+      "speaker": "narrator",
+      "text_key": "bir_singh.no_wake",
+      "end": true
+    },
+    "took_uniform": {
+      "speaker": "narrator",
+      "text_key": "bir_singh.took_uniform",
+      "end": true
+    }
+  }
+}

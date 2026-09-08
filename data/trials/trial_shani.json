@@ -1,0 +1,180 @@
+{
+  "id": "trial_shani",
+  "car": "car_01",
+  "presence": "god_shani",
+  "type": "debate_clock",
+  "start_time": "20:30",
+  "loss_per_round_hours": 1,
+  "soft_reset_at_hours_lost": 6,
+  "wins_needed": 3,
+  "intro_key": "trial.shani.intro",
+  "stage_key": "trial.shani.stage",
+  "rhythm": {
+    "bpm": 72,
+    "window_ms": 160,
+    "hit_modifier": 2,
+    "miss_modifier": -2,
+    "track": "amb_shani_regulator",
+    "gold_flash_on": "clock_turn"
+  },
+  "critical_argument": {
+    "conditions": [
+      {
+        "flag": "car_01.journal_seen",
+        "is": true
+      },
+      {
+        "flag": "ticket.smear_noticed",
+        "is": true
+      }
+    ],
+    "text_key": "trial.shani.critical",
+    "outcome_key": "trial.shani.critical.out"
+  },
+  "rounds": [
+    {
+      "id": "name",
+      "argument_key": "trial.shani.name.arg",
+      "stage_key": "trial.shani.name.stage",
+      "find_key": "trial.shani.name.find",
+      "options": [
+        {
+          "text_key": "trial.shani.name.persuade",
+          "check": {
+            "skills_any": [
+              "persuasion",
+              "deception"
+            ],
+            "dc": 13,
+            "label_key": "trial.shani.check.name"
+          },
+          "advantage_if": [
+            {
+              "class": "babu"
+            }
+          ],
+          "win_key": "trial.shani.name.win",
+          "lose_key": "trial.shani.name.lose"
+        },
+        {
+          "text_key": "trial.shani.name.bahi",
+          "conditions": [
+            {
+              "origin": "marwari"
+            }
+          ],
+          "auto": "win",
+          "win_key": "trial.shani.name.bahi.win"
+        },
+        {
+          "text_key": "trial.shani.name.shout",
+          "auto": "lose",
+          "lose_key": "trial.shani.name.shout.lose"
+        }
+      ]
+    },
+    {
+      "id": "lateness",
+      "argument_key": "trial.shani.late.arg",
+      "stage_key": "trial.shani.late.stage",
+      "find_key": "trial.shani.late.find",
+      "options": [
+        {
+          "text_key": "trial.shani.late.insight",
+          "check": {
+            "skill": "insight",
+            "dc": 14,
+            "label_key": "trial.shani.check.late"
+          },
+          "win_key": "trial.shani.late.win",
+          "lose_key": "trial.shani.late.lose"
+        },
+        {
+          "text_key": "trial.shani.late.debt",
+          "conditions": [
+            {
+              "origin": "pathan"
+            }
+          ],
+          "auto": "win",
+          "win_key": "trial.shani.late.debt.win"
+        },
+        {
+          "text_key": "trial.shani.late.minutes",
+          "auto": "lose",
+          "lose_key": "trial.shani.late.minutes.lose"
+        }
+      ]
+    },
+    {
+      "id": "haste",
+      "argument_key": "trial.shani.haste.arg",
+      "stage_key": "trial.shani.haste.stage",
+      "find_key": "trial.shani.haste.find",
+      "options": [
+        {
+          "text_key": "trial.shani.haste.yield",
+          "auto": "win",
+          "win_key": "trial.shani.haste.yield.win"
+        },
+        {
+          "text_key": "trial.shani.haste.argue",
+          "auto": "lose",
+          "lose_key": "trial.shani.haste.argue.lose"
+        },
+        {
+          "text_key": "trial.shani.haste.argue_hard",
+          "auto": "lose",
+          "lose_key": "trial.shani.haste.argue_hard.lose"
+        }
+      ]
+    }
+  ],
+  "hours": {
+    "1": {
+      "text_key": "trial.shani.hour.1",
+      "light": "dusk"
+    },
+    "2": {
+      "text_key": "trial.shani.hour.2",
+      "light": "sunset"
+    },
+    "3": {
+      "text_key": "trial.shani.hour.3",
+      "light": "afternoon",
+      "npc_states": {
+        "npc_bir_singh": "patrol"
+      }
+    },
+    "4": {
+      "text_key": "trial.shani.hour.4",
+      "light": "day"
+    },
+    "5": {
+      "text_key": "trial.shani.hour.5",
+      "light": "day",
+      "npc_states": {
+        "npc_bir_singh": "patrol",
+        "npc_kanu": "hidden"
+      }
+    },
+    "6": {
+      "text_key": "trial.shani.hour.6",
+      "light": "siding"
+    }
+  },
+  "clock_turn_key": "trial.shani.clock_turn",
+  "win": {
+    "text_key": "trial.shani.win",
+    "effects": [
+      {
+        "set_flag": "car_01.trial_won",
+        "value": true
+      }
+    ]
+  },
+  "soft_reset": {
+    "text_key": "trial.shani.soft_reset",
+    "effects": []
+  }
+}

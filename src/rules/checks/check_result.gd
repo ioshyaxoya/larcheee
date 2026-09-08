@@ -6,6 +6,8 @@ extends RefCounted
 var kind: String = "check"          # "check" | "chance"
 var label_key: String = ""
 var die: int = 0
+var die_second: int = 0            # второй кубик при преимуществе (показывается)
+var advantage: bool = false
 var modifiers: Array[Dictionary] = []   # {label_key, param, name_key, value}
 var total: int = 0
 var dc: int = 0

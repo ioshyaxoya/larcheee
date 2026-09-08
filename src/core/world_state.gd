@@ -24,6 +24,7 @@ var mallick_outcome: String = "none"
 var detonation: Dictionary = {"pressure": 0, "state": "sealed", "form": "", "beat": 0}
 var settled_in: Array = []
 var god_states: Dictionary = {}
+var inventory: Array = []
 var rng_seed: int = 0
 var rng_state: int = 0
 
@@ -63,6 +64,19 @@ func has_tag(tag: String) -> bool:
 	return get_flag(FlagRegistry.TAG_PREFIX + tag, false) == true
 
 
+func has_item(item_id: String) -> bool:
+	return inventory.has(item_id)
+
+
+func add_item(item_id: String) -> void:
+	if not inventory.has(item_id):
+		inventory.append(item_id)
+
+
+func remove_item(item_id: String) -> void:
+	inventory.erase(item_id)
+
+
 func car_state(car_id: String) -> Dictionary:
 	if not cars.has(car_id):
 		cars[car_id] = {"state": {}, "visited": false}
@@ -87,6 +101,7 @@ func to_dict() -> Dictionary:
 		"detonation": detonation.duplicate(true),
 		"settled_in": settled_in.duplicate(true),
 		"god_states": god_states.duplicate(true),
+		"inventory": inventory.duplicate(),
 		"rng_seed": rng_seed,
 		"rng_state": rng_state,
 	}
@@ -111,6 +126,7 @@ func from_dict(data: Dictionary) -> void:
 	detonation = (data.get("detonation", detonation) as Dictionary).duplicate(true)
 	settled_in = (data.get("settled_in", []) as Array).duplicate(true)
 	god_states = (data.get("god_states", {}) as Dictionary).duplicate(true)
+	inventory = (data.get("inventory", []) as Array).duplicate()
 	rng_seed = int(data.get("rng_seed", 0))
 	rng_state = int(data.get("rng_state", 0))
 

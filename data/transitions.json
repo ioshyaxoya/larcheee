@@ -1,0 +1,62 @@
+{
+  "_comment": "Ритуал перелезания (A8): постановка без бросков, 20–40 секунд; вариант по главе/погоде/времени суток; после первого просмотра варианта — пропуск.",
+  "variants": {
+    "night_bengal": {
+      "chapter": 1,
+      "conditions": [],
+      "steps": [
+        {
+          "text_key": "transition.night_bengal.1",
+          "seconds": 4
+        },
+        {
+          "text_key": "transition.night_bengal.2",
+          "seconds": 5
+        },
+        {
+          "text_key": "transition.night_bengal.3",
+          "seconds": 6
+        },
+        {
+          "text_key": "transition.night_bengal.4",
+          "seconds": 5
+        },
+        {
+          "text_key": "transition.night_bengal.5",
+          "seconds": 4
+        }
+      ]
+    },
+    "night_bengal_forced": {
+      "chapter": 1,
+      "conditions": [
+        {
+          "flag": "car_01.forced_door",
+          "is": true
+        }
+      ],
+      "steps": [
+        {
+          "text_key": "transition.night_bengal_forced.1",
+          "seconds": 4
+        },
+        {
+          "text_key": "transition.night_bengal.2",
+          "seconds": 5
+        },
+        {
+          "text_key": "transition.night_bengal.3",
+          "seconds": 6
+        },
+        {
+          "text_key": "transition.night_bengal.4",
+          "seconds": 5
+        },
+        {
+          "text_key": "transition.night_bengal.5",
+          "seconds": 4
+        }
+      ]
+    }
+  }
+}

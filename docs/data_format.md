@@ -127,3 +127,19 @@ godot --headless --import --path . && godot --headless --path . -s tests/smoke.g
 ```
 
 Godot 4.3: `Godot_v4.3-stable_linux.x86_64` с releases.godotengine.org; CI скачивает сам.
+
+## Предметы, мини-игры, испытания, концовки, переходы (задача 3)
+
+| Каталог | Что |
+|---|---|
+| `data/items/<id>.json` | предмет: `name_key`, `desc_key`, `kind` (seed / tool / …), `seed_for`, `takeable`, `position`, `conditions`, `on_take`. Карточка вагона перечисляет `items_present` и `seed_items`; семян берётся не больше `seed_take_limit` |
+| `data/minigames/<id>.json` | `type`: `rhythm` (beats, pass_hits, window_ms / window_ms_taught + taught_flag), `choice` (slots с correct, error_flag), `reading` (entries, on_complete, notice.check). В варианте диалога — поле `"minigame": "id"`, у него обязателен `next_on_fail` |
+| `data/trials/<id>.json` | испытание присутствия: `rhythm`, `rounds[]` с `options[]` (`check` + `advantage_if` \| `auto: win/lose`), `critical_argument`, `hours` (что физически меняется в вагоне за каждый потерянный час), `wins_needed`, `soft_reset_at_hours_lost` |
+| `data/endings/<id>.json` | `lines[]`, `credits[]`, `effects[]`, `detonation` |
+| `data/transitions.json` | варианты ритуала перелезания: `steps[]` (text_key, seconds), `conditions`; бросков в шагах быть не может |
+
+Условие `{"has_item": "id"}`, эффекты `{"add_item": "id"}`, `{"remove_item": "id"}`.
+
+`car.custom_script` (только уникальная механика, B5): скрипт получает `attach(car, ctx)` и
+слушает `custom_event` вагона (`emit` из данных). Для car_01: `start_trial`, `force_round`,
+`clock_turn`, `exit_forward`, `ending_5`, `go_<путь>`, `door_glimpse`, `title_card`, `hafiz_named`.

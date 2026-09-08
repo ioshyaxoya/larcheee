@@ -1,0 +1,8 @@
+{
+  "id": "gift_hour_ago",
+  "name_key": "item.gift_hour_ago.name",
+  "desc_key": "item.gift_hour_ago.desc",
+  "kind": "gift",
+  "takeable": false,
+  "in_car": false
+}

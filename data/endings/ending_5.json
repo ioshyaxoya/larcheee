@@ -1,0 +1,28 @@
+{
+  "id": "ending_5",
+  "number": 5,
+  "title_key": "ending_5.title",
+  "detonation": false,
+  "lines": [
+    "ending_5.line_1",
+    "ending_5.line_2",
+    "ending_5.line_3",
+    "ending_5.line_4"
+  ],
+  "credits": [
+    "credits.title",
+    "credits.made_by",
+    "credits.srd_attribution",
+    "credits.fiction_note"
+  ],
+  "effects": [
+    {
+      "set_flag": "ending.reached",
+      "value": 5
+    },
+    {
+      "set_flag": "car_01.lantern_taken",
+      "value": true
+    }
+  ]
+}

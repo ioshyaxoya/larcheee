@@ -1,0 +1,20 @@
+{
+  "id": "seed_mallick_notebook",
+  "name_key": "item.seed_mallick_notebook.name",
+  "desc_key": "item.seed_mallick_notebook.desc",
+  "kind": "seed",
+  "seed_for": "car_31",
+  "takeable": true,
+  "position": [
+    2.0,
+    2.2,
+    -13.0
+  ],
+  "conditions": [
+    {
+      "flag": "prologue.mallick_notebook_taken",
+      "is": false
+    }
+  ],
+  "_note": "Тетрадь Маллика лежит на стеллаже, только если игрок не взял её у Шошибхушона в прологе."
+}

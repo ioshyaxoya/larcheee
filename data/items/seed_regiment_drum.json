@@ -1,0 +1,14 @@
+{
+  "id": "seed_regiment_drum",
+  "name_key": "item.seed_regiment_drum.name",
+  "desc_key": "item.seed_regiment_drum.desc",
+  "kind": "seed",
+  "seed_for": "car_17",
+  "takeable": true,
+  "position": [
+    -2.0,
+    0.6,
+    -8.5
+  ],
+  "conditions": []
+}

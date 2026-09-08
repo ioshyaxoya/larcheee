@@ -1,0 +1,102 @@
+{
+  "id": "car_01_paths",
+  "car": "car_01",
+  "start": "hub",
+  "nodes": {
+    "hub": {
+      "branches": [
+        {
+          "conditions": [
+            {
+              "flag": "car_01.trial_won",
+              "is": true
+            }
+          ],
+          "next": "hub_won"
+        },
+        {
+          "conditions": [],
+          "next": "hub_lost"
+        }
+      ]
+    },
+    "hub_won": {
+      "speaker": "god_shani",
+      "text_key": "paths.hub_won",
+      "next": "menu"
+    },
+    "hub_lost": {
+      "speaker": "god_shani",
+      "text_key": "paths.hub_lost",
+      "next": "menu"
+    },
+    "menu": {
+      "speaker": "narrator",
+      "text_key": "paths.menu",
+      "options": [
+        {
+          "text_key": "paths.ask_exit",
+          "next": "exit_lie"
+        },
+        {
+          "text_key": "paths.force",
+          "effects": [
+            {
+              "emit": "go_force"
+            },
+            {
+              "end": true
+            }
+          ]
+        },
+        {
+          "text_key": "paths.deceit",
+          "effects": [
+            {
+              "emit": "go_deceit"
+            },
+            {
+              "end": true
+            }
+          ]
+        },
+        {
+          "text_key": "paths.service",
+          "effects": [
+            {
+              "emit": "go_service"
+            },
+            {
+              "end": true
+            }
+          ]
+        },
+        {
+          "text_key": "paths.stay",
+          "effects": [
+            {
+              "emit": "go_stay"
+            },
+            {
+              "end": true
+            }
+          ]
+        },
+        {
+          "text_key": "paths.look_around",
+          "effects": [
+            {
+              "end": true
+            }
+          ]
+        }
+      ]
+    },
+    "exit_lie": {
+      "speaker": "god_shani",
+      "text_key": "paths.exit_lie",
+      "stage": "paths.exit_lie.stage",
+      "next": "menu"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "mg_brake_wheel",
+  "type": "rhythm",
+  "title_key": "mg.brake_wheel.title",
+  "intro_key": "mg.brake_wheel.intro",
+  "beats": 3,
+  "pass_hits": 2,
+  "window_ms": 180,
+  "window_ms_taught": 300,
+  "taught_flag": "car_01.ratan_taught",
+  "track": "whistle_descent_hooghly"
+}

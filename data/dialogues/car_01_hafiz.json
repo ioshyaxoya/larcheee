@@ -1,0 +1,112 @@
+{
+  "id": "car_01_hafiz",
+  "car": "car_01",
+  "start": "seated",
+  "nodes": {
+    "seated": {
+      "branches": [
+        {
+          "conditions": [
+            {
+              "flag": "car_01.hafiz_named",
+              "is": true
+            }
+          ],
+          "next": "named"
+        },
+        {
+          "conditions": [
+            {
+              "flag": "car_01.hafiz_spoken",
+              "is": true
+            }
+          ],
+          "next": "second"
+        },
+        {
+          "conditions": [],
+          "next": "first"
+        }
+      ]
+    },
+    "first": {
+      "speaker": "narrator",
+      "text_key": "hafiz.first",
+      "stage": "hafiz.stage",
+      "on_enter": [
+        {
+          "set_flag": "car_01.hafiz_spoken",
+          "value": true
+        }
+      ],
+      "options": [
+        {
+          "text_key": "hafiz.look",
+          "check": {
+            "skill": "insight",
+            "dc": 15,
+            "label_key": "car_01.check.insight"
+          },
+          "next": "dead",
+          "next_on_fail": "asleep"
+        },
+        {
+          "text_key": "hafiz.leave",
+          "effects": [
+            {
+              "end": true
+            }
+          ]
+        }
+      ]
+    },
+    "second": {
+      "speaker": "narrator",
+      "text_key": "hafiz.second",
+      "next": "dead"
+    },
+    "asleep": {
+      "speaker": "narrator",
+      "text_key": "hafiz.asleep",
+      "end": true
+    },
+    "dead": {
+      "speaker": "narrator",
+      "text_key": "hafiz.dead",
+      "options": [
+        {
+          "text_key": "hafiz.say",
+          "effects": [
+            {
+              "set_flag": "car_01.hafiz_named",
+              "value": true
+            },
+            {
+              "emit": "hafiz_named"
+            }
+          ],
+          "next": "said"
+        },
+        {
+          "text_key": "hafiz.keep",
+          "next": "kept"
+        }
+      ]
+    },
+    "said": {
+      "speaker": "narrator",
+      "text_key": "hafiz.said",
+      "end": true
+    },
+    "kept": {
+      "speaker": "narrator",
+      "text_key": "hafiz.kept",
+      "end": true
+    },
+    "named": {
+      "speaker": "narrator",
+      "text_key": "hafiz.named",
+      "end": true
+    }
+  }
+}

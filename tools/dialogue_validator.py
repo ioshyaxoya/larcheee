@@ -29,7 +29,7 @@ from dataclasses import dataclass
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(REPO_ROOT, "data")
-DEFAULT_PATHS = [os.path.join(DATA_DIR, "dialogues"), os.path.join(DATA_DIR, "npcs"), os.path.join(DATA_DIR, "encounters"), os.path.join(DATA_DIR, "prologue")]
+DEFAULT_PATHS = [os.path.join(DATA_DIR, d) for d in ("dialogues", "npcs", "encounters", "items", "minigames", "trials", "endings", "prologue")] + [os.path.join(DATA_DIR, "transitions.json")]
 TRIGGER_EVENTS = {"car_entered", "car_left", "npc_approached", "item_taken", "dialogue_ended", "trial_lost_round", "trial_won", "trial_soft_reset", "flag_changed"}
 
 TEXT_KEY_RE = re.compile(r"^[a-z0-9_]+(\.[a-z0-9_]+)+$")
@@ -37,7 +37,7 @@ ID_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 SPEAKER_SPECIAL = {"narrator", "player"}
 NODE_KEYS = {"speaker", "text_key", "stage", "on_enter", "options", "next", "end", "pearl", "pearl_id", "branches"}
 OPTION_KEYS = {
-    "id", "text_key", "conditions", "check", "chance", "cost_minutes", "cost_on_fail_minutes", "cost_note_key",
+    "id", "text_key", "conditions", "check", "chance", "minigame", "cost_minutes", "cost_on_fail_minutes", "cost_note_key",
     "effects", "effects_on_fail", "next", "next_on_fail", "pearl", "pearl_id",
 }
 CHANCE_PROVIDERS = {"bridge_raised", "coin"}
@@ -55,6 +55,8 @@ class Registry:
     pearls: set
     npc_ids: set
     dialogue_ids: set
+    item_ids: set
+    minigame_ids: set
     texts_ru: set
     texts_en: set
 
@@ -89,10 +91,14 @@ def load_registry() -> Registry:
     npc_ids = {n[:-5] for n in os.listdir(npc_dir) if n.endswith(".json")} if os.path.isdir(npc_dir) else set()
     dlg_dir = os.path.join(DATA_DIR, "dialogues")
     dialogue_ids = {n[:-5] for n in os.listdir(dlg_dir) if n.endswith(".json")} if os.path.isdir(dlg_dir) else set()
+    item_dir = os.path.join(DATA_DIR, "items")
+    item_ids = {n[:-5] for n in os.listdir(item_dir) if n.endswith(".json")} if os.path.isdir(item_dir) else set()
+    mg_dir = os.path.join(DATA_DIR, "minigames")
+    minigame_ids = {n[:-5] for n in os.listdir(mg_dir) if n.endswith(".json")} if os.path.isdir(mg_dir) else set()
     texts_ru = set(_load_json(os.path.join(DATA_DIR, "texts", "ru.json")).keys())
     en_path = os.path.join(DATA_DIR, "texts", "en.json")
     texts_en = set(_load_json(en_path).keys()) if os.path.exists(en_path) else set()
-    return Registry(load_flags(), axes, abilities, skills, origins, classes, pearls, npc_ids, dialogue_ids, texts_ru, texts_en)
+    return Registry(load_flags(), axes, abilities, skills, origins, classes, pearls, npc_ids, dialogue_ids, item_ids, minigame_ids, texts_ru, texts_en)
 
 
 class Report:
@@ -201,6 +207,10 @@ class Checker:
             elif c.get("pole") not in self.reg.axes[axis]["poles"]:
                 self.err(where, f"полюс `{c.get('pole')}` не принадлежит оси `{axis}`")
             return
+        if "has_item" in c:
+            if c["has_item"] not in self.reg.item_ids:
+                self.err(where, f"предмет `{c['has_item']}` не найден в data/items/")
+            return
         if "money_min" in c or "minutes_spent_min" in c:
             return
         self.err(where, f"неизвестное условие {sorted(c.keys())}")
@@ -231,6 +241,10 @@ class Checker:
         elif "add_money" in e:
             if not isinstance(e["add_money"], int):
                 self.err(where, "add_money — целое (анны)")
+        elif "add_item" in e or "remove_item" in e:
+            iid = e.get("add_item", e.get("remove_item"))
+            if iid not in self.reg.item_ids:
+                self.err(where, f"предмет `{iid}` не найден в data/items/")
         elif "goto" in e:
             if nodes is not None and e["goto"] not in nodes:
                 self.err(where, f"goto на несуществующий узел `{e['goto']}`")
@@ -374,11 +388,16 @@ class Checker:
         for k in ("cost_minutes", "cost_on_fail_minutes"):
             if k in opt and (not isinstance(opt[k], int) or opt[k] < 0):
                 self.err(where, f"{k} — неотрицательное целое")
+        if "minigame" in opt:
+            if opt["minigame"] not in self.reg.minigame_ids:
+                self.err(where, f"мини-игра `{opt['minigame']}` не найдена в data/minigames/")
+            if "next_on_fail" not in opt:
+                self.err(where, "у мини-игры нет next_on_fail — провал не прячется")
         if "check" in opt:
             self.check(where + ".check", opt["check"])
             if "next_on_fail" not in opt and not any("goto" in e for e in opt.get("effects_on_fail", [])):
                 self.err(where, "у проверки нет next_on_fail — провал не прячется, ему нужна ветка (B5)")
-        elif any(k in opt for k in ("next_on_fail", "effects_on_fail", "cost_on_fail_minutes")):
+        elif "minigame" not in opt and any(k in opt for k in ("next_on_fail", "effects_on_fail", "cost_on_fail_minutes")):
             self.err(where, "поля *_on_fail без check")
         if "chance" in opt:
             self.chance(where + ".chance", opt["chance"], nodes)
@@ -406,6 +425,8 @@ class Checker:
         if not isinstance(axes, dict):
             self.err("attitude_axes", "объект ось → {полюс: text_key}")
             return
+        for st, k in doc.get("states", {}).items():
+            self.text_key(f"states.{st}", k)
         for axis, reaction in axes.items():
             if axis not in self.reg.axes:
                 self.err("attitude_axes", f"ось `{axis}` не зарегистрирована (B4)")
@@ -430,6 +451,107 @@ class Checker:
         self.effects("effects", doc.get("effects"))
         if "dialogue" in doc and doc["dialogue"] is not None and doc["dialogue"] not in self.reg.dialogue_ids:
             self.err("dialogue", f"диалог `{doc['dialogue']}` не найден в data/dialogues/")
+
+    def item_doc(self, doc: dict) -> None:
+        base = os.path.splitext(os.path.basename(self.path))[0]
+        if doc.get("id") != base:
+            self.err("id", f"`{doc.get('id')}` должен совпадать с именем файла")
+        self.text_key("name_key", doc.get("name_key"))
+        self.text_key("desc_key", doc.get("desc_key"))
+        self.conditions("conditions", doc.get("conditions"))
+        self.effects("on_take", doc.get("on_take"))
+
+    def minigame_doc(self, doc: dict) -> None:
+        base = os.path.splitext(os.path.basename(self.path))[0]
+        if doc.get("id") != base:
+            self.err("id", f"`{doc.get('id')}` должен совпадать с именем файла")
+        if doc.get("type") not in ("rhythm", "choice", "reading"):
+            self.err("type", f"неизвестный тип `{doc.get('type')}`")
+        self.text_key("title_key", doc.get("title_key"))
+        self.text_key("intro_key", doc.get("intro_key"))
+        for k in ("taught_flag", "hint_flag", "error_flag"):
+            if k in doc:
+                self.flag(k, doc[k])
+        for i, slot in enumerate(doc.get("slots", [])):
+            self.text_key(f"slots[{i}].label_key", slot.get("label_key"))
+            if slot.get("correct") not in doc.get("colors", {}):
+                self.err(f"slots[{i}]", "correct не из colors")
+        for c, k in doc.get("colors", {}).items():
+            self.text_key(f"colors.{c}", k)
+        for i, k in enumerate(doc.get("entries", [])):
+            self.text_key(f"entries[{i}]", k)
+        self.effects("on_complete", doc.get("on_complete"))
+        notice = doc.get("notice")
+        if notice:
+            self.check("notice.check", notice.get("check", {}))
+            self.effects("notice.effects", notice.get("effects"))
+            self.text_key("notice.text_key", notice.get("text_key"))
+            self.text_key("notice.fail_key", notice.get("fail_key"), required=False)
+
+    def trial_doc(self, doc: dict) -> None:
+        base = os.path.splitext(os.path.basename(self.path))[0]
+        if doc.get("id") != base:
+            self.err("id", f"`{doc.get('id')}` должен совпадать с именем файла")
+        for k in ("intro_key", "stage_key", "clock_turn_key"):
+            self.text_key(k, doc.get(k), required=False)
+        crit = doc.get("critical_argument")
+        if crit:
+            self.conditions("critical_argument.conditions", crit.get("conditions"))
+            self.text_key("critical_argument.text_key", crit.get("text_key"))
+            self.text_key("critical_argument.outcome_key", crit.get("outcome_key"))
+        if not doc.get("rounds"):
+            self.err("rounds", "у испытания нет раундов")
+        for i, rd in enumerate(doc.get("rounds", [])):
+            w = f"rounds[{i}]"
+            for k in ("argument_key", "stage_key", "find_key"):
+                self.text_key(f"{w}.{k}", rd.get(k), required=k == "argument_key")
+            if len(rd.get("options", [])) < 2:
+                self.err(w, "у раунда меньше двух вариантов")
+            for j, o in enumerate(rd.get("options", [])):
+                ow = f"{w}.options[{j}]"
+                self.text_key(ow + ".text_key", o.get("text_key"))
+                self.conditions(ow + ".conditions", o.get("conditions"))
+                self.conditions(ow + ".advantage_if", o.get("advantage_if"))
+                if "check" in o:
+                    self.check(ow + ".check", o["check"])
+                    self.text_key(ow + ".win_key", o.get("win_key"))
+                    self.text_key(ow + ".lose_key", o.get("lose_key"))
+                elif o.get("auto") == "win":
+                    self.text_key(ow + ".win_key", o.get("win_key"))
+                elif o.get("auto") == "lose":
+                    self.text_key(ow + ".lose_key", o.get("lose_key"))
+                else:
+                    self.err(ow, "вариант без check и без auto")
+        for h, st in doc.get("hours", {}).items():
+            self.text_key(f"hours.{h}.text_key", st.get("text_key"))
+            for npc in st.get("npc_states", {}):
+                if npc not in self.reg.npc_ids:
+                    self.err(f"hours.{h}", f"NPC `{npc}` не найден")
+        for k in ("win", "soft_reset"):
+            if k in doc:
+                self.text_key(f"{k}.text_key", doc[k].get("text_key"))
+                self.effects(f"{k}.effects", doc[k].get("effects"))
+
+    def ending_doc(self, doc: dict) -> None:
+        base = os.path.splitext(os.path.basename(self.path))[0]
+        if doc.get("id") != base:
+            self.err("id", f"`{doc.get('id')}` должен совпадать с именем файла")
+        self.text_key("title_key", doc.get("title_key"))
+        for i, k in enumerate(doc.get("lines", [])):
+            self.text_key(f"lines[{i}]", k)
+        for i, k in enumerate(doc.get("credits", [])):
+            self.text_key(f"credits[{i}]", k)
+        self.effects("effects", doc.get("effects"))
+
+    def transitions_doc(self, doc: dict) -> None:
+        for vid, v in doc.get("variants", {}).items():
+            self.conditions(f"variants.{vid}.conditions", v.get("conditions"))
+            if not v.get("steps"):
+                self.err(f"variants.{vid}", "нет шагов")
+            for i, st in enumerate(v.get("steps", [])):
+                self.text_key(f"variants.{vid}.steps[{i}].text_key", st.get("text_key"))
+                if "check" in st:
+                    self.err(f"variants.{vid}.steps[{i}]", "в ритуале перелезания нет бросков (A8)")
 
     def dialogue_doc(self, doc: dict) -> None:
         base = os.path.splitext(os.path.basename(self.path))[0]
@@ -476,6 +598,16 @@ def classify(path: str, doc: dict) -> str:
         return "dialogue"
     if "encounters" in parts:
         return "encounter"
+    if "items" in parts:
+        return "item"
+    if "minigames" in parts:
+        return "minigame"
+    if "trials" in parts:
+        return "trial"
+    if "endings" in parts:
+        return "ending"
+    if os.path.basename(path) == "transitions.json":
+        return "transitions"
     return "skip"
 
 
@@ -514,7 +646,9 @@ def main(argv: list[str]) -> int:
             continue
         checked += 1
         c = Checker(path, reg, rep)
-        {"quest": c.quest_doc, "npc": c.npc, "dialogue": c.dialogue_doc, "encounter": c.encounter_doc}[kind](doc)
+        {"quest": c.quest_doc, "npc": c.npc, "dialogue": c.dialogue_doc, "encounter": c.encounter_doc,
+         "item": c.item_doc, "minigame": c.minigame_doc, "trial": c.trial_doc, "ending": c.ending_doc,
+         "transitions": c.transitions_doc}[kind](doc)
     for w in rep.warnings:
         print(f"  предупреждение: {w}")
     for e in rep.errors:

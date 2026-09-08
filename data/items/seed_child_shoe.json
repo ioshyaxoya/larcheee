@@ -1,0 +1,14 @@
+{
+  "id": "seed_child_shoe",
+  "name_key": "item.seed_child_shoe.name",
+  "desc_key": "item.seed_child_shoe.desc",
+  "kind": "seed",
+  "seed_for": "car_14",
+  "takeable": true,
+  "position": [
+    -2.0,
+    2.2,
+    -7.0
+  ],
+  "conditions": []
+}

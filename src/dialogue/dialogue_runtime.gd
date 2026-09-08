@@ -17,6 +17,7 @@ var current: Dictionary = {}
 var finished: bool = false
 var speakers: Dictionary = {}          # npc_id → name_key (говорящие квеста)
 var chance_provider: Callable          # (provider: String) -> float
+var minigame_provider: Callable        # (minigame_id: String) -> bool — успех/провал мини-игры
 var last_check: CheckResult = null
 var trail: Array[String] = []
 
@@ -24,6 +25,7 @@ var trail: Array[String] = []
 func _init(context: GameContext) -> void:
 	ctx = context
 	chance_provider = func(_provider: String) -> float: return 0.5
+	minigame_provider = func(_id: String) -> bool: return true
 
 
 func start(dialogue: Dictionary) -> void:
@@ -82,6 +84,7 @@ func available_options() -> Array[Dictionary]:
 			"cost_note_key": str(opt.get("cost_note_key", "")),
 			"check": opt.get("check", {}),
 			"chance": opt.get("chance", {}),
+			"minigame": str(opt.get("minigame", "")),
 			"probability": 0.0,
 			"hit_minutes": 0,
 		}
@@ -115,6 +118,8 @@ func choose(index: int) -> void:
 		return
 	var text_key := str(opt.get("text_key", ""))
 	var success := true
+	if opt.has("minigame"):
+		success = bool(minigame_provider.call(str(opt["minigame"])))
 	if opt.has("check"):
 		last_check = ctx.checks.roll(ctx.character, opt["check"])
 		success = last_check.success

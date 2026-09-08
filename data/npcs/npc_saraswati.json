@@ -8,5 +8,6 @@
     0.8
   ],
   "silhouette": "sari_tiffin",
-  "attitude_axes": {}
+  "attitude_axes": {},
+  "dialogue": "car_01_saraswati"
 }

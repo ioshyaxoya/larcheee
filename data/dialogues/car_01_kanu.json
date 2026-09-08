@@ -1,0 +1,68 @@
+{
+  "id": "car_01_kanu",
+  "car": "car_01",
+  "start": "boy",
+  "nodes": {
+    "boy": {
+      "speaker": "npc_kanu",
+      "text_key": "kanu.boy",
+      "stage": "kanu.stage",
+      "options": [
+        {
+          "text_key": "kanu.ask_long",
+          "next": "three_months"
+        },
+        {
+          "text_key": "kanu.ask_shelves",
+          "next": "shelves"
+        },
+        {
+          "text_key": "kanu.food",
+          "conditions": [
+            {
+              "has_item": "chagul"
+            }
+          ],
+          "effects": [
+            {
+              "remove_item": "chagul"
+            },
+            {
+              "add_item": "lathi"
+            }
+          ],
+          "next": "lathi"
+        },
+        {
+          "text_key": "kanu.leave",
+          "effects": [
+            {
+              "end": true
+            }
+          ]
+        }
+      ]
+    },
+    "three_months": {
+      "speaker": "npc_kanu",
+      "text_key": "kanu.three_months",
+      "next": "boy"
+    },
+    "shelves": {
+      "speaker": "npc_kanu",
+      "text_key": "kanu.shelves",
+      "on_enter": [
+        {
+          "set_flag": "car_01.kanu_shelves",
+          "value": true
+        }
+      ],
+      "next": "boy"
+    },
+    "lathi": {
+      "speaker": "npc_kanu",
+      "text_key": "kanu.lathi",
+      "next": "boy"
+    }
+  }
+}

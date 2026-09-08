@@ -6,6 +6,7 @@ extends Control
 signal start_requested(origin: String, class_id: String, sex: String, tags: Array, seed_v: int)
 signal enter_car_requested
 signal talk_requested(npc_id: String)
+signal take_requested(item_id: String)
 signal save_requested
 signal load_requested
 
@@ -118,6 +119,14 @@ func show_car_controls(car: Car) -> void:
 		b.text = ctx.texts.t("ui.debug.talk", {"name": ctx.texts.t(str(node.def.get("name_key", "")))})
 		b.pressed.connect(func(): talk_requested.emit(npc_id))
 		talk_box.add_child(b)
+	for item_id in car.items.keys():
+		var def: Dictionary = car.items[item_id]
+		if not def.get("takeable", false):
+			continue
+		var ib := Button.new()
+		ib.text = ctx.texts.t("ui.debug.take", {"name": ctx.texts.t(str(def.get("name_key", "")))})
+		ib.pressed.connect(func(): take_requested.emit(String(item_id)))
+		talk_box.add_child(ib)
 
 
 func show_enter_car() -> void:

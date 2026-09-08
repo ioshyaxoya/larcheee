@@ -1,0 +1,14 @@
+{
+  "id": "seed_zenana_shawl",
+  "name_key": "item.seed_zenana_shawl.name",
+  "desc_key": "item.seed_zenana_shawl.desc",
+  "kind": "seed",
+  "seed_for": "car_05",
+  "takeable": true,
+  "position": [
+    -2.0,
+    2.2,
+    -12.0
+  ],
+  "conditions": []
+}

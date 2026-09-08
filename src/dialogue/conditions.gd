@@ -44,6 +44,8 @@ static func evaluate(c: Dictionary, ctx: GameContext) -> bool:
 		return ctx.character != null and ctx.character.sex == c["sex"]
 	if c.has("axis"):
 		return ctx.character != null and ctx.character.axes.get(c["axis"], "") == c.get("pole", "")
+	if c.has("has_item"):
+		return ctx.world.has_item(c["has_item"]) == c.get("is", true)
 	if c.has("money_min"):
 		return ctx.world.money >= int(c["money_min"])
 	if c.has("minutes_spent_min"):

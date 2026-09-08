@@ -1,0 +1,14 @@
+{
+  "id": "lathi",
+  "name_key": "item.lathi.name",
+  "desc_key": "item.lathi.desc",
+  "kind": "weapon",
+  "takeable": false,
+  "position": [
+    1.2,
+    0.2,
+    -2.0
+  ],
+  "conditions": [],
+  "_note": "У Кану; отдаст за еду через диалог."
+}

@@ -25,19 +25,23 @@ func _init(context: GameContext) -> void:
 	ctx = context
 
 
-func start(quest_id: String) -> DialogueRuntime:
+func start(quest_id: String, start_node: String = "", start_minutes: int = -1) -> DialogueRuntime:
 	def = load_def(quest_id)
 	if def.is_empty():
 		return null
 	var clock: Dictionary = def.get("clock", {})
-	ctx.clock.configure(int(clock.get("start_minutes", 20 * 60)), int(clock.get("deadline_minutes", 20 * 60 + 30)))
+	var start_m := int(clock.get("start_minutes", 20 * 60)) if start_minutes < 0 else start_minutes
+	ctx.clock.configure(start_m, int(clock.get("deadline_minutes", 20 * 60 + 30)))
 	ctx.world.location["quest"] = quest_id
 	runtime = DialogueRuntime.new(ctx)
 	runtime.chance_provider = func(provider: String) -> float: return ChanceProviders.probability(provider, ctx)
 	for npc in def.get("npcs", []):
 		runtime.speakers[str(npc["id"])] = str(npc["name_key"])
 	runtime.ended.connect(_on_ended)
-	runtime.start(def["dialogues"][str(def["entry"])])
+	var dlg: Dictionary = (def["dialogues"][str(def["entry"])] as Dictionary).duplicate()
+	if start_node != "":
+		dlg["start"] = start_node
+	runtime.start(dlg)
 	return runtime
 
 

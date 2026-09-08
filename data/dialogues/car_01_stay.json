@@ -1,0 +1,60 @@
+{
+  "id": "car_01_stay",
+  "car": "car_01",
+  "start": "hook",
+  "nodes": {
+    "hook": {
+      "speaker": "narrator",
+      "text_key": "stay.hook",
+      "options": [
+        {
+          "text_key": "stay.take",
+          "next": "question"
+        },
+        {
+          "text_key": "stay.leave",
+          "effects": [
+            {
+              "end": true
+            }
+          ]
+        }
+      ]
+    },
+    "question": {
+      "speaker": "god_shani",
+      "text_key": "stay.question",
+      "stage": "stay.question.stage",
+      "options": [
+        {
+          "text_key": "stay.yes",
+          "effects": [
+            {
+              "set_flag": "car_01.path",
+              "value": "stay"
+            },
+            {
+              "set_flag": "car_01.shani_attitude",
+              "value": "respectful"
+            },
+            {
+              "emit": "ending_5"
+            },
+            {
+              "end": true
+            }
+          ]
+        },
+        {
+          "text_key": "stay.no",
+          "next": "hang_back"
+        }
+      ]
+    },
+    "hang_back": {
+      "speaker": "narrator",
+      "text_key": "stay.hang_back",
+      "end": true
+    }
+  }
+}

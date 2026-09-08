@@ -6,6 +6,7 @@ extends Node3D
 var npc_id: String = ""
 var def: Dictionary = {}
 var label: Label3D
+var state: String = "default"
 
 
 func setup(npc_def: Dictionary, ctx: GameContext) -> void:
@@ -31,6 +32,12 @@ func setup(npc_def: Dictionary, ctx: GameContext) -> void:
 		label.font_size = 24
 		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		add_child(label)
+
+
+## Состояние NPC (данные npc.states): patrol, hidden, crying… Скрытые не видны.
+func set_state(new_state: String) -> void:
+	state = new_state
+	visible = new_state != "hidden"
 
 
 ## Реплика по оси отношения: полюс персонажа → text_key (B4 attitude_axes).

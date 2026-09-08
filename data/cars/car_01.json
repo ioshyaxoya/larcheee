@@ -131,7 +131,20 @@
     "car_01.lantern_taken",
     "car_01.shift_worked",
     "car_01.forced_door",
-    "ticket.smear_noticed"
+    "ticket.smear_noticed",
+    "car_01.trial_won",
+    "car_01.clock_hours_lost",
+    "car_01.shani_attitude",
+    "car_01.gift_hour_ago",
+    "car_01.vahana_crow_feather",
+    "car_01.ratan_taught",
+    "car_01.signal_error",
+    "car_01.hafiz_named",
+    "car_01.clock_fact",
+    "car_01.seeds_taken",
+    "car_01.cold_open_done",
+    "car_01.soft_resets",
+    "ending.reached"
   ],
   "npcs": [
     "god_shani",
@@ -201,5 +214,29 @@
     "npc_dog": "prologue.dog_followed",
     "detainer_cameo": "prologue.detainer_resolution == helped"
   },
-  "hours_note": "Поднято с 2.5 после расширения населения (8 NPC, 124 узла). Объём контента 3.75; одно прохождение ~2.9. Бюджет A4 сдвигается на +1 ч."
+  "hours_note": "Поднято с 2.5 после расширения населения (8 NPC, 124 узла). Объём контента 3.75; одно прохождение ~2.9. Бюджет A4 сдвигается на +1 ч.",
+  "custom_script": "res://src/train/cars/car_01_brake_van.gd",
+  "scenes": {
+    "cold_open": "car_01_cold_open",
+    "return": "car_01_return",
+    "paths_hub": "car_01_paths",
+    "force": "car_01_force",
+    "deceit": "car_01_deceit",
+    "service": "car_01_service",
+    "stay": "car_01_stay"
+  },
+  "trial": "trial_shani",
+  "seed_take_limit": 3,
+  "transition_variant": "night_bengal",
+  "exits": {
+    "forward": "car_02",
+    "stay": "ending_5"
+  },
+  "tail_scene": {
+    "forced_door": "car_01.tail.forced_door",
+    "shift_worked": "car_01.tail.shift_worked",
+    "lantern_taken": "car_01.tail.lantern_taken",
+    "clock_hours_lost>0": "car_01.tail.clock_hours_lost",
+    "default": "car_01.tail.default"
+  }
 }

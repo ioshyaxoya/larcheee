@@ -20,6 +20,10 @@ static func apply(effs: Variant, ctx: GameContext, emitter: Object = null) -> Di
 			ctx.world.money += int(e["add_money"])
 			if ctx.character != null:
 				ctx.character.money = ctx.world.money
+		elif e.has("add_item"):
+			ctx.world.add_item(str(e["add_item"]))
+		elif e.has("remove_item"):
+			ctx.world.remove_item(str(e["remove_item"]))
 		elif e.has("goto"):
 			result["goto"] = str(e["goto"])
 		elif e.has("end"):

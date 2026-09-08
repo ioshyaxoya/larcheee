@@ -1,0 +1,14 @@
+{
+  "id": "seed_wire_spool",
+  "name_key": "item.seed_wire_spool.name",
+  "desc_key": "item.seed_wire_spool.desc",
+  "kind": "seed",
+  "seed_for": "car_20",
+  "takeable": true,
+  "position": [
+    2.0,
+    2.2,
+    -7.5
+  ],
+  "conditions": []
+}

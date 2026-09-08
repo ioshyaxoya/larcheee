@@ -1,0 +1,13 @@
+{
+  "id": "morse_key",
+  "name_key": "item.morse_key.name",
+  "desc_key": "item.morse_key.desc",
+  "kind": "tool",
+  "takeable": true,
+  "position": [
+    1.0,
+    0.8,
+    -2.5
+  ],
+  "conditions": []
+}

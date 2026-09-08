@@ -14,5 +14,6 @@
       "flag": "prologue.dog_followed",
       "is": true
     }
-  ]
+  ],
+  "dialogue": "car_01_dog"
 }

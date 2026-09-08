@@ -1,0 +1,8 @@
+{
+  "id": "small_prana_crystal",
+  "name_key": "item.small_prana_crystal.name",
+  "desc_key": "item.small_prana_crystal.desc",
+  "kind": "crystal",
+  "takeable": false,
+  "in_car": false
+}
