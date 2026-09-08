@@ -1,0 +1,63 @@
+name: web
+
+# Собирает веб-сборку и публикует её на GitHub Pages.
+# Один раз включите Pages: Settings → Pages → Source: GitHub Actions.
+# После этого игра открывается по адресу вида
+# https://<owner>.github.io/<repo>/ и не требует ни Godot, ни установки.
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GODOT_VERSION: "4.3"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Godot and export templates
+        run: |
+          curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip && mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 godot && chmod +x godot
+          curl -sSL -o templates.tpz "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          unzip -q templates.tpz -d tpl
+          mkdir -p ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          cp tpl/templates/web* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
+
+      - name: Import project
+        run: ./godot --headless --import --path . || true
+
+      - name: Smoke test
+        run: ./godot --headless --path . -s tests/smoke.gd
+
+      - name: Export web
+        run: |
+          mkdir -p build/web
+          ./godot --headless --path . --export-release "Web" build/web/index.html
+          ls -la build/web
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

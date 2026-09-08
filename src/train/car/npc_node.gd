@@ -1,45 +1,34 @@
 class_name NpcNode
 extends Node3D
-## NPC в вагоне: плоская фигура-силуэт (визуальное направление: плоский
-## театральный 2.5D, фигуры без лиц) и подпись. Реакции — по осям attitude_axes.
+## NPC на сцене: плоский силуэт без лица, читаемый очертанием (тюрбан, топи,
+## сари, шинель) — docs/visual_direction.md §3. Форма и светлота задаются
+## данными NPC. Подписей над головой нет: имя говорящего показывает панель
+## диалога. Свет лепит фигуру, а не текстура.
 
 var npc_id: String = ""
 var def: Dictionary = {}
-var label: Label3D
 var state: String = "default"
 var hidden_by_dark: bool = false
+var body: Node3D
 
 
-func setup(npc_def: Dictionary, ctx: GameContext) -> void:
+func setup(npc_def: Dictionary, _ctx: GameContext) -> void:
 	def = npc_def
 	npc_id = str(npc_def.get("id", ""))
 	name = npc_id
 	var pos: Array = npc_def.get("position", [0, 0, 0])
 	position = Vector3(float(pos[0]), float(pos[1]), float(pos[2]))
-	if DisplayServer.get_name() != "headless":
-		var body := MeshInstance3D.new()
-		var quad := QuadMesh.new()
-		quad.size = Vector2(0.6, 1.8)
-		body.mesh = quad
-		body.position.y = 0.9
-		var mat := StandardMaterial3D.new()
-		mat.albedo_color = Color(0.22, 0.2, 0.24)
-		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-		mat.billboard_mode = BaseMaterial3D.BILLBOARD_FIXED_Y
-		body.material_override = mat
-		add_child(body)
-		label = Label3D.new()
-		label.text = ctx.texts.t(str(npc_def.get("name_key", "")))
-		label.position.y = 2.0
-		label.font_size = 20
-		label.modulate = Color(0.8, 0.78, 0.72)
-		label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		add_child(label)
+	if DisplayServer.get_name() == "headless":
+		return
+	body = StageBuilder.silhouette(npc_def)
+	add_child(body)
 
 
-## Состояние NPC (данные npc.states): patrol, hidden, crying… Скрытые не видны.
+## Состояние NPC (данные npc.states): patrol, hidden, crying, standing.
 func set_state(new_state: String) -> void:
 	state = new_state
+	if state == "standing" and body != null:
+		body.position.y = 0.12
 	_refresh_visibility()
 
 

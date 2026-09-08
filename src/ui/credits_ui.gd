@@ -27,7 +27,9 @@ func _init() -> void:
 	box.add_theme_constant_override("separation", 12)
 	margin.add_child(box)
 	title_label = Label.new()
-	title_label.add_theme_font_size_override("font_size", 36)
+	title_label.add_theme_font_override("font", GameTheme.clock_font())
+	title_label.add_theme_font_size_override("font_size", 40)
+	title_label.add_theme_color_override("font_color", GameTheme.GOLD)
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title_label)
 	label = RichTextLabel.new()

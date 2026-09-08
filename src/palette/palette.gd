@@ -59,14 +59,14 @@ func exit_trial() -> void:
 	colour_return = 1.0
 
 
-## Применить к окружению сцены (Environment.adjustment_*) — базовый грейдинг M0.
+## Окружение: только рассеянный свет по палитре. Цвет кадра доводит шейдер
+## (GradeLayer), чтобы базовый режим и режим испытания шли одним конвейером.
 func apply(env: Environment) -> void:
 	if env == null:
 		return
 	var p := effective()
-	env.adjustment_enabled = true
-	env.adjustment_brightness = float(p.get("brightness", 1.0))
-	env.adjustment_contrast = float(p.get("contrast", 1.0))
-	env.adjustment_saturation = float(p.get("saturation", 1.0))
 	var tint: Array = p.get("tint", [1, 1, 1])
-	env.ambient_light_color = Color(float(tint[0]) * 0.2, float(tint[1]) * 0.2, float(tint[2]) * 0.2)
+	var ambient := 0.02 if in_trial else 0.045
+	env.ambient_light_color = Color(float(tint[0]), float(tint[1]), float(tint[2]))
+	env.ambient_light_energy = ambient
+	env.adjustment_enabled = false

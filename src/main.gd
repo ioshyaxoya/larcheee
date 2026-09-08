@@ -6,10 +6,13 @@ extends Node
 signal title_dismissed
 
 var ctx: GameContext
+var world_viewport: SubViewport
 var stage: Node3D
 var camera: Camera3D
 var world_env: WorldEnvironment
 var palette: Palette
+var grade: GradeLayer
+var theme_res: Theme
 var hud: Hud
 var dialogue_ui: DialogueUi
 var check_ui: CheckUi
@@ -28,15 +31,23 @@ var control_locked: bool = false
 func _ready() -> void:
 	ctx = Game.ctx if Game.ctx != null else Game.new_game(0)
 	palette = Palette.new()
+	theme_res = GameTheme.build()
 	_build_stage()
+	_build_grade()
 	_build_ui()
 	_bind(ctx)
 
 
 func _build_stage() -> void:
+	# Сцена живёт в подвьюпорте: её кадр грейдится шейдером, интерфейс — нет.
+	world_viewport = SubViewport.new()
+	world_viewport.name = "World"
+	world_viewport.size = Vector2i(1280, 720)
+	world_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	add_child(world_viewport)
 	stage = Node3D.new()
 	stage.name = "Stage"
-	add_child(stage)
+	world_viewport.add_child(stage)
 	camera = Camera3D.new()
 	camera.projection = Camera3D.PROJECTION_ORTHOGONAL
 	camera.size = 9.0
@@ -54,8 +65,16 @@ func _build_stage() -> void:
 	stage.add_child(world_env)
 
 
+func _build_grade() -> void:
+	grade = GradeLayer.new()
+	add_child(grade)
+	grade.set_source(world_viewport.get_texture())
+	grade.bind(palette)
+
+
 func _build_ui() -> void:
 	var layer := CanvasLayer.new()
+	layer.layer = 2   # интерфейс поверх грейдинга
 	add_child(layer)
 	hud = Hud.new()
 	layer.add_child(hud)
@@ -73,8 +92,10 @@ func _build_ui() -> void:
 	layer.add_child(credits_ui)
 	var title_layer := CanvasLayer.new()
 	title_layer.layer = 10
+	title_card_theme_holder(title_layer)
 	add_child(title_layer)
 	title_card = Control.new()
+	title_card.theme = theme_res
 	title_card.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	title_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	title_card.visible = false
@@ -85,7 +106,9 @@ func _build_ui() -> void:
 	title_card.add_child(backdrop)
 	title_label = Label.new()
 	title_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	title_label.add_theme_font_size_override("font_size", 44)
+	title_label.add_theme_font_override("font", GameTheme.clock_font())
+	title_label.add_theme_font_size_override("font_size", 46)
+	title_label.add_theme_color_override("font_color", GameTheme.TEXT)
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	title_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -115,15 +138,23 @@ func _build_ui() -> void:
 	credits_ui.closed.connect(func(): debug_panel.visible = true)
 
 
+## Титр — тоже интерфейс: тема нужна и ему.
+func title_card_theme_holder(_layer: CanvasLayer) -> void:
+	pass
+
+
 func _bind(context: GameContext) -> void:
 	ctx = context
 	for ui in [hud, dialogue_ui, check_ui, trial_ui, credits_ui, transition_ui, debug_panel]:
+		ui.theme = theme_res
 		ui.bind(ctx)
 	hint_label.text = ctx.texts.t("ui.debug.hint")
 
 
 func _apply_palette() -> void:
 	palette.apply(world_env.environment)
+	if grade != null:
+		grade.refresh()
 
 
 # --- поток ------------------------------------------------------------------
@@ -153,9 +184,11 @@ func _spawn_car() -> void:
 	if car != null:
 		car.queue_free()
 	car = Car.new()
-	car.setup(CarLoader.load_card("car_01"), ctx)
+	var card := CarLoader.load_card("car_01")
+	car.setup(card, ctx)
 	stage.add_child(car)
-	palette.set_palette(str(car.card.get("palette", "human")))
+	StageBuilder.apply_camera(card, camera)
+	palette.set_palette(str(card.get("palette", "human")))
 	_apply_palette()
 	car.custom.control_locked.connect(_lock_control)
 	car.custom.title_card.connect(_show_title)

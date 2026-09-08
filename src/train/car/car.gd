@@ -22,6 +22,7 @@ var triggers: TriggerSystem
 var items: Dictionary = {}         # item_id → def (только те, что в вагоне сейчас)
 var custom: Node = null            # car.custom_script — уникальная механика вагона
 var hours_lost: int = 0
+var lantern_pools: Array[Node3D] = []
 var entered: bool = false
 var active_runtime: DialogueRuntime = null
 
@@ -48,29 +49,13 @@ func setup(car_card: Dictionary, context: GameContext) -> void:
 func _build_stage() -> void:
 	if DisplayServer.get_name() == "headless":
 		return   # dummy-рендер не строит меши; логика вагона от сцены не зависит
-	var grid: Dictionary = card.get("grid", {"w": 18, "h": 46})
-	var w := float(grid.get("w", 18)) * CELL
-	var h := float(grid.get("h", 46)) * CELL
-	var floor_mesh := MeshInstance3D.new()
-	var plane := PlaneMesh.new()
-	plane.size = Vector2(w, h)
-	floor_mesh.mesh = plane
-	floor_mesh.name = "Floor"
-	add_child(floor_mesh)
-	var backdrop := MeshInstance3D.new()
-	var quad := QuadMesh.new()
-	quad.size = Vector2(w, 3.0)
-	backdrop.mesh = quad
-	backdrop.position = Vector3(0, 1.5, -h / 2.0)
-	backdrop.name = "Backdrop"
-	add_child(backdrop)
-	var light := OmniLight3D.new()
-	light.name = "Lantern"
-	light.position = Vector3(0, 2.2, 2.0)
-	light.light_color = Color(1.0, 0.8, 0.55)
-	light.omni_range = 6.0
-	light.visible = ctx.world.get_flag("car_01.lantern_lit", false) == true
-	add_child(light)
+	StageBuilder.build(card, self)
+	var lit: bool = ctx.world.get_flag("car_01.lantern_lit", false) == true
+	for pool_def in card.get("stage_lantern_pools", []):
+		var pool := StageBuilder.quad(pool_def, true)
+		pool.visible = lit
+		lantern_pools.append(pool)
+		add_child(pool)
 
 
 func _spawn_npcs() -> void:
@@ -96,13 +81,12 @@ func _apply_darkness() -> void:
 		(npcs[npc_id] as NpcNode).set_hidden_by_dark(not lit)
 
 
-## Фонарь зажжён: вагон становится виден.
+## Фонарь зажжён: лужи света ложатся на пол и стены, вагон становится виден.
 func reveal() -> void:
 	for npc_id in npcs.keys():
 		(npcs[npc_id] as NpcNode).set_hidden_by_dark(false)
-	var lantern := get_node_or_null("Lantern")
-	if lantern != null:
-		lantern.visible = true
+	for pool in lantern_pools:
+		pool.visible = true
 
 
 func _load_items() -> void:
@@ -206,12 +190,19 @@ func apply_hour_state(hours: int, hour_states: Dictionary) -> void:
 	if car_id == "car_01":
 		ctx.world.set_flag("car_01.clock_hours_lost", hours)
 	var st: Dictionary = hour_states.get(str(hours), {})
-	var lantern := get_node_or_null("Lantern")
-	if lantern != null:
-		var light := str(st.get("light", "night"))
-		var colors := {"night": Color(1.0, 0.8, 0.55), "dusk": Color(1.0, 0.6, 0.35), "sunset": Color(1.0, 0.5, 0.3), "afternoon": Color(1.0, 0.9, 0.7), "day": Color(1.0, 1.0, 0.95), "siding": Color(0.9, 0.9, 0.9)}
-		lantern.light_color = colors.get(light, colors["night"])
-		lantern.light_energy = 1.0 + hours * 0.6
+	# Каждый потерянный час физически меняет вагон: свет уходит к дневному.
+	var light := str(st.get("light", "night"))
+	var day_light := {"night": Color(1.0, 0.74, 0.40), "dusk": Color(1.0, 0.55, 0.30), "sunset": Color(1.0, 0.45, 0.26), "afternoon": Color(0.95, 0.88, 0.72), "day": Color(0.86, 0.90, 1.0), "siding": Color(0.80, 0.86, 1.0)}
+	var strength := {"night": 0.60, "dusk": 0.70, "sunset": 0.80, "afternoon": 1.0, "day": 1.2, "siding": 1.35}
+	for pool in lantern_pools:
+		var mesh := pool as MeshInstance3D
+		if mesh == null:
+			continue
+		var mat := mesh.material_override as StandardMaterial3D
+		var c: Color = day_light.get(light, day_light["night"])
+		c.a = mat.albedo_color.a * float(strength.get(light, 1.0)) / (1.0 if hours == 0 else 1.0)
+		mat.albedo_color = Color(c.r, c.g, c.b, clampf(c.a, 0.0, 1.0))
+		mesh.visible = true if hours > 0 else mesh.visible
 	for npc_id in st.get("npc_states", {}).keys():
 		if npcs.has(npc_id):
 			(npcs[npc_id] as NpcNode).set_state(str(st["npc_states"][npc_id]))

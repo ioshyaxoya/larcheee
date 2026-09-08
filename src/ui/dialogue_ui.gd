@@ -25,20 +25,27 @@ func _init() -> void:
 	panel.size_flags_vertical = Control.SIZE_SHRINK_END
 	column.add_child(panel)
 	var margin := MarginContainer.new()
-	for side in ["margin_left", "margin_right", "margin_top", "margin_bottom"]:
-		margin.add_theme_constant_override(side, 24)
+	margin.add_theme_constant_override("margin_left", 28)
+	margin.add_theme_constant_override("margin_right", 28)
+	margin.add_theme_constant_override("margin_top", 18)
+	margin.add_theme_constant_override("margin_bottom", 18)
 	panel.add_child(margin)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
 	margin.add_child(box)
 	speaker_label = Label.new()
-	speaker_label.add_theme_font_size_override("font_size", 20)
+	speaker_label.add_theme_font_override("font", GameTheme.clock_font())
+	speaker_label.add_theme_font_size_override("font_size", 19)
+	speaker_label.add_theme_color_override("font_color", GameTheme.GOLD)
 	box.add_child(speaker_label)
 	stage_label = Label.new()
-	stage_label.modulate = Color(0.75, 0.75, 0.8)
+	stage_label.add_theme_font_override("font", GameTheme.stage_font())
+	stage_label.add_theme_color_override("font_color", GameTheme.TEXT_DIM)
+	stage_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(stage_label)
 	text_label = RichTextLabel.new()
 	text_label.bbcode_enabled = false
+	text_label.add_theme_font_size_override("normal_font_size", 19)
 	text_label.fit_content = true
 	text_label.custom_minimum_size = Vector2(0, 56)
 	box.add_child(text_label)

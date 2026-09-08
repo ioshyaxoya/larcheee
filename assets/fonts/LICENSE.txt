@@ -1,0 +1,4 @@
+IBM Plex Sans — SIL Open Font License 1.1
+Copyright © 2017 IBM Corp. https://github.com/IBM/plex
+Полный текст лицензии: https://github.com/IBM/plex/blob/master/LICENSE.txt
+Кириллица поддерживается; шрифт используется как основной интерфейсный.

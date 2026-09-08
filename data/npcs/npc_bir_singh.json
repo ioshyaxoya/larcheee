@@ -3,9 +3,9 @@
   "name_key": "npc.bir_singh.name",
   "kind": "human",
   "position": [
-    -1.0,
+    -1.88,
     0.0,
-    1.5
+    -1.8
   ],
   "silhouette": "conductor_asleep",
   "attitude_axes": {},
@@ -13,5 +13,34 @@
   "states": {
     "asleep": "npc.bir_singh.state.asleep",
     "patrol": "npc.bir_singh.state.patrol"
-  }
+  },
+  "silhouette_parts": [
+    {
+      "pos": [
+        0.0,
+        0.62,
+        0.0
+      ],
+      "size": [
+        1.72,
+        0.34
+      ]
+    },
+    {
+      "pos": [
+        0.72,
+        0.74,
+        0.0
+      ],
+      "size": [
+        0.24,
+        0.26
+      ]
+    }
+  ],
+  "color": [
+    0.01,
+    0.011,
+    0.017
+  ]
 }

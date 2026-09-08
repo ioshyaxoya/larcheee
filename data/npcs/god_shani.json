@@ -4,9 +4,9 @@
   "kind": "presence",
   "dialogue": "car_01_paths",
   "position": [
+    0.72,
     0.0,
-    0.0,
-    -3.6
+    -2.4
   ],
   "silhouette": "dark_lame",
   "attitude_axes": {
@@ -22,5 +22,56 @@
       "man": "npc.god_shani.axis.man",
       "woman": "npc.god_shani.axis.woman"
     }
-  }
+  },
+  "silhouette_parts": [
+    {
+      "pos": [
+        0.0,
+        1.44,
+        0.0
+      ],
+      "size": [
+        0.24,
+        0.28
+      ]
+    },
+    {
+      "pos": [
+        0.0,
+        0.86,
+        0.0
+      ],
+      "size": [
+        0.58,
+        0.92
+      ]
+    },
+    {
+      "pos": [
+        0.0,
+        0.24,
+        0.06
+      ],
+      "size": [
+        0.66,
+        0.42
+      ]
+    },
+    {
+      "pos": [
+        0.34,
+        0.62,
+        0.0
+      ],
+      "size": [
+        0.16,
+        0.52
+      ]
+    }
+  ],
+  "color": [
+    0.01,
+    0.011,
+    0.017
+  ]
 }

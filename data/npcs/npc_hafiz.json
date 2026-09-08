@@ -3,11 +3,51 @@
   "name_key": "npc.hafiz.name",
   "kind": "human",
   "position": [
-    -0.8,
+    -1.5,
     0.0,
-    -1.2
+    -2.9
   ],
   "silhouette": "pilgrim_seated",
   "attitude_axes": {},
-  "dialogue": "car_01_hafiz"
+  "dialogue": "car_01_hafiz",
+  "silhouette_parts": [
+    {
+      "pos": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "size": [
+        0.26,
+        0.2
+      ]
+    },
+    {
+      "pos": [
+        0.0,
+        0.6,
+        0.0
+      ],
+      "size": [
+        0.56,
+        0.66
+      ]
+    },
+    {
+      "pos": [
+        0.0,
+        0.18,
+        0.0
+      ],
+      "size": [
+        0.62,
+        0.34
+      ]
+    }
+  ],
+  "color": [
+    0.01,
+    0.011,
+    0.017
+  ]
 }

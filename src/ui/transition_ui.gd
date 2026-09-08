@@ -27,6 +27,7 @@ func _init() -> void:
 	box.add_theme_constant_override("separation", 16)
 	margin.add_child(box)
 	label = RichTextLabel.new()
+	label.add_theme_font_size_override("normal_font_size", 20)
 	label.fit_content = true
 	box.add_child(label)
 	next_button = Button.new()

@@ -31,17 +31,26 @@ func _init() -> void:
 	box.add_theme_constant_override("separation", 6)
 	margin.add_child(box)
 	title_label = Label.new()
+	title_label.add_theme_color_override("font_color", GameTheme.TEXT_DIM)
+	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(title_label)
 	die_label = Label.new()
-	die_label.add_theme_font_size_override("font_size", 64)
+	die_label.add_theme_font_override("font", GameTheme.clock_font())
+	die_label.add_theme_font_size_override("font_size", 72)
+	die_label.add_theme_color_override("font_color", GameTheme.GOLD)
 	die_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(die_label)
 	mods_label = Label.new()
+	mods_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	mods_label.add_theme_color_override("font_color", GameTheme.TEXT_DIM)
 	box.add_child(mods_label)
 	total_label = Label.new()
+	total_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(total_label)
 	outcome_label = Label.new()
-	outcome_label.add_theme_font_size_override("font_size", 28)
+	outcome_label.add_theme_font_override("font", GameTheme.clock_font())
+	outcome_label.add_theme_font_size_override("font_size", 26)
+	outcome_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	box.add_child(outcome_label)
 	continue_button = Button.new()
 	continue_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER

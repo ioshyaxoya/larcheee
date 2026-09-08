@@ -3,11 +3,62 @@
   "name_key": "npc.saraswati.name",
   "kind": "human",
   "position": [
-    1.0,
+    1.32,
     0.0,
-    0.8
+    1.4
   ],
   "silhouette": "sari_tiffin",
   "attitude_axes": {},
-  "dialogue": "car_01_saraswati"
+  "dialogue": "car_01_saraswati",
+  "silhouette_parts": [
+    {
+      "pos": [
+        0.0,
+        1.5,
+        0.0
+      ],
+      "size": [
+        0.22,
+        0.26
+      ]
+    },
+    {
+      "pos": [
+        0.0,
+        0.92,
+        0.0
+      ],
+      "size": [
+        0.44,
+        0.94
+      ]
+    },
+    {
+      "pos": [
+        0.0,
+        0.3,
+        0.0
+      ],
+      "size": [
+        0.62,
+        0.62
+      ]
+    },
+    {
+      "pos": [
+        0.3,
+        0.7,
+        0.0
+      ],
+      "size": [
+        0.18,
+        0.22
+      ]
+    }
+  ],
+  "color": [
+    0.01,
+    0.011,
+    0.017
+  ]
 }
