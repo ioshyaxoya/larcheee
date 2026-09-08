@@ -6,12 +6,14 @@ extends CanvasLayer
 
 const THEATRICAL := "res://assets/shaders/theatrical.gdshader"
 const DITHER := "res://assets/shaders/dither_1bit.gdshader"
+const PRESENCE := "res://assets/shaders/presence.gdshader"
 
 var palette: Palette
 var rect: TextureRect
 var presence_rect: TextureRect
 var theatrical_mat: ShaderMaterial
 var dither_mat: ShaderMaterial
+var presence_mat: ShaderMaterial
 var world_tex: Texture2D          # кадр вагона: он же — то, что видно в глитче
 var trial_tex: Texture2D          # кадр мира испытания
 var glitch: float = 0.0
@@ -38,6 +40,9 @@ func _init() -> void:
 	presence_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	presence_rect.stretch_mode = TextureRect.STRETCH_SCALE
 	presence_rect.visible = false
+	presence_mat = ShaderMaterial.new()
+	presence_mat.shader = load(PRESENCE)
+	presence_rect.material = presence_mat
 	add_child(presence_rect)
 
 
@@ -88,6 +93,9 @@ func refresh() -> void:
 		mat.set_shader_parameter("glitch", glitch)
 		if world_tex != null:
 			mat.set_shader_parameter("alt_tex", world_tex)
+		# Тот же спад к краям, что у мира: присутствие в кадре, а не на кадре.
+		presence_mat.set_shader_parameter("vignette", float(p.get("vignette", 0.35)))
+		presence_mat.set_shader_parameter("ambient_mix", 0.10 - 0.06 * palette.colour_return)
 	else:
 		mat.set_shader_parameter("contrast", float(p.get("contrast", 1.0)))
 		mat.set_shader_parameter("brightness", float(p.get("brightness", 1.0)))

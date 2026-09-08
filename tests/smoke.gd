@@ -459,8 +459,10 @@ func test_palette_and_transition() -> void:
 	var tst: Dictionary = trial_def.get("stage", {})
 	check(tst.has("camera") and String(tst["camera"].get("projection", "")) == "perspective",
 		"встреча снята длинным объективом снизу вверх")
-	check(float(tst["camera"]["pos"][1]) < 1.2 and float(tst["camera"]["rot"][0]) > 5.0,
-		"камера ниже человеческого роста и смотрит вверх: на присутствие смотрят снизу")
+	# Ниже уровня глаз человека (≈1,55 м) и с наклоном вверх: на присутствие
+	# смотрят снизу, потому что смотрит ошарашенный человек.
+	check(float(tst["camera"]["pos"][1]) < 1.55 and float(tst["camera"]["rot"][0]) > 5.0,
+		"камера ниже уровня глаз и смотрит вверх: на присутствие смотрят снизу")
 	var presence: Array = tst.get("presence", [])
 	check(presence.size() >= 2, "присутствие — ворон и Шани: %d фигуры" % presence.size())
 	var presence_parts := 0
