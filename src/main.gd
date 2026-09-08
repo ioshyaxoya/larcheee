@@ -263,6 +263,9 @@ func _return_to_car(_snap: Dictionary) -> void:
 
 
 func _on_trial_started(trial: TrialRuntime) -> void:
+	# Журнал минут пролога в суде не нужен: шкала здесь другая — часы на
+	# регуляторе, а не потерянные в Калькутте минуты.
+	hud.clear_log()
 	palette.enter_trial()
 	_enter_presence(trial)
 	_apply_palette()

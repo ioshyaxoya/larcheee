@@ -107,6 +107,12 @@ func _on_node(_node_id: String, node: Dictionary) -> void:
 
 ## Начать набор реплики. Варианты придут, когда текст дописан.
 func _start_typing() -> void:
+	# Варианты прошлой реплики убираются сразу: пока текст печатается, на
+	# экране не должно висеть то, что уже можно нажать — иначе игрок отвечает
+	# на вопрос, которого ещё не прочёл.
+	for b in option_buttons:
+		b.queue_free()
+	option_buttons.clear()
 	_typed = 0.0
 	text_label.visible_characters = 0
 	typing = text_label.get_total_character_count() > 0

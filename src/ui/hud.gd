@@ -69,6 +69,13 @@ func refresh() -> void:
 	log_label.text = "\n".join(_entries)
 
 
+## Забыть журнал минут: пролог кончился, и его расход больше не при чём.
+## Иначе список «−7 мин — досмотр багажа» висит поверх суда Шани.
+func clear_log() -> void:
+	_entries.clear()
+	refresh()
+
+
 func _on_time_spent(minutes: int, reason_key: String, _now: int) -> void:
 	var reason := ctx.texts.t(reason_key) if reason_key != "" else ""
 	_entries.append(ctx.texts.t("ui.clock.spent", {"minutes": minutes, "reason": reason}))
