@@ -178,3 +178,13 @@ static func apply_camera(card: Dictionary, camera: Camera3D) -> void:
 	var rot: Array = cam.get("rot", [-28.0, 0.0, 0.0])
 	camera.rotation_degrees = Vector3(float(rot[0]), float(rot[1]), float(rot[2]))
 	camera.size = float(cam.get("size", 8.0))
+	# Вагон-коридор читается только длинным объективом: ортография убивает глубину,
+	# а вся суть тормозного вагона — полки, уходящие дальше, чем длина состава
+	# (docs/car_01_brake_van.md §2). Вагон сам выбирает проекцию в своих данных.
+	if String(cam.get("projection", "orthogonal")) == "perspective":
+		camera.projection = Camera3D.PROJECTION_PERSPECTIVE
+		camera.fov = float(cam.get("fov", 34.0))
+	else:
+		camera.projection = Camera3D.PROJECTION_ORTHOGONAL
+	camera.near = float(cam.get("near", 0.05))
+	camera.far = float(cam.get("far", 200.0))

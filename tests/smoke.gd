@@ -436,8 +436,12 @@ func test_palette_and_transition() -> void:
 	var shani := CarLoader.load_npc("god_shani")
 	var fig: Dictionary = shani.get("figure", {})
 	check((fig.get("parts", []) as Array).size() >= 6, "силуэт Шани — сплошная фигура из %d контуров, а не прямоугольник" % (fig.get("parts", []) as Array).size())
-	var head: PackedVector2Array = StageBuilder.points_of((fig["parts"] as Array)[3])
-	check(head.size() >= 16 and not StageBuilder.polygon_mesh(head).get_surfaces() == 0, "контур головы гладкий (%d точек) и триангулируется" % head.size())
+	var smooth_contours := 0
+	for p in fig["parts"] as Array:
+		var pts: PackedVector2Array = StageBuilder.points_of(p)
+		if pts.size() >= 16 and StageBuilder.polygon_mesh(pts).get_surface_count() > 0:
+			smooth_contours += 1
+	check(smooth_contours >= 6, "фигура нарисована кривыми: %d контуров по 16+ точек триангулируются" % smooth_contours)
 	var figures := 0
 	for npc_file in ["god_shani", "npc_ratan", "npc_bir_singh", "npc_hafiz", "npc_saraswati", "npc_monimala", "npc_kanu", "npc_dog"]:
 		var doc := CarLoader.load_npc(npc_file)
