@@ -471,7 +471,29 @@ func test_palette_and_transition() -> void:
 		for pt in (pdef as Dictionary).get("parts", []):
 			var pts: PackedVector2Array = StageBuilder.points_of(pt)
 			presence_top = maxf(presence_top, pts[pts.size() / 2].y)
-	check(presence_parts >= 100, "присутствие нарисовано подробно: %d контуров" % presence_parts)
+	check(presence_parts >= 180, "присутствие нарисовано подробно: %d контуров" % presence_parts)
+	# Присутствие рисуется по другому закону, чем люди (visual_direction §3.1):
+	# лицо есть, иконография обязательна, и три тона с бликом на каждой форме.
+	var deity: Dictionary = {}
+	for pdef in presence:
+		if String((pdef as Dictionary).get("id", "")) == "shani":
+			deity = pdef
+	check(not deity.is_empty(), "присутствие названо: группа «shani» есть в постановке")
+	var tones := {}
+	for pt in deity.get("parts", []):
+		tones[var_to_str((pt as Dictionary).get("color", []))] = true
+	check(tones.size() >= 14, "глазурь: %d тонов на фигуре, а не плоский силуэт" % tones.size())
+	var deity_pts := 0
+	for pt in deity.get("parts", []):
+		deity_pts += (StageBuilder.points_of(pt)).size()
+	check(deity_pts >= 1200, "фигура присутствия из %d точек кривых" % deity_pts)
+	# Масштаб задают собака и человек: без них три роста не читаются.
+	var scale_cues := 0
+	for pr in tst.get("props", []):
+		var pid := String((pr as Dictionary).get("id", ""))
+		if pid == "dog" or pid.begins_with("bystander") or pid == "witness":
+			scale_cues += 1
+	check(scale_cues >= 2, "в кадре есть собака и человек для масштаба: %d" % scale_cues)
 	check(presence_top > 5.2, "Шани выше трёх человеческих ростов: %.1f м" % presence_top)
 	var world_layers := 0
 	for wl in tst.get("layers", []) + tst.get("props", []):
