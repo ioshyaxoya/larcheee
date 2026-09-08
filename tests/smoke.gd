@@ -405,11 +405,13 @@ func test_palette_and_transition() -> void:
 	var pal := Palette.new()
 	check(pal.has("bollywood_dark") and pal.has("void") and pal.has("raj"), "палитры A10 зарегистрированы")
 	pal.set_palette("bollywood_dark")
-	check(is_equal_approx(float(pal.effective()["saturation"]), 1.3), "bollywood_dark: насыщенность 1.3")
+	# Числа палитры живут в data/palettes.json — тест сверяется с данными, не с копией.
+	var authored := float(pal.params("bollywood_dark")["saturation"])
+	check(is_equal_approx(float(pal.effective()["saturation"]), authored), "bollywood_dark: насыщенность из данных (%.2f)" % authored)
 	pal.enter_trial()
 	check(is_equal_approx(float(pal.effective()["saturation"]), 0.0) and pal.effective()["dither"] == "1bit", "испытание: время стоит — цвета нет, дизеринг")
 	pal.set_colour_return(0.5)
-	check(is_equal_approx(float(pal.effective()["saturation"]), 0.65), "выигранные раунды возвращают цвет по шкале")
+	check(is_equal_approx(float(pal.effective()["saturation"]), authored * 0.5), "выигранные раунды возвращают цвет по шкале")
 	pal.exit_trial()
 	var env := Environment.new()
 	pal.apply(env)
@@ -418,7 +420,7 @@ func test_palette_and_transition() -> void:
 	var grade := GradeLayer.new()
 	grade.bind(pal)
 	check(grade.rect.material == grade.theatrical_mat, "базовый режим — theatrical.gdshader")
-	check(is_equal_approx(float(grade.theatrical_mat.get_shader_parameter("saturation")), 1.3), "палитра доехала до шейдера")
+	check(is_equal_approx(float(grade.theatrical_mat.get_shader_parameter("saturation")), authored), "палитра доехала до шейдера")
 	pal.enter_trial()
 	grade.refresh()
 	check(grade.rect.material == grade.dither_mat, "режим испытания — dither_1bit.gdshader")
@@ -432,7 +434,21 @@ func test_palette_and_transition() -> void:
 	var st: Dictionary = card.get("stage", {})
 	check(st.has("camera") and (st.get("layers", []) as Array).size() >= 6 and (st.get("props", []) as Array).size() >= 12, "театральная постановка в данных вагона: камера, кулисы, реквизит")
 	var shani := CarLoader.load_npc("god_shani")
-	check((shani.get("silhouette_parts", []) as Array).size() >= 3 and not shani.has("name_label"), "силуэт — шарнирная вырезка из данных, подписи над головой нет")
+	var fig: Dictionary = shani.get("figure", {})
+	check((fig.get("parts", []) as Array).size() >= 6, "силуэт Шани — сплошная фигура из %d контуров, а не прямоугольник" % (fig.get("parts", []) as Array).size())
+	var head: PackedVector2Array = StageBuilder.points_of((fig["parts"] as Array)[3])
+	check(head.size() >= 16 and not StageBuilder.polygon_mesh(head).get_surfaces() == 0, "контур головы гладкий (%d точек) и триангулируется" % head.size())
+	var figures := 0
+	for npc_file in ["god_shani", "npc_ratan", "npc_bir_singh", "npc_hafiz", "npc_saraswati", "npc_monimala", "npc_kanu", "npc_dog"]:
+		var doc := CarLoader.load_npc(npc_file)
+		if (doc.get("figure", {}).get("parts", []) as Array).size() >= 4 and doc.has("silhouette"):
+			figures += 1
+	check(figures == 8, "нарисованы все восемь фигур вагона (%d)" % figures)
+	var drawn_props := 0
+	for pr in card.get("stage", {}).get("props", []):
+		if (pr as Dictionary).has("parts"):
+			drawn_props += 1
+	check(drawn_props >= 15, "реквизит нарисован контурами: %d предметов" % drawn_props)
 	var ctx := _make_ctx(29, "armenian", "babu", "m", [])
 	var tr := TransitionRuntime.new(ctx)
 	var steps: Array[String] = []

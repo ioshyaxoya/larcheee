@@ -27,8 +27,8 @@ func _init() -> void:
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 28)
 	margin.add_theme_constant_override("margin_right", 28)
-	margin.add_theme_constant_override("margin_top", 18)
-	margin.add_theme_constant_override("margin_bottom", 18)
+	margin.add_theme_constant_override("margin_top", 14)
+	margin.add_theme_constant_override("margin_bottom", 14)
 	panel.add_child(margin)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 6)
@@ -50,7 +50,7 @@ func _init() -> void:
 	text_label.custom_minimum_size = Vector2(0, 56)
 	box.add_child(text_label)
 	options_box = VBoxContainer.new()
-	options_box.add_theme_constant_override("separation", 4)
+	options_box.add_theme_constant_override("separation", 1)
 	box.add_child(options_box)
 	visible = false
 

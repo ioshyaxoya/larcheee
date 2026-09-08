@@ -31,10 +31,48 @@ func _ready() -> void:
 	await _frames(10)
 	if scenario == "paths":
 		await _run_paths()
+	elif scenario == "scene":
+		await _run_scene()
 	else:
 		await _run()
 	_write_log()
 	get_tree().quit()
+
+
+## Третий сценарий: только сцена, без интерфейса — смотреть на постановку.
+func _run_scene() -> void:
+	await _debug_press("Сразу в вагон")
+	await _wait_options()
+	main.dialogue_ui.visible = false
+	main.hud.visible = false
+	main.debug_panel.visible = false
+	await _frames(10)
+	await _shot("scene_lit", "Вагон при зажжённом фонаре, без интерфейса.")
+	# Ближе к посту кондуктора
+	main.camera.position = Vector3(0.0, 1.55, 2.6)
+	main.camera.rotation_degrees = Vector3(-7.0, 0.0, 0.0)
+	main.camera.size = 3.4
+	await _frames(6)
+	await _shot("scene_close", "Пост кондуктора вблизи: печка, штурвал, конторка, фигуры.")
+	# Вид в глубину багажного корпуса
+	main.camera.position = Vector3(0.0, 2.2, 0.0)
+	main.camera.rotation_degrees = Vector3(-6.0, 0.0, 0.0)
+	main.camera.size = 4.2
+	await _frames(6)
+	await _shot("scene_depth", "Стеллажи уходят в темноту.")
+	# Тот же вагон в режиме испытания: монохром с дизерингом
+	main.palette.enter_trial()
+	main.palette.set_colour_return(0.0)
+	main._apply_palette()
+	main.camera.position = Vector3(0.0, 1.75, 4.6)
+	main.camera.rotation_degrees = Vector3(-9.0, 0.0, 0.0)
+	main.camera.size = 4.4
+	await _frames(6)
+	await _shot("scene_trial_mono", "Испытание: время стоит, цвета нет.")
+	main.palette.set_colour_return(0.6)
+	main._apply_palette()
+	await _frames(6)
+	await _shot("scene_trial_colour", "Два выигранных раунда: цвет возвращается.")
 
 
 ## Второй сценарий: пути тормозного вагона и концовка 5 — через прямой вход.

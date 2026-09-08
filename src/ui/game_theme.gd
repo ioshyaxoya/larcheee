@@ -42,16 +42,16 @@ static func build() -> Theme:
 	var empty := StyleBoxEmpty.new()
 	empty.content_margin_left = 12
 	empty.content_margin_right = 12
-	empty.content_margin_top = 6
-	empty.content_margin_bottom = 6
+	empty.content_margin_top = 3
+	empty.content_margin_bottom = 3
 	var hover := StyleBoxFlat.new()
 	hover.bg_color = Color(1.0, 0.78, 0.28, 0.08)
 	hover.border_width_left = 2
 	hover.border_color = GOLD
 	hover.content_margin_left = 10
 	hover.content_margin_right = 12
-	hover.content_margin_top = 6
-	hover.content_margin_bottom = 6
+	hover.content_margin_top = 3
+	hover.content_margin_bottom = 3
 	var pressed := hover.duplicate() as StyleBoxFlat
 	pressed.bg_color = Color(1.0, 0.78, 0.28, 0.16)
 	theme.set_stylebox("normal", "Button", empty)
