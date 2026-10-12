@@ -79,6 +79,129 @@
     return [];
   }
 
+  /* ── название и «смотреть» ─────────────────────────────────────────────────
+     У фильма два названия, на всех языках одни: оригинальное (film.title) и
+     официальное английское (film.titleEn). Не переводятся: по ним фильм ищут
+     фестивали и базы, и восемь вариантов только размыли бы поиск. */
+
+  /** Вторая строка названия: официальное английское, если оно есть и отличается от оригинала. */
+  function filmTitleEn(film) {
+    return film.titleEn && film.titleEn !== film.title ? film.titleEn : '';
+  }
+
+  /** Хронометраж: 345 → «5:45», 3725 → «1:02:05». */
+  function formatRuntime(sec) {
+    sec = Math.round(sec);
+    var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), r = sec % 60;
+    var two = function (n) { return (n < 10 ? '0' : '') + n; };
+    return h ? h + ':' + two(m) + ':' + two(r) : m + ':' + two(r);
+  }
+
+  /** Длительность для <time datetime>: 345 → «PT5M45S». */
+  function isoDuration(sec) {
+    sec = Math.round(sec);
+    var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), r = sec % 60;
+    return 'PT' + (h ? h + 'H' : '') + (m ? m + 'M' : '') + (r || (!h && !m) ? r + 'S' : '');
+  }
+
+  /** Название площадки по адресу: пригодится в подписи кнопки для читалки экрана. */
+  function hostName(url) {
+    var h = '';
+    try { h = new URL(url).hostname.replace(/^www\./, ''); } catch (e) { return ''; }
+    if (/(^|\.)youtube\.com$|^youtu\.be$/.test(h)) return 'YouTube';
+    if (/(^|\.)vk\.com$|(^|\.)vkvideo\.ru$|(^|\.)vk\.ru$/.test(h)) return 'VK Видео';
+    if (/(^|\.)vimeo\.com$/.test(h)) return 'Vimeo';
+    return h;
+  }
+
+  /** Куда вести «смотреть»: links — список [{label, url}] (VK первым), иначе одна link. */
+  function watchLinks(film) {
+    var out = [];
+    (Array.isArray(film.links) ? film.links : []).forEach(function (l) {
+      if (l && l.url) out.push({ url: l.url, label: l.label || hostName(l.url) });
+    });
+    if (!out.length && film.link) out.push({ url: film.link, label: hostName(film.link) });
+    return out;
+  }
+
+  /**
+   * Явная кнопка «смотреть» с хронометражем — в описании фильма («о фильме»). На самом
+   * экране фильма та же ссылка — название (оно светится как ссылка), отдельной кнопки там нет.
+   * Подписи (и aria-label с площадкой и «откроется в новой вкладке») ставит applyLocale.
+   */
+  function buildWatch(film, link, cls) {
+    var a = document.createElement('a');
+    a.className = 'watch-link ' + cls;
+    a.href = link.url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    if (link.label) { a.dataset.host = link.label; a.title = link.label; }
+
+    var ico = document.createElement('span');
+    ico.className = 'watch-ico';
+    ico.setAttribute('aria-hidden', 'true');
+    ico.textContent = '\u25B6';
+    a.appendChild(ico);
+
+    var lab = document.createElement('span');
+    lab.className = 'watch-label';
+    lab.dataset.t = film.kind === 'mv' ? 'watchClip' : 'watch';
+    a.dataset.watchKey = lab.dataset.t;
+    a.appendChild(lab);
+
+    if (film.duration) {
+      var tm = document.createElement('time');
+      tm.className = 'watch-time';
+      tm.dateTime = isoDuration(film.duration);
+      tm.textContent = formatRuntime(film.duration);
+      a.dataset.runtime = tm.textContent;
+      a.appendChild(tm);
+    }
+
+    var out = document.createElement('span');
+    out.className = 'watch-out';
+    out.setAttribute('aria-hidden', 'true');
+    out.textContent = '\u2197';
+    a.appendChild(out);
+    return a;
+  }
+
+  /** Ряд кнопок «смотреть» в описании: по одной на ссылку (VK Видео, YouTube), у нескольких — с названием площадки. */
+  function buildWatchRow(film, links) {
+    var row = document.createElement('div');
+    row.className = 'panel-watch';
+    links.forEach(function (l) {
+      var a = buildWatch(film, l, 'panel-watch-link');
+      if (links.length > 1 && l.label) {
+        var host = document.createElement('span');
+        host.className = 'watch-host';
+        host.textContent = l.label;
+        a.insertBefore(host, a.lastChild);
+      }
+      row.appendChild(a);
+    });
+    return row;
+  }
+
+  /** Заголовок описания: оригинальное название и, второй строкой, английское. */
+  function fillCreditsHead(head, film) {
+    if (!head) return;
+    head.textContent = '';
+    var o = document.createElement('span');
+    o.className = 'credits-film-orig';
+    if (film.titleLang) o.lang = film.titleLang;
+    o.textContent = film.title || '';
+    head.appendChild(o);
+    var en = filmTitleEn(film);
+    if (en) {
+      var e = document.createElement('span');
+      e.className = 'credits-film-en';
+      e.lang = 'en';
+      e.textContent = en;
+      head.appendChild(e);
+    }
+  }
+
   function each(sel, fn) {
     Array.prototype.forEach.call(document.querySelectorAll(sel), fn);
   }
@@ -147,13 +270,33 @@
     vign.className = 'vignette';
     s.appendChild(vign);
 
+    // На экране фильма ссылка на полную версию — само название (оно светится как ссылка);
+    // явная кнопка «смотреть» с хронометражем лежит в описании фильма.
+    var links = watchLinks(film);
     var title = document.createElement('div');
     title.className = 'film-title';
-    var tt = document.createElement(film.link ? 'a' : 'span');
+    var tt = document.createElement(links.length ? 'a' : 'span');
     tt.className = 't';
-    tt.dataset.tFilm = film.id || '';
-    if (film.link) { tt.href = film.link; tt.target = '_blank'; tt.rel = 'noopener'; }
+    tt.textContent = film.title || '';
+    if (film.titleLang) tt.lang = film.titleLang;
+    if (links.length) {
+      tt.href = links[0].url;
+      tt.target = '_blank';
+      tt.rel = 'noopener';
+      tt.dataset.watchKey = film.kind === 'mv' ? 'watchClip' : 'watch';
+      if (links[0].label) tt.dataset.host = links[0].label;
+      if (film.duration) tt.dataset.runtime = formatRuntime(film.duration);
+    }
     title.appendChild(tt);
+
+    var en = filmTitleEn(film);
+    if (en) {
+      var te = document.createElement('span');
+      te.className = 't-en';
+      te.lang = 'en';
+      te.textContent = en;
+      title.appendChild(te);
+    }
 
     var sub = document.createElement('span');
     sub.className = 's';
@@ -177,7 +320,7 @@
   /** Экран-анонс: без видео и без нарезки — только типографика поверх свечения. */
   function buildSoonSection(film, i) {
     var s = document.createElement('section');
-    s.className = 'section section--soon' + (film.id ? '' : ' soon-untitled');
+    s.className = 'section section--soon' + (film.title ? '' : ' soon-untitled');
     s.dataset.anchor = String(i + 2);
 
     if (film.poster) {
@@ -231,11 +374,11 @@
     inner.appendChild(badge);
 
     var opener = badge;                 // пока названия нет, страницу открывает «скоро»
-    if (film.id) {
+    if (film.title) {
       var st = document.createElement('button');
       st.type = 'button';
       st.className = 'soon-title';
-      st.dataset.tFilm = film.id;
+      st.textContent = film.title;
       inner.appendChild(st);
       opener = st;
     }
@@ -1422,8 +1565,12 @@
     if (!body) return;
 
     if (h2) h2.dataset.t = film.soon ? 'aboutClip' : 'aboutFilm';
-    if (head) head.textContent = tin('films', film.id);
+    fillCreditsHead(head, film);
     body.textContent = '';
+
+    // у клипа ссылок пока нет — когда появятся (film.links), кнопка встанет сама
+    var wl = watchLinks(film);
+    if (wl.length) body.appendChild(buildWatchRow(film, wl));
 
     var rows = creditsFor(film);
     var syn = tin('synopsis', film.id);
@@ -1584,8 +1731,12 @@
     if (!body) return;
 
     if (h2) h2.dataset.t = film.soon ? 'aboutClip' : 'aboutFilm';
-    if (head) head.textContent = tin('films', film.id);
+    fillCreditsHead(head, film);
     body.textContent = '';
+
+    // «смотреть» — сразу под названием, до синопсиса: чтобы не искать
+    var wl = watchLinks(film);
+    if (wl.length) body.appendChild(buildWatchRow(film, wl));
 
     var syn = tin('synopsis', film.id);
     if (syn) {
@@ -1777,7 +1928,21 @@
     if (meta) meta.setAttribute('content', t('description'));
 
     each('[data-t]', function (el) { el.textContent = t(el.dataset.t); });
-    each('[data-t-film]', function (el) { el.textContent = tin('films', el.dataset.tFilm); });
+    // подпись кнопки «смотреть» для читалки экрана: что, сколько идёт, где откроется
+    each('.watch-link', function (el) {
+      var parts = [t(el.dataset.watchKey || 'watch')];
+      if (el.dataset.runtime) parts[0] += ', ' + el.dataset.runtime;
+      if (el.dataset.host) parts.push(el.dataset.host);
+      el.setAttribute('aria-label', parts.join(' \u2014 ') + ' (' + t('newTab') + ')');
+    });
+    // название-ссылка на экране фильма: читалке экрана — название и что будет по нажатию
+    // (в имя входит видимый текст, WCAG 2.5.3)
+    each('.film-title a.t', function (el) {
+      var parts = [t(el.dataset.watchKey || 'watch')];
+      if (el.dataset.runtime) parts[0] += ', ' + el.dataset.runtime;
+      if (el.dataset.host) parts.push(el.dataset.host);
+      el.setAttribute('aria-label', el.textContent + ' \u2014 ' + parts.join(' \u2014 ') + ' (' + t('newTab') + ')');
+    });
     each('[data-t-kind]', function (el) {
       var kind = tin('kinds', el.dataset.tKind);
       var year = el.dataset.year;

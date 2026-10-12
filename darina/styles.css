@@ -285,10 +285,104 @@ a:hover { color: var(--accent); }
 }
 a.film-link,
 .film-title a.t { cursor: pointer; }
-.film-title a.t:hover {
-  color: var(--accent);
+
+/* второе название — официальное английское; оригинал и английский одни на всех языках */
+.film-title .t-en {
+  display: block;
+  margin-top: 2px;
+  font-size: calc(clamp(12px, 1.5vw, 15px) * var(--tx, 1));
+  letter-spacing: .02em;
+  color: var(--ink-dim);
+}
+
+/* Название ведёт на полную версию, но прежде оно не выглядело ссылкой. Теперь оно
+   светится как ссылка: тонкая черта и мягкое красное свечение, которое медленно
+   дышит (как свечение на экране-анонсе). На сенсорном экране наведения нет, поэтому подсказка
+   постоянная, а не по наведению. Поля вокруг — запас зоны нажатия (≥ 24px высотой,
+   WCAG 2.2, 2.5.8); раскладка прежняя. */
+.film-title a.t {
+  padding: 4px 0;
+  margin: -4px 0;
   text-decoration: underline;
-  text-underline-offset: 6px;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(243, 241, 234, .45);
+  text-underline-offset: .22em;
+  text-shadow: 0 0 4px rgba(255, 255, 255, .35), 0 0 12px rgba(255, 42, 18, .75), 0 0 26px rgba(255, 42, 18, .45), 0 1px 3px #000;
+  animation: title-glow 3.4s ease-in-out infinite;
+  transition: color 200ms ease, text-decoration-color 200ms ease;
+}
+@keyframes title-glow {
+  0%, 100% { text-shadow: 0 0 4px rgba(255, 255, 255, .3), 0 0 11px rgba(255, 42, 18, .65), 0 0 24px rgba(255, 42, 18, .35), 0 1px 3px #000; }
+  50%      { text-shadow: 0 0 6px rgba(255, 255, 255, .55), 0 0 16px rgba(255, 42, 18, .95), 0 0 34px rgba(255, 42, 18, .7), 0 1px 3px #000; }
+}
+.film-title a.t:hover,
+.film-title a.t:focus-visible {
+  color: var(--accent);
+  text-decoration-color: currentColor;
+  animation: none;
+  text-shadow: 0 0 12px rgba(255, 42, 18, .8), 0 0 28px rgba(255, 42, 18, .55), 0 1px 3px #000;
+}
+.film-title a.t:focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+
+/* ── кнопка «смотреть»: лежит в описании фильма (на экране фильма ссылка — само название) ── */
+
+.watch-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 16px;
+  font-family: inherit;
+  font-size: calc(11px * var(--tx, 1));
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  color: var(--ink);
+  background: rgba(11, 11, 11, .55);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(243, 241, 234, .55);
+  cursor: pointer;
+  text-shadow: none;
+  transition: color 200ms ease, border-color 200ms ease, background 200ms ease;
+}
+.watch-link:hover,
+.watch-link:focus-visible {
+  color: #fff;
+  border-color: var(--accent);
+  background: rgba(255, 42, 18, .18);
+}
+.watch-link:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }
+.watch-ico { color: var(--accent); font-size: .8em; line-height: 1; }
+.watch-time {
+  padding-inline-start: 10px;
+  border-inline-start: 1px solid rgba(243, 241, 234, .35);
+  letter-spacing: .08em;
+  font-variant-numeric: tabular-nums;
+  opacity: .9;
+}
+.watch-host { opacity: .65; letter-spacing: .12em; }
+.watch-out { opacity: .6; font-size: .95em; line-height: 1; }
+body.is-rtl .watch-link,
+body.is-script .watch-link,
+body.is-rtl .watch-host,
+body.is-script .watch-host { letter-spacing: 0; text-transform: none; }
+body.is-rtl .watch-time { letter-spacing: 0; }
+/* в панели у всех ссылок есть подчёркивание (.panel-inner a); у кнопки его быть не должно */
+.panel-inner .watch-link { text-decoration: none; }
+
+/* в описании фильма — крупнее и сразу под названием */
+.panel-watch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: -8px 0 30px;
+}
+.panel-watch-link {
+  min-height: 48px;
+  padding: 0 22px;
+  font-size: calc(12px * var(--tx, 1));
 }
 
 /* заглушка, если файла нет */
@@ -597,7 +691,8 @@ body.is-rtl .credits-shot figcaption { letter-spacing: 0; text-transform: none; 
 .cue {
   position: fixed;
   left: 50%;
-  bottom: 24px;
+  bottom: 8px;                      /* 24 − 16: поле ниже — запас зоны нажатия (44×44), стрелка на месте */
+  padding: 16px 18px;
   transform: translateX(-50%);
   z-index: 60;
   font-family: inherit;
@@ -631,7 +726,15 @@ body.is-rtl .credits-shot figcaption { letter-spacing: 0; text-transform: none; 
   max-width: calc(100vw - 24px);
 }
 
+/* Кнопки языка были 18–22px высотой — меньше минимума WCAG 2.2 (2.5.8: цель нажатия
+   от 24×24), и попасть пальцем было трудно. Теперь не ниже 32px мышью и 44px на
+   сенсорных экранах; сами буквы прежние, растёт зона нажатия. */
 .lang-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
   font-family: inherit;
   font-size: calc(10px * var(--tx, 1));
   letter-spacing: .14em;
@@ -640,10 +743,13 @@ body.is-rtl .credits-shot figcaption { letter-spacing: 0; text-transform: none; 
   opacity: .5;
   background: none;
   border: 0;
-  padding: 4px 7px;
+  padding: 0 8px;
   cursor: pointer;
   text-shadow: 0 1px 2px #000;
   transition: opacity 200ms ease, color 200ms ease;
+}
+@media (pointer: coarse) {
+  .lang-btn { min-height: 44px; min-width: 44px; }
 }
 .lang-btn:hover { opacity: 1; }
 .lang-btn.is-on { opacity: 1; color: var(--accent); }
@@ -695,8 +801,8 @@ body.is-rtl .panel-inner { text-align: start; }
 
 .film-credits {
   display: block;
-  margin-top: 9px;
-  padding: 0;
+  margin: -3px 0 -11px;              /* 9px сверху, как было, минус 12px поля; снизу поле вычтено, плюс 1px прежней черты-границы */
+  padding: 12px 0;                   /* зона нажатия ≥ 24px высотой (WCAG 2.2, 2.5.8); текст не сдвигается */
   font-family: inherit;
   font-size: calc(10px * var(--tx, 1));
   letter-spacing: .2em;
@@ -705,7 +811,9 @@ body.is-rtl .panel-inner { text-align: start; }
   opacity: .6;
   background: none;
   border: 0;
-  border-bottom: 1px solid currentColor;
+  text-decoration: underline;        /* черта была border-bottom у самого текста; с полями она бы уехала вниз */
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
   cursor: pointer;
   transition: color 200ms ease, opacity 200ms ease;
 }
@@ -728,6 +836,14 @@ body.is-rtl .film-credits { letter-spacing: 0; text-transform: none; }
   font-size: calc(clamp(17px, 2.4vw, 23px) * var(--tx, 1));
   margin-bottom: 26px;
   color: var(--ink);
+}
+/* официальное английское название — второй строкой, помельче */
+.credits-film-en {
+  display: block;
+  margin-top: 5px;
+  font-size: calc(13px * var(--tx, 1));
+  letter-spacing: .02em;
+  color: var(--ink-dim);
 }
 
 .credits-synopsis {
@@ -1160,8 +1276,9 @@ body.is-script .car-count {
 
 .panel-close {
   position: absolute;
-  top: 18px;
-  inset-inline-end: 24px;
+  top: 9px;                         /* 18 − 9 и 24 − 15: поля — зона нажатия 44×44, крестик на месте */
+  inset-inline-end: 9px;
+  padding: 9px 15px;
   font-size: calc(26px * var(--tx, 1));
   line-height: 1;
   color: var(--ink-dim);
@@ -1183,8 +1300,29 @@ body.is-script .car-count {
   .side-end   { inset-inline-end: 4px; }
   .film-title { inset-inline-start: 14px; bottom: 54px; }
   .cuts { inset-inline-end: 14px; bottom: 56px; gap: 2px; }
-  .lang { top: 10px; gap: 0; }
-  .lang-btn { padding: 4px 5px; font-size: calc(9px * var(--tx, 1)); }
+  /* Телефон: все восемь языков в одну строку на всю ширину — раньше они шли в две и
+     наползали на портрет. Каждая кнопка делит ширину поровну (на самом узком экране,
+     320px, — по 39px) и 44px высотой: попасть пальцем легко. Буквы чуть крупнее (10px
+     вместо 9px), чтобы читались на такой ширине. */
+  .lang {
+    top: 0;
+    left: 0;
+    right: 0;
+    transform: none;
+    max-width: none;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 0;
+    padding: env(safe-area-inset-top, 0) 6px 0;
+  }
+  .lang-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 1px;
+    font-size: calc(10px * var(--tx, 1));
+    letter-spacing: .1em;
+  }
   /* запас по бокам под фиксированные about/contact: подписи у разных
      языков сильно разной длины («о себе» короче, чем «niri buruz»),
      поэтому место считаем по самой длинной. На узком экране сетка
@@ -1197,7 +1335,7 @@ body.is-script .car-count {
 
 @media (prefers-reduced-motion: reduce) {
   .deck { transition: none; }
-  .cue, .soon-badge, .soon-glow { animation: none; }
+  .cue, .soon-badge, .soon-glow, .film-title a.t { animation: none; }
   .section--film .cut-flash { display: none; }
 }
 
@@ -1498,7 +1636,8 @@ body.is-script .panel-inner h2 {
   gap: clamp(16px, 3vw, 34px);
 }
 .foot-links button {
-  padding: 0;
+  padding: 6px 4px;                 /* зона нажатия ≥ 24×24 («куки» — слово в 21px); те же поля вычтены ниже — раскладка прежняя */
+  margin: -6px -4px;
   border: 0;
   background: none;
   font-family: inherit;
