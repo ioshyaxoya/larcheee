@@ -15,6 +15,8 @@ window.I18N = {
 
   ru: {
     label: 'Рус', dir: 'ltr',
+    labelOther: 'Rus',                  // подпись кнопки на нерусских страницах: русского там быть не должно
+    langNav: 'Язык',
     title: 'Дарина Данилюк — режиссёр',
     description: 'Дарина Данилюк — дипломированный режиссёр игрового и документального кино, хореограф.',
     about: 'о себе', contact: 'контакты',
@@ -76,6 +78,7 @@ window.I18N = {
 
   'en-GB': {
     label: 'Eng', dir: 'ltr',
+    langNav: 'Language',
     title: 'Darina Danilyuk — film director',
     description: 'Darina Danilyuk — a qualified director of fiction and documentary film, and a choreographer.',
     about: 'about', contact: 'contact',
@@ -138,6 +141,7 @@ window.I18N = {
 
   es: {
     label: 'Esp', dir: 'ltr',
+    langNav: 'Idioma',
     title: 'Darina Danilyuk — directora de cine',
     description: 'Darina Danilyuk — directora titulada de cine de ficción y documental, coreógrafa.',
     about: 'sobre mí', contact: 'contacto',
@@ -199,6 +203,7 @@ window.I18N = {
 
   eu: {
     label: 'Eus', dir: 'ltr',
+    langNav: 'Hizkuntza',
     title: 'Darina Danilyuk — zine zuzendaria',
     description: 'Darina Danilyuk — fikziozko eta dokumentalezko filmen zuzendari tituluduna, koreografoa.',
     about: 'niri buruz', contact: 'kontaktua',
@@ -260,6 +265,7 @@ window.I18N = {
 
   it: {
     label: 'Ita', dir: 'ltr',
+    langNav: 'Lingua',
     title: 'Darina Danilyuk — regista',
     description: 'Darina Danilyuk — regista diplomata di cinema di finzione e documentario, coreografa.',
     about: 'chi sono', contact: 'contatti',
@@ -321,6 +327,7 @@ window.I18N = {
 
   fr: {
     label: 'Fra', dir: 'ltr',
+    langNav: 'Langue',
     title: 'Darina Danilyuk — réalisatrice',
     description: 'Darina Danilyuk — réalisatrice diplômée de fiction et de documentaire, chorégraphe.',
     about: 'à propos', contact: 'contact',
@@ -384,6 +391,7 @@ window.I18N = {
   // Greenscreen, demnächst вместо «coming soon», Musikvideo вместо Clip.
   de: {
     label: 'Deu', dir: 'ltr',
+    langNav: 'Sprache',
     title: 'Darina Danilyuk — Filmregisseurin',
     description: 'Darina Danilyuk — diplomierte Regisseurin für Spielfilm und Dokumentarfilm, Choreographin.',
     about: 'über mich', contact: 'Kontakt',
@@ -445,6 +453,7 @@ window.I18N = {
 
   'ar-SA': {
     label: 'عربي', dir: 'rtl',
+    langNav: 'اللغة',
     title: 'دارينا دانيليوك — مخرجة أفلام',
     description: 'دارينا دانيليوك — مخرجة أفلام روائية ووثائقية حاصلة على شهادة في الإخراج، ومصممة رقصات.',
     about: 'عني', contact: 'تواصل',

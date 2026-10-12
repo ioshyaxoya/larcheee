@@ -80,13 +80,20 @@
   }
 
   /* ── название и «смотреть» ─────────────────────────────────────────────────
-     У фильма два названия, на всех языках одни: оригинальное (film.title) и
-     официальное английское (film.titleEn). Не переводятся: по ним фильм ищут
-     фестивали и базы, и восемь вариантов только размыли бы поиск. */
+     У фильма два названия, одни на всех языках: оригинальное (film.title) и
+     официальное английское (film.titleEn). По ним фильм ищут фестивали и базы,
+     поэтому переводов нет. На странице показывается только то, что на её языке:
+     на русской — оригинал, а под ним английское; на остальных — одно английское.
+     Русского вне русской страницы быть не должно. */
 
-  /** Вторая строка названия: официальное английское, если оно есть и отличается от оригинала. */
-  function filmTitleEn(film) {
-    return film.titleEn && film.titleEn !== film.title ? film.titleEn : '';
+  /** Что показать в названии на текущем языке: { main, lang, sub }. */
+  function titleFor(film) {
+    var orig = film.title || '';
+    var en = film.titleEn && film.titleEn !== orig ? film.titleEn : '';
+    var base = String(locale || '').split('-')[0];
+    // страница не на языке оригинала — только английское название
+    if (en && film.titleLang && film.titleLang !== base) return { main: en, lang: 'en', sub: '' };
+    return { main: orig, lang: film.titleLang || '', sub: en };
   }
 
   /** Хронометраж: 345 → «5:45», 3725 → «1:02:05». */
@@ -104,49 +111,51 @@
     return 'PT' + (h ? h + 'H' : '') + (m ? m + 'M' : '') + (r || (!h && !m) ? r + 'S' : '');
   }
 
-  /** Название площадки по адресу: пригодится в подписи кнопки для читалки экрана. */
-  function hostName(url) {
+  /** Площадка по адресу: 'youtube' | 'vk' | 'vimeo' | имя хоста. */
+  function hostKey(url) {
     var h = '';
     try { h = new URL(url).hostname.replace(/^www\./, ''); } catch (e) { return ''; }
-    if (/(^|\.)youtube\.com$|^youtu\.be$/.test(h)) return 'YouTube';
-    if (/(^|\.)vk\.com$|(^|\.)vkvideo\.ru$|(^|\.)vk\.ru$/.test(h)) return 'VK Видео';
-    if (/(^|\.)vimeo\.com$/.test(h)) return 'Vimeo';
+    if (/(^|\.)youtube\.com$|^youtu\.be$/.test(h)) return 'youtube';
+    if (/(^|\.)vk\.com$|(^|\.)vkvideo\.ru$|(^|\.)vk\.ru$/.test(h)) return 'vk';
+    if (/(^|\.)vimeo\.com$/.test(h)) return 'vimeo';
     return h;
   }
 
-  /** Куда вести «смотреть»: links — список [{label, url}] (VK первым), иначе одна link. */
+  /** Название площадки для подписи. По-русски («VK Видео») — только на русской странице. */
+  function hostLabel(key) {
+    if (key === 'youtube') return 'YouTube';
+    if (key === 'vimeo') return 'Vimeo';
+    if (key === 'vk') return locale === 'ru' ? 'VK Видео' : 'VK Video';
+    return key;
+  }
+
+  /** Куда вести «смотреть»: links — список [{url}] (VK первым), иначе одна link. */
   function watchLinks(film) {
     var out = [];
     (Array.isArray(film.links) ? film.links : []).forEach(function (l) {
-      if (l && l.url) out.push({ url: l.url, label: l.label || hostName(l.url) });
+      if (l && l.url) out.push({ url: l.url, host: hostKey(l.url) });
     });
-    if (!out.length && film.link) out.push({ url: film.link, label: hostName(film.link) });
+    if (!out.length && film.link) out.push({ url: film.link, host: hostKey(film.link) });
     return out;
   }
 
   /**
-   * Явная кнопка «смотреть» с хронометражем — в описании фильма («о фильме»). На самом
-   * экране фильма та же ссылка — название (оно светится как ссылка), отдельной кнопки там нет.
+   * Ссылка «смотреть» в описании фильма: строка текста с хронометражем и стрелкой, без
+   * рамки и значка. На самом экране фильма та же ссылка — название (оно выделено маркером).
    * Подписи (и aria-label с площадкой и «откроется в новой вкладке») ставит applyLocale.
    */
-  function buildWatch(film, link, cls) {
+  function buildWatch(film, link) {
     var a = document.createElement('a');
-    a.className = 'watch-link ' + cls;
+    a.className = 'watch-link';
     a.href = link.url;
     a.target = '_blank';
     a.rel = 'noopener';
-    if (link.label) { a.dataset.host = link.label; a.title = link.label; }
-
-    var ico = document.createElement('span');
-    ico.className = 'watch-ico';
-    ico.setAttribute('aria-hidden', 'true');
-    ico.textContent = '\u25B6';
-    a.appendChild(ico);
+    a.dataset.host = link.host;
+    a.dataset.watchKey = film.kind === 'mv' ? 'watchClip' : 'watch';
 
     var lab = document.createElement('span');
     lab.className = 'watch-label';
-    lab.dataset.t = film.kind === 'mv' ? 'watchClip' : 'watch';
-    a.dataset.watchKey = lab.dataset.t;
+    lab.dataset.t = a.dataset.watchKey;
     a.appendChild(lab);
 
     if (film.duration) {
@@ -161,43 +170,42 @@
     var out = document.createElement('span');
     out.className = 'watch-out';
     out.setAttribute('aria-hidden', 'true');
-    out.textContent = '\u2197';
+    out.textContent = '↗';
     a.appendChild(out);
     return a;
   }
 
-  /** Ряд кнопок «смотреть» в описании: по одной на ссылку (VK Видео, YouTube), у нескольких — с названием площадки. */
+  /** Строка «смотреть» в описании: по ссылке на площадку (VK Video, YouTube); у нескольких — с её названием. */
   function buildWatchRow(film, links) {
     var row = document.createElement('div');
     row.className = 'panel-watch';
     links.forEach(function (l) {
-      var a = buildWatch(film, l, 'panel-watch-link');
-      if (links.length > 1 && l.label) {
+      var a = buildWatch(film, l);
+      if (links.length > 1) {
         var host = document.createElement('span');
         host.className = 'watch-host';
-        host.textContent = l.label;
-        a.insertBefore(host, a.lastChild);
+        a.insertBefore(host, a.querySelector('.watch-time') || a.lastChild);
       }
       row.appendChild(a);
     });
     return row;
   }
 
-  /** Заголовок описания: оригинальное название и, второй строкой, английское. */
+  /** Заголовок описания: название на языке страницы и, на русской, под ним английское. */
   function fillCreditsHead(head, film) {
     if (!head) return;
+    var ti = titleFor(film);
     head.textContent = '';
     var o = document.createElement('span');
-    o.className = 'credits-film-orig';
-    if (film.titleLang) o.lang = film.titleLang;
-    o.textContent = film.title || '';
+    o.className = 'credits-film-main';
+    if (ti.lang) o.lang = ti.lang;
+    o.textContent = ti.main;
     head.appendChild(o);
-    var en = filmTitleEn(film);
-    if (en) {
+    if (ti.sub) {
       var e = document.createElement('span');
       e.className = 'credits-film-en';
       e.lang = 'en';
-      e.textContent = en;
+      e.textContent = ti.sub;
       head.appendChild(e);
     }
   }
@@ -222,6 +230,7 @@
     var s = document.createElement('section');
     s.className = 'section section--film';
     s.dataset.anchor = String(i + 2);          // #1 — герой, фильмы с #2
+    s._film = film;                            // applyLocale ставит название по языку страницы
 
     var media = document.createElement('div');
     media.className = 'film-media';
@@ -270,31 +279,32 @@
     vign.className = 'vignette';
     s.appendChild(vign);
 
-    // На экране фильма ссылка на полную версию — само название (оно светится как ссылка);
-    // явная кнопка «смотреть» с хронометражем лежит в описании фильма.
+    // На экране фильма ссылка на полную версию — само название: оно выделено маркером.
+    // Ссылка «смотреть» с хронометражем лежит в описании фильма. Текст названия
+    // (по языку страницы) ставит applyLocale; маркер рисуется на внутреннем .t-text.
     var links = watchLinks(film);
     var title = document.createElement('div');
     title.className = 'film-title';
     var tt = document.createElement(links.length ? 'a' : 'span');
     tt.className = 't';
-    tt.textContent = film.title || '';
-    if (film.titleLang) tt.lang = film.titleLang;
+    var tx = document.createElement('span');
+    tx.className = 't-text';
+    tt.appendChild(tx);
     if (links.length) {
       tt.href = links[0].url;
       tt.target = '_blank';
       tt.rel = 'noopener';
       tt.dataset.watchKey = film.kind === 'mv' ? 'watchClip' : 'watch';
-      if (links[0].label) tt.dataset.host = links[0].label;
+      tt.dataset.host = links[0].host;
       if (film.duration) tt.dataset.runtime = formatRuntime(film.duration);
     }
     title.appendChild(tt);
 
-    var en = filmTitleEn(film);
-    if (en) {
+    if (film.titleEn && film.titleEn !== film.title) {
       var te = document.createElement('span');
       te.className = 't-en';
       te.lang = 'en';
-      te.textContent = en;
+      te.hidden = true;                  // нужен только на русской странице — решает applyLocale
       title.appendChild(te);
     }
 
@@ -322,6 +332,7 @@
     var s = document.createElement('section');
     s.className = 'section section--soon' + (film.title ? '' : ' soon-untitled');
     s.dataset.anchor = String(i + 2);
+    s._film = film;
 
     if (film.poster) {
       var ph = document.createElement('img');
@@ -378,7 +389,6 @@
       var st = document.createElement('button');
       st.type = 'button';
       st.className = 'soon-title';
-      st.textContent = film.title;
       inner.appendChild(st);
       opener = st;
     }
@@ -426,7 +436,8 @@
       inner.appendChild(nt);
     }
 
-    // появятся после премьеры: VK Видео первым, YouTube вторым
+    // появятся после премьеры: VK Видео первым, YouTube вторым. Название площадки
+    // берётся из адреса и ставится по языку страницы (applyLocale): по-русски — только на русской
     if (film.links && film.links.length) {
       var row = document.createElement('div');
       row.className = 'soon-links';
@@ -436,7 +447,8 @@
         a.href = l.url;
         a.target = '_blank';
         a.rel = 'noopener';
-        a.textContent = l.label || l.url;
+        a.dataset.host = hostKey(l.url);
+        a.textContent = hostLabel(a.dataset.host) || l.url;
         row.appendChild(a);
       });
       if (row.children.length) inner.appendChild(row);
@@ -1477,6 +1489,7 @@
   /* ── вкладки описания ───────────────────────────────────────────────────── */
 
   var creditsUI = null;          // что сейчас открыто в описании: работа, вкладка, листалки
+  var creditsFilm = null;        // работа в открытом описании (для снятых фильмов creditsUI пуст)
   var rebuilding = false;        // перестройка уже идёт — applyLocale не должен запускать вторую
 
   function buildTabs(into, defs, wantKey) {
@@ -1568,10 +1581,6 @@
     fillCreditsHead(head, film);
     body.textContent = '';
 
-    // у клипа ссылок пока нет — когда появятся (film.links), кнопка встанет сама
-    var wl = watchLinks(film);
-    if (wl.length) body.appendChild(buildWatchRow(film, wl));
-
     var rows = creditsFor(film);
     var syn = tin('synopsis', film.id);
 
@@ -1587,6 +1596,10 @@
       cl.dataset.t = film.creditsKey;
       body.appendChild(cl);
     }
+
+    // у клипа ссылок пока нет — когда появятся (film.links), строка «смотреть» встанет сама
+    var wl = watchLinks(film);
+    if (wl.length) body.appendChild(buildWatchRow(film, wl));
 
     creditsUI = { film: film, key: wantKey || null, activeCar: function () { return null; } };
     var defs = [];
@@ -1734,10 +1747,6 @@
     fillCreditsHead(head, film);
     body.textContent = '';
 
-    // «смотреть» — сразу под названием, до синопсиса: чтобы не искать
-    var wl = watchLinks(film);
-    if (wl.length) body.appendChild(buildWatchRow(film, wl));
-
     var syn = tin('synopsis', film.id);
     if (syn) {
       var sp = document.createElement('p');
@@ -1745,6 +1754,10 @@
       sp.textContent = syn;
       body.appendChild(sp);
     }
+
+    // «смотреть» — сразу под синопсисом: прочитал — и вот куда идти дальше
+    var wl = watchLinks(film);
+    if (wl.length) body.appendChild(buildWatchRow(film, wl));
 
     // бэкстейдж живёт при своей работе: лента внутри описания фильма.
     // Высота у кадров общая, ширина — по пропорции, поэтому ничего не режется.
@@ -1880,6 +1893,7 @@
   function openCredits(film) {
     var panel = document.getElementById('panel-credits');
     var isClip = !!film.soon;
+    creditsFilm = film;
     if (panel) panel.classList.toggle('panel--clip', isClip);
     if (isClip) {
       renderClipPanel(film, null);
@@ -1928,20 +1942,46 @@
     if (meta) meta.setAttribute('content', t('description'));
 
     each('[data-t]', function (el) { el.textContent = t(el.dataset.t); });
-    // подпись кнопки «смотреть» для читалки экрана: что, сколько идёт, где откроется
-    each('.watch-link', function (el) {
+
+    // названия на экранах: русская страница — оригинал и под ним английское, остальные —
+    // одно английское (русского вне русской страницы быть не должно)
+    each('.section', function (sec) {
+      var film = sec._film;
+      if (!film) return;
+      var ti = titleFor(film);
+      var tt = sec.querySelector('.film-title .t');
+      if (tt) {
+        tt.querySelector('.t-text').textContent = ti.main;
+        if (ti.lang) tt.lang = ti.lang; else tt.removeAttribute('lang');
+      }
+      var te = sec.querySelector('.film-title .t-en');
+      if (te) { te.textContent = ti.sub; te.hidden = !ti.sub; }
+      var st = sec.querySelector('.soon-title');
+      if (st) {
+        st.textContent = ti.main;
+        if (ti.lang) st.lang = ti.lang; else st.removeAttribute('lang');
+      }
+    });
+
+    each('.soon-links a', function (a) { a.textContent = hostLabel(a.dataset.host) || a.href; });
+
+    // подпись ссылки «смотреть» для читалки экрана: что, сколько идёт, где откроется
+    var watchName = function (el) {
+      var host = el.dataset.host ? hostLabel(el.dataset.host) : '';
       var parts = [t(el.dataset.watchKey || 'watch')];
       if (el.dataset.runtime) parts[0] += ', ' + el.dataset.runtime;
-      if (el.dataset.host) parts.push(el.dataset.host);
-      el.setAttribute('aria-label', parts.join(' \u2014 ') + ' (' + t('newTab') + ')');
+      if (host) parts.push(host);
+      return parts.join(' \u2014 ') + ' (' + t('newTab') + ')';
+    };
+    each('.watch-link', function (el) {
+      var chip = el.querySelector('.watch-host');
+      if (chip) chip.textContent = hostLabel(el.dataset.host);
+      el.setAttribute('aria-label', watchName(el));
     });
     // название-ссылка на экране фильма: читалке экрана — название и что будет по нажатию
     // (в имя входит видимый текст, WCAG 2.5.3)
     each('.film-title a.t', function (el) {
-      var parts = [t(el.dataset.watchKey || 'watch')];
-      if (el.dataset.runtime) parts[0] += ', ' + el.dataset.runtime;
-      if (el.dataset.host) parts.push(el.dataset.host);
-      el.setAttribute('aria-label', el.textContent + ' \u2014 ' + parts.join(' \u2014 ') + ' (' + t('newTab') + ')');
+      el.setAttribute('aria-label', el.textContent + ' \u2014 ' + watchName(el));
     });
     each('[data-t-kind]', function (el) {
       var kind = tin('kinds', el.dataset.tKind);
@@ -1973,8 +2013,12 @@
     if (lb.play) lb.play.setAttribute('aria-label', t(lb.playing ? 'pause' : 'play'));
     if (cueEl) cueEl.setAttribute('aria-label', t('next'));
 
+    if (langEl) langEl.setAttribute('aria-label', t('langNav'));
     each('.lang-btn', function (b) {
       var on = b.dataset.lang === locale;
+      var bd = dict(b.dataset.lang);
+      // кнопка русского на нерусских страницах — латиницей: кириллицы там быть не должно
+      b.textContent = (!on && bd.labelOther) || bd.label || b.dataset.lang;
       b.classList.toggle('is-on', on);
       b.setAttribute('aria-current', on ? 'true' : 'false');
     });
@@ -1988,8 +2032,15 @@
     if (legal && !legal.hidden && legal.dataset.doc) openLegal(legal.dataset.doc);
 
     // открытое описание работы тоже пересобирается, оставаясь на той же вкладке
-    if (!rebuilding && creditsUI && panelOpen && panelOpen.id === 'panel-credits') {
-      renderClipPanel(creditsUI.film, creditsUI.key);
+    if (!rebuilding && panelOpen && panelOpen.id === 'panel-credits') {
+      if (creditsUI) {
+        renderClipPanel(creditsUI.film, creditsUI.key);
+      } else if (creditsFilm) {
+        var was = rebuilding;            // renderFilmPanel сам зовёт applyLocale — вторую перестройку не запускаем
+        rebuilding = true;
+        renderFilmPanel(creditsFilm);
+        rebuilding = was;
+      }
     }
   }
 
