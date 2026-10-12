@@ -32,21 +32,29 @@ window.HERO = {
     'assets/portraits/darina-01.jpg',
     'assets/portraits/darina-02.jpg',
     'assets/portraits/darina-03.jpg',
+    'assets/portraits/darina-04.jpg',
+    'assets/portraits/darina-05.jpg',
   ],
   // Склейки, по которым идёт первый экран. Первая — один кадр, крупный план.
   // Дальше чередуются по два, по три и по одному. Числа — номера в photos.
   sets: [
     [2],
     [0, 1],
-    [2, 0],
-    [1, 2, 0],
+    [3],
+    [4, 2],
+    [1, 3, 0],
     [0],
-    [1, 0],
-    [2, 1],
-    [0, 2, 1],
+    [2, 4],
+    [3, 1],
+    [4],
+    [0, 2, 3],
     [1],
-    [0, 1, 2],
+    [3, 4],
+    [2, 0, 1],
+    [3, 2],
+    [4, 1, 0],
   ],
+
 };
 
 /* Контакты. Пустой url — строка не показывается. */
@@ -188,6 +196,16 @@ window.FILMS = [
     artists: 'uniqe, nkeeei & ARTEM SHILOVETS',
     note: '',            // «13 октября», если Дарина выкладывает сама
     creditsKey: 'clipCredits',
+    // посты-анонсы с её аккаунта: обложки скачаны, а не прилинкованы —
+    // инстаграм отдаёт их по подписанным ссылкам, которые протухают
+    posts: [
+    { cover: 'assets/wall/ig-01.jpg', url: 'https://www.instagram.com/darinadanilyuk/p/DdbDMEJDbM4/' },
+    { cover: 'assets/wall/ig-02.jpg', url: 'https://www.instagram.com/darinadanilyuk/reel/DdUW3YoR6GJ/', kind: 'video' },
+    { cover: 'assets/wall/ig-03.jpg', url: 'https://www.instagram.com/darinadanilyuk/p/DdeFqJJjew2/' },
+    { cover: 'assets/wall/ig-04.jpg', url: 'https://www.instagram.com/darinadanilyuk/p/DdpSVALjWU2/' },
+    { cover: 'assets/wall/ig-05.jpg', url: 'https://www.instagram.com/darinadanilyuk/reel/Ddy96zFNdm2/', kind: 'video' },
+    { cover: 'assets/wall/ig-06.jpg', url: 'https://www.instagram.com/darinadanilyuk/reel/DeMTNLxN-ly/', kind: 'video' },
+    ],
     bts: [
       { cover: 'assets/wall/shoot-01.jpg', shot: 0 },
       { cover: 'assets/wall/shoot-02.jpg', shot: 1 },
@@ -206,20 +224,4 @@ window.FILMS = [
    * Подписи плиток необязательны: shot — номер в i18n.js → shots[].
    * url у плитки делает её ссылкой на пост в инстаграме.
    * -------------------------------------------------------------------- */
-  {
-    wall: true,
-    groups: [
-      // посты-анонсы с её аккаунта. Обложки скачаны, а не прилинкованы:
-      // Instagram отдаёт их по подписанным ссылкам, которые протухают.
-      // kind: 'video' рисует на плитке метку воспроизведения (рилсы).
-      { key: 'fromInstagram', posts: [
-        { cover: 'assets/wall/ig-01.jpg', url: 'https://www.instagram.com/darinadanilyuk/p/DdbDMEJDbM4/' },
-        { cover: 'assets/wall/ig-02.jpg', url: 'https://www.instagram.com/darinadanilyuk/reel/DdUW3YoR6GJ/', kind: 'video' },
-        { cover: 'assets/wall/ig-03.jpg', url: 'https://www.instagram.com/darinadanilyuk/p/DdeFqJJjew2/' },
-        { cover: 'assets/wall/ig-04.jpg', url: 'https://www.instagram.com/darinadanilyuk/p/DdpSVALjWU2/' },
-        { cover: 'assets/wall/ig-05.jpg', url: 'https://www.instagram.com/darinadanilyuk/reel/Ddy96zFNdm2/', kind: 'video' },
-        { cover: 'assets/wall/ig-06.jpg', url: 'https://www.instagram.com/darinadanilyuk/reel/DeMTNLxN-ly/', kind: 'video' },
-      ] },
-    ],
-  },
 ];

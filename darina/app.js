@@ -289,84 +289,73 @@
     return s;
   }
 
-  /** Стена: кадры со съёмок и посты из инстаграма, плитками-постерами. */
-  function buildWallSection(film, i) {
+  /** Подвал: контакты, правовые ссылки и имя, уходящее в тень. */
+  function buildFooterSection(i) {
     var s = document.createElement('section');
-    s.className = 'section section--wall';
+    s.className = 'section section--footer';
     s.dataset.anchor = String(i + 2);
 
-    var scroll = document.createElement('div');
-    scroll.className = 'wall-scroll js-scroll';
+    var f = document.createElement('div');
+    f.className = 'foot';
 
-    var inner = document.createElement('div');
-    inner.className = 'wall-inner';
-
-    var k = document.createElement('div');
-    k.className = 'wall-kicker';
-    k.dataset.t = 'fromInstagram';
-    inner.appendChild(k);
-
-    // по группе на съёмку, заголовок берётся из словаря
-    var groups = film.groups || [{ posts: film.posts || [] }];
-    var seq = 0;
-
-    groups.forEach(function (group) {
-      // при единственной группе её заголовок повторял бы подпись экрана
-      if (groups.length > 1 && (group.film || group.kind || group.key)) {
-        var h = document.createElement('div');
-        h.className = 'wall-group';
-        if (group.film) h.dataset.tFilm = group.film;
-        else if (group.kind) h.dataset.tKind = group.kind;
-        else h.dataset.t = group.key;
-        inner.appendChild(h);
-      }
-
-      var grid = document.createElement('div');
-      grid.className = 'wall-grid';
-
-      (group.posts || []).forEach(function (post) {
-        if (!post || !post.cover) return;
-        var tile = document.createElement(post.url ? 'a' : 'div');
-        tile.className = 'wall-tile' + (post.shot === undefined ? ' wall-tile--bare' : '');
-        if (post.url) { tile.href = post.url; tile.target = '_blank'; tile.rel = 'noopener'; }
-        // лёгкий детерминированный наклон — читается как приколотые снимки
-        tile.style.setProperty('--tilt', ((((seq * 37) % 9) - 4) * 0.4).toFixed(2) + 'deg');
-        seq++;
-
-        var img = document.createElement('img');
-        img.src = post.cover;
-        img.alt = '';
-        img.loading = 'lazy';
-        tile.appendChild(img);
-
-        if (post.kind === 'video') {
-          var pl = document.createElement('span');
-          pl.className = 'wall-play';
-          pl.setAttribute('aria-hidden', 'true');
-          tile.appendChild(pl);
-        }
-        if (post.shot !== undefined) {
-          var cap = document.createElement('span');
-          cap.className = 'wall-cap';
-          cap.dataset.tShot = String(post.shot);
-          tile.appendChild(cap);
-        }
-        grid.appendChild(tile);
-      });
-
-      inner.appendChild(grid);
+    // верх: куда писать
+    var top = document.createElement('div');
+    top.className = 'foot-top';
+    (window.CONTACTS || []).forEach(function (c) {
+      var a = document.createElement('a');
+      a.className = 'foot-pill';
+      a.href = c.url;
+      a.textContent = c.text;
+      if (c.url.indexOf('mailto:') !== 0) { a.target = '_blank'; a.rel = 'noopener'; }
+      top.appendChild(a);
     });
-    scroll.appendChild(inner);
-    s.appendChild(scroll);
+    f.appendChild(top);
+
+    var rule = document.createElement('div');
+    rule.className = 'foot-rule';
+    f.appendChild(rule);
+
+    // правовые документы — открываются оверлеем, как «о себе»
+    var nav = document.createElement('nav');
+    nav.className = 'foot-links';
+    LEGAL_DOCS.forEach(function (key) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.t = key;
+      btn.addEventListener('click', function () { openLegal(key); });
+      nav.appendChild(btn);
+    });
+    f.appendChild(nav);
+
+    var who = document.createElement('p');
+    who.className = 'foot-who';
+    who.dataset.t = 'footWho';
+    f.appendChild(who);
+
+    var copy = document.createElement('p');
+    copy.className = 'foot-copy';
+    copy.dataset.year = String(new Date().getFullYear());
+    f.appendChild(copy);
+
+    // имя во всю ширину, уходит вниз в тень
+    var mark = document.createElement('div');
+    mark.className = 'foot-mark';
+    var mi = document.createElement('img');
+    mi.src = 'assets/logo-darina.svg';
+    mi.alt = '';
+    mark.appendChild(mi);
+
+    s.appendChild(f);
+    s.appendChild(mark);
     return s;
   }
 
+  var LEGAL_DOCS = ['legalTerms', 'legalPrivacy', 'legalCookies', 'legalNotice'];
+
   FILMS.forEach(function (film, i) {
-    var build = film.wall ? buildWallSection
-              : film.soon ? buildSoonSection
-              : buildFilmSection;
-    deckEl.appendChild(build(film, i));
+    deckEl.appendChild((film.soon ? buildSoonSection : buildFilmSection)(film, i));
   });
+  deckEl.appendChild(buildFooterSection(FILMS.length));
 
   var sections = Array.prototype.slice.call(deckEl.querySelectorAll('.section'));
 
@@ -623,7 +612,7 @@
   var playersBySection = [];
   FILMS.forEach(function (film, i) {
     var si = i + 1;
-    if (film.soon || film.wall) {
+    if (film.soon) {
       engineBySection[si] = null;
       playersBySection[si] = sections[si].querySelector('video') ? new SoonMedia(sections[si]) : null;
       return;
@@ -1023,6 +1012,22 @@
     });
   }
 
+  /** Правовой документ: заголовок и абзацы из словаря. */
+  function openLegal(key) {
+    var panel = document.getElementById('panel-legal');
+    if (!panel) return;
+    panel.querySelector('h2').textContent = t(key);
+    var body = panel.querySelector('.panel-body');
+    body.textContent = '';
+    tlist(key + 'Text').forEach(function (para) {
+      var p = document.createElement('p');
+      p.textContent = para;
+      body.appendChild(p);
+    });
+    panel.dataset.doc = key;
+    openPanel('legal');
+  }
+
   function openCredits(film) {
     var body = document.querySelector('#panel-credits .panel-body');
     var head = document.querySelector('#panel-credits .credits-film');
@@ -1084,6 +1089,51 @@
       strip.addEventListener('scroll', atEnd);
       requestAnimationFrame(atEnd);
       body.appendChild(wrap);
+    }
+
+    // посты-анонсы: та же лента, но плитки ведут в инстаграм
+    if (film.posts && film.posts.length) {
+      var psub = document.createElement('div');
+      psub.className = 'credits-sub';
+      psub.textContent = t('fromInstagram');
+      body.appendChild(psub);
+
+      var pstrip = document.createElement('div');
+      pstrip.className = 'credits-shots';
+
+      film.posts.forEach(function (post) {
+        if (!post || !post.cover) return;
+        var tile = document.createElement(post.url ? 'a' : 'figure');
+        tile.className = 'credits-shot credits-post';
+        if (post.url) {
+          tile.href = post.url;
+          tile.target = '_blank';
+          tile.rel = 'noopener';
+        }
+        var pi = document.createElement('img');
+        pi.src = post.cover;
+        pi.alt = '';
+        pi.loading = 'lazy';
+        tile.appendChild(pi);
+        if (post.kind === 'video') {
+          var pl = document.createElement('span');
+          pl.className = 'post-play';
+          pl.setAttribute('aria-hidden', 'true');
+          tile.appendChild(pl);
+        }
+        pstrip.appendChild(tile);
+      });
+
+      var pwrap = document.createElement('div');
+      pwrap.className = 'credits-shots-wrap';
+      pwrap.appendChild(pstrip);
+      var pEnd = function () {
+        pwrap.classList.toggle('is-end',
+          Math.abs(pstrip.scrollLeft) + pstrip.clientWidth >= pstrip.scrollWidth - 2);
+      };
+      pstrip.addEventListener('scroll', pEnd);
+      requestAnimationFrame(pEnd);
+      body.appendChild(pwrap);
     }
 
     var rows = creditsFor(film);
@@ -1149,6 +1199,10 @@
   }
 
   /** Раскладывает строки текущего языка по разметке. */
+  // языки, набранные связным письмом: французский (Mistral), итальянский
+  // (Monotype Corsiva) и арабская вязь
+  var SCRIPT_LOCALES = ['fr', 'it', 'ar-SA'];
+
   function applyLocale() {
     var d = dict(locale);
     var rtl = d.dir === 'rtl';
@@ -1167,6 +1221,7 @@
       var year = el.dataset.year;
       el.textContent = year ? kind + ' · ' + year : kind;
     });
+    each('.foot-copy', function (el) { el.textContent = '© ' + el.dataset.year + ' ' + t('name'); });
     var shots = tlist('shots');
     each('[data-t-shot]', function (el) { el.textContent = shots[+el.dataset.tShot] || ''; });
 
@@ -1196,6 +1251,12 @@
     });
 
     document.body.classList.toggle('is-rtl', rtl);
+    // связный рукописный и арабская вязь не терпят разрядки и прописных
+    document.body.classList.toggle('is-script', SCRIPT_LOCALES.indexOf(locale) >= 0);
+
+    // открытый правовой документ переписываем на новый язык
+    var legal = document.getElementById('panel-legal');
+    if (legal && !legal.hidden && legal.dataset.doc) openLegal(legal.dataset.doc);
   }
 
   function setLocale(code) {

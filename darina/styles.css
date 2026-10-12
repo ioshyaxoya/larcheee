@@ -144,7 +144,9 @@ a:hover { color: var(--accent); }
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -104%);
+  /* Ниже середины, но не ровно по центру: выше подпись ложилась на глаза
+     почти в каждой склейке. Лица в кадрах занимают верхнюю треть. */
+  transform: translate(-50%, -30%);
   width: min(74vw, 860px);
   text-align: center;
   z-index: 4;
@@ -433,8 +435,13 @@ a.film-link,
   opacity: .5;
 }
 
-/* кнопка «о клипе» — тот же вид, что у фильмов */
-.soon-about { margin-top: 24px; }
+/* Кнопка «о клипе» — тот же вид, что у фильмов, но на анонсе всё по центру.
+   .film-credits блочная: она сжимается по содержимому и встаёт слева, а
+   text-align родителя на блок не действует. Здесь делаем её строчным блоком. */
+.soon-inner .soon-about {
+  display: inline-block;      /* вес селектора выше .film-credits ниже по файлу */
+  margin-top: 24px;
+}
 
 .soon-links {
   margin-top: 26px;
@@ -453,107 +460,8 @@ a.film-link,
 
 /* ── стена: кадры со съёмок и посты из инстаграма ────────────────────────── */
 
-.section--wall { background: #0b0b0b; }
 
-.wall-scroll {
-  position: absolute;
-  inset: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
-  scrollbar-color: #2a2a2a transparent;
-}
-.wall-scroll::-webkit-scrollbar { width: 6px; }
-.wall-scroll::-webkit-scrollbar-thumb { background: #2a2a2a; }
-
-.wall-inner {
-  min-height: 100%;
-  padding: 86px 88px 96px;   /* по бокам — место под фиксированные about/contact */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-/* когда групп много, прижимаем к верху — иначе центрирование режет первую */
-.wall-scroll .wall-inner:has(.wall-group) { justify-content: flex-start; }
-
-.wall-kicker {
-  font-size: 11px;
-  letter-spacing: .3em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-  opacity: .55;
-  text-align: center;
-  margin-bottom: 34px;
-}
-
-.wall-group {
-  font-size: 11px;
-  letter-spacing: .26em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-  opacity: .45;
-  text-align: center;
-  margin: 34px 0 18px;
-}
-.wall-group:first-of-type { margin-top: 0; }
-body.is-rtl .wall-group { letter-spacing: 0; text-transform: none; }
-
-.wall-grid {
-  display: grid;
-  /* постов шесть: три колонки дают ровные 3×2 без одинокого хвоста */
-  grid-template-columns: repeat(3, 1fr);
-  gap: 26px;
-  max-width: 860px;
-  width: 100%;
-  margin: 0 auto;
-}
-
-/* плитка — приколотый постер: лёгкий наклон и тень */
-.wall-tile {
-  --tilt: 0deg;
-  position: relative;
-  display: block;
-  background: #141414;
-  padding: 9px 9px 34px;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, .55);
-  transform: rotate(var(--tilt));
-  transition: transform 260ms ease, box-shadow 260ms ease;
-}
-/* плитка без подписи — без нижнего поля под неё; правило обязано стоять
-   после .wall-tile: специфичность та же, выигрывает последнее */
-.wall-tile--bare { padding-bottom: 9px; }
-
-.wall-tile img {
-  display: block;
-  width: 100%;
-  height: 330px;          /* ближе к вертикали инстаграмных постов */
-  object-fit: cover;
-  filter: grayscale(.2) contrast(1.04) brightness(.92);
-  transition: filter 260ms ease;
-}
-a.wall-tile:hover {
-  transform: rotate(0deg) translateY(-4px);
-  box-shadow: 0 16px 34px rgba(0, 0, 0, .7);
-}
-a.wall-tile:hover img { filter: none; }
-a.wall-tile:hover .wall-cap { color: var(--accent); }
-
-.wall-cap {
-  position: absolute;
-  left: 9px;
-  right: 9px;
-  bottom: 11px;
-  font-size: 10px;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-  opacity: .75;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  transition: color 260ms ease;
-}
+/* метка «это видео» */
 
 /* бэкстейдж внутри описания работы: лента в один ряд.
    Высота у кадров общая, ширина — по пропорции, поэтому ничего не режется. */
@@ -572,6 +480,7 @@ a.wall-tile:hover .wall-cap { color: var(--accent); }
 .credits-shots::-webkit-scrollbar-thumb { background: #3a3a3a; }
 
 .credits-shot {
+  position: relative;         /* якорь для метки рилса */
   flex: 0 0 auto;
   margin: 0;
   scroll-snap-align: start;
@@ -618,14 +527,11 @@ body.is-rtl .credits-shot figcaption { letter-spacing: 0; text-transform: none; 
   margin: 0 0 26px;
 }
 
-/* метка «это видео» */
-/* смещение вверх компенсирует поле под подписью; без подписи его нет */
-.wall-tile--bare .wall-play { top: 50%; }
-
-.wall-play {
+/* метка «это видео» — по центру кадра */
+.post-play {
   position: absolute;
   left: 50%;
-  top: calc(50% - 12px);
+  top: 50%;
   transform: translate(-50%, -50%);
   width: 38px;
   height: 38px;
@@ -633,7 +539,7 @@ body.is-rtl .credits-shot figcaption { letter-spacing: 0; text-transform: none; 
   border-radius: 50%;
   pointer-events: none;
 }
-.wall-play::before {
+.post-play::before {
   content: '';
   position: absolute;
   left: 53%;
@@ -664,7 +570,9 @@ body.is-rtl .credits-shot figcaption { letter-spacing: 0; text-transform: none; 
   text-shadow: 0 1px 2px #000;
 }
 .cue:hover { color: var(--accent); }
-.cue.is-hidden { opacity: 0; pointer-events: none; }
+/* анимация перебивает opacity из обычного правила, поэтому гасим и её —
+   иначе на последнем экране стрелка продолжала мигать */
+.cue.is-hidden { opacity: 0; pointer-events: none; animation: none; }
 
 /* ── переключатель языка ─────────────────────────────────────────────────── */
 
@@ -706,8 +614,6 @@ body.is-rtl .film-title .s,
 body.is-rtl .soon-kicker,
 body.is-rtl .soon-badge,
 body.is-rtl .soon-note,
-body.is-rtl .wall-kicker,
-body.is-rtl .wall-cap,
 body.is-rtl .film-missing,
 body.is-rtl .panel-inner h2,
 body.is-rtl .soon-links a {
@@ -917,21 +823,6 @@ body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
      языков сильно разной длины («о себе» короче, чем «niri buruz»),
      поэтому место считаем по самой длинной. На узком экране сетка
      схлопывается в одну колонку — стена прокручивается внутри себя. */
-  .wall-inner { padding: 72px 78px 86px; }
-  .wall-group {
-  font-size: 11px;
-  letter-spacing: .26em;
-  text-transform: uppercase;
-  color: var(--ink-dim);
-  opacity: .45;
-  text-align: center;
-  margin: 34px 0 18px;
-}
-.wall-group:first-of-type { margin-top: 0; }
-body.is-rtl .wall-group { letter-spacing: 0; text-transform: none; }
-
-.wall-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
-  .wall-tile img { height: 230px; }
   .soon-badge { letter-spacing: .34em; text-indent: .34em; }
   .cuts i { width: 1px; }
 }
@@ -941,7 +832,6 @@ body.is-rtl .wall-group { letter-spacing: 0; text-transform: none; }
 @media (prefers-reduced-motion: reduce) {
   .deck { transition: none; }
   .cue, .soon-badge, .soon-glow { animation: none; }
-  .wall-tile { transform: none; }
   .section--film .cut-flash { display: none; }
 }
 
@@ -1067,4 +957,191 @@ body.is-lightbox { overflow: hidden; }
   .lightbox-stage img { max-height: 58vh; max-width: 94vw; }
   .credits-shot img { height: 165px; }
   .lightbox-bar { gap: 14px; }
+}
+
+/* ── шрифт по языку ──────────────────────────────────────────────────────────
+
+   Шрифты системные и проприетарные: вшить их в сайт нельзя, подгружать со
+   стороны — значит потерять открытие с file://. Поэтому стек локальный:
+   сперва названный шрифт, за ним ближайшее из того, что обычно стоит.
+   На Windows с Office почти все эти шрифты есть, на других системах
+   подхватится запасной. Русский остаётся на Verdana, как было.            */
+
+html[lang="en-GB"] body {
+  font-family: 'Comic Sans MS', 'Comic Sans', Papyrus, 'Chalkboard SE', 'Comic Neue', cursive;
+}
+html[lang="es"] body {
+  font-family: Jokerman, 'Jokerman LET', Hobo, 'Hobo Std', 'HoboStd', Chiller, fantasy, Verdana, sans-serif;
+}
+html[lang="eu"] body {
+  /* Karako — баскская наборная традиция: тяжёлый брусковый с подсечками.
+     Запасные подобраны по этому же рисунку. */
+  font-family: Karako, 'Euskal Tipografia', Rockwell, 'Rockwell Nova', 'Bookman Old Style', 'Baskerville Old Face', serif;
+}
+html[lang="it"] body {
+  font-family: 'Monotype Corsiva', 'Brush Script MT', 'Lucida Handwriting', 'Apple Chancery', 'Segoe Script', cursive;
+}
+html[lang="fr"] body {
+  font-family: Mistral, 'Segoe Script', 'Bradley Hand', 'Bradley Hand ITC', 'Snell Roundhand', cursive;
+}
+html[lang="de"] body {
+  /* Rotis SemiSerif — гуманистический полусерифный; запасные того же склада */
+  font-family: 'Rotis SemiSerif', 'Rotis SemiSerif Std', 'Rotis Semi Serif', 'Rotis Serif', Candara, Optima, 'Gill Sans MT', 'Trebuchet MS', sans-serif;
+}
+html[lang="ar-SA"] body {
+  font-family: 'Simplified Arabic', 'Traditional Arabic', 'Arial Arabic', 'Arabic Transparent', Tahoma, 'Geeza Pro', 'Noto Naskh Arabic', 'Noto Sans Arabic', sans-serif;
+}
+
+/* Связный рукописный шрифт (Mistral, Corsiva) и арабская вязь распадаются,
+   если разогнать буквы и поднять их в прописные. Там, где у сайта мелкие
+   подписи набраны капителью вразрядку, для этих языков то и другое снимаем. */
+body.is-script .film-title .s,
+body.is-script .film-missing,
+body.is-script .soon-kicker,
+body.is-script .soon-badge,
+body.is-script .soon-note,
+body.is-script .soon-links a,
+body.is-script .credits-shot figcaption,
+body.is-script .lightbox-stage figcaption,
+body.is-script .lightbox-count,
+body.is-script .cue,
+body.is-script .film-credits,
+body.is-script .credits-sub,
+body.is-script .credits-role,
+body.is-script .panel-inner h2 {
+  text-transform: none;
+  letter-spacing: 0;
+  text-indent: 0;
+}
+
+/* рукописное мельче читается — чуть крупнее основной кегль */
+html[lang="fr"] .panel-inner,
+html[lang="it"] .panel-inner { font-size: 15px; }
+html[lang="fr"] .credits-synopsis,
+html[lang="it"] .credits-synopsis { font-size: 16px; }
+
+/* Переключатель — это коды языков, он должен выглядеть одинаково на всех
+   языках, поэтому капитель с него не снимаем. А вот арабской метке разрядка
+   рвёт вязь в любом языке, её гасим отдельно. */
+.lang-btn[data-lang="ar-SA"] { letter-spacing: 0; }
+
+/* ── подвал ──────────────────────────────────────────────────────────────────
+   Устроен по образцу deblock.com: контакты, черта, правовые ссылки, подпись,
+   копирайт — и имя во всю ширину, уходящее вниз в тень.                     */
+
+.section--footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;   /* содержимое внизу, как в референсе */
+}
+
+.foot {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 5vw, 54px);
+  margin-bottom: clamp(18px, 4vh, 44px);
+}
+
+.foot-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.foot-pill {
+  display: inline-block;
+  padding: 11px 22px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #111;
+  font-size: 12px;
+  text-decoration: none;
+  transition: background 200ms ease, color 200ms ease;
+}
+.foot-pill:hover { background: #fff; }
+
+.foot-rule {
+  height: 1px;
+  background: rgba(243, 241, 234, .14);
+  margin: clamp(26px, 5vh, 46px) 0 clamp(18px, 3vh, 28px);
+}
+
+.foot-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(16px, 3vw, 34px);
+}
+.foot-links button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--ink);
+  opacity: .85;
+  cursor: pointer;
+  transition: color 180ms ease, opacity 180ms ease;
+}
+.foot-links button:hover { color: var(--accent); opacity: 1; }
+
+.foot-who {
+  margin: clamp(18px, 3vh, 30px) 0 0;
+  max-width: 64ch;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ink-dim);
+  opacity: .5;
+}
+.foot-copy {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--ink-dim);
+  opacity: .32;
+}
+
+/* имя во всю ширину: тёмное, снизу растворяется в фоне */
+.foot-mark {
+  position: relative;          /* стоит под текстом, а не за ним */
+  z-index: 1;
+  pointer-events: none;
+  line-height: 0;
+  overflow: hidden;
+}
+.foot-mark img {
+  display: block;
+  width: 118%;                 /* шире экрана: края подписи срезаны */
+  max-width: none;
+  margin-inline-start: -9%;
+  height: auto;
+  opacity: .085;
+  /* растворяется книзу — само уходит в тень, без жёсткого обреза */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 88%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 30%, transparent 88%);
+}
+
+/* ── оверлей с правовым текстом ──────────────────────────────────────────── */
+
+.panel--legal .panel-inner {
+  max-width: 680px;
+  width: 100%;
+  max-height: 78vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2a transparent;
+}
+.panel--legal .panel-body p {
+  margin-bottom: 16px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--ink);
+  opacity: .88;
+}
+
+@media (max-width: 720px) {
+  .foot { margin-bottom: clamp(80px, 18vh, 160px); }
+  .foot-pill { padding: 9px 16px; font-size: 11px; }
+  .foot-who, .foot-copy, .foot-links button { font-size: 11px; }
 }
