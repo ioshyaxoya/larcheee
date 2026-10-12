@@ -675,6 +675,15 @@ body.is-rtl .credits-role { letter-spacing: 0; text-transform: none; }
 .panel-inner code { font-family: ui-monospace, monospace; }
 .panel-inner a { text-decoration: underline; text-underline-offset: 3px; }
 
+.contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 14px;
+}
+.contacts a { text-underline-offset: 5px; }
+
 .panel-close {
   position: absolute;
   top: 18px;
