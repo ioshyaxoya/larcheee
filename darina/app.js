@@ -167,12 +167,95 @@
       inner.appendChild(nt);
     }
 
+    if (film.credits) {
+      var cr = document.createElement('div');
+      cr.className = 'soon-credits';
+      cr.textContent = film.credits;
+      inner.appendChild(cr);
+    }
+
+    // появятся после премьеры: VK Видео первым, YouTube вторым
+    if (film.links && film.links.length) {
+      var row = document.createElement('div');
+      row.className = 'soon-links';
+      film.links.forEach(function (l) {
+        if (!l || !l.url) return;
+        var a = document.createElement('a');
+        a.href = l.url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = l.label || l.url;
+        row.appendChild(a);
+      });
+      if (row.children.length) inner.appendChild(row);
+    }
+
     s.appendChild(inner);
     return s;
   }
 
+  /** Стена: кадры со съёмок и посты из инстаграма, плитками-постерами. */
+  function buildWallSection(film, i) {
+    var s = document.createElement('section');
+    s.className = 'section section--wall';
+    s.dataset.anchor = String(i + 2);
+
+    var scroll = document.createElement('div');
+    scroll.className = 'wall-scroll js-scroll';
+
+    var inner = document.createElement('div');
+    inner.className = 'wall-inner';
+
+    if (film.kicker) {
+      var k = document.createElement('div');
+      k.className = 'wall-kicker';
+      k.textContent = film.kicker;
+      inner.appendChild(k);
+    }
+
+    var grid = document.createElement('div');
+    grid.className = 'wall-grid';
+
+    (film.posts || []).forEach(function (post, n) {
+      if (!post || !post.cover) return;
+      var tile = document.createElement(post.url ? 'a' : 'div');
+      tile.className = 'wall-tile';
+      if (post.url) { tile.href = post.url; tile.target = '_blank'; tile.rel = 'noopener'; }
+      // лёгкий детерминированный наклон — читается как приколотые постеры
+      tile.style.setProperty('--tilt', ((((n * 37) % 9) - 4) * 0.4).toFixed(2) + 'deg');
+
+      var img = document.createElement('img');
+      img.src = post.cover;
+      img.alt = post.caption || '';
+      img.loading = 'lazy';
+      tile.appendChild(img);
+
+      if (post.kind === 'video') {
+        var pl = document.createElement('span');
+        pl.className = 'wall-play';
+        pl.setAttribute('aria-hidden', 'true');
+        tile.appendChild(pl);
+      }
+      if (post.caption) {
+        var cap = document.createElement('span');
+        cap.className = 'wall-cap';
+        cap.textContent = post.caption;
+        tile.appendChild(cap);
+      }
+      grid.appendChild(tile);
+    });
+
+    inner.appendChild(grid);
+    scroll.appendChild(inner);
+    s.appendChild(scroll);
+    return s;
+  }
+
   FILMS.forEach(function (film, i) {
-    deckEl.appendChild(film.soon ? buildSoonSection(film, i) : buildFilmSection(film, i));
+    var build = film.wall ? buildWallSection
+              : film.soon ? buildSoonSection
+              : buildFilmSection;
+    deckEl.appendChild(build(film, i));
   });
 
   var sections = Array.prototype.slice.call(deckEl.querySelectorAll('.section'));
@@ -415,7 +498,7 @@
   var playersBySection = [];
   FILMS.forEach(function (film, i) {
     var si = i + 1;
-    if (film.soon) {
+    if (film.soon || film.wall) {
       engineBySection[si] = null;
       playersBySection[si] = sections[si].querySelector('video') ? new SoonMedia(sections[si]) : null;
       return;
@@ -453,6 +536,12 @@
 
     sections.forEach(function (s, n) { s.classList.toggle('is-active', n === i); });
 
+    // список покинутого экрана отматываем наверх, чтобы вернуться к началу
+    if (prev !== i) {
+      var leftBehind = sections[prev] && sections[prev].querySelector('.js-scroll');
+      if (leftBehind) leftBehind.scrollTop = 0;
+    }
+
     // видео: играет только активный экран, соседи — прогреваются
     playersBySection.forEach(function (pl, si) {
       if (!pl) return;
@@ -480,9 +569,30 @@
   function next() { if (!locked) go(current + 1); }
   function prev() { if (!locked) go(current - 1); }
 
+  /* — экраны с прокручиваемым содержимым (стена) —
+     жест сначала отдаётся списку и только на его краю листает деку */
+
+  /** Прокручиваемая область под точкой события, если она есть. */
+  function scrollHost(node) {
+    while (node && node !== document.body) {
+      if (node.classList && node.classList.contains('js-scroll')) return node;
+      node = node.parentNode;
+    }
+    return null;
+  }
+
+  /** Может ли область ещё прокрутиться в эту сторону. */
+  function canScroll(el, dy) {
+    if (!el || el.scrollHeight <= el.clientHeight + 1) return false;
+    return dy < 0 ? el.scrollTop > 1
+                  : el.scrollTop + el.clientHeight < el.scrollHeight - 1;
+  }
+
   /* — колесо / трекпад — */
   window.addEventListener('wheel', function (e) {
     if (panelOpen) return;
+    var host = scrollHost(e.target);
+    if (canScroll(host, e.deltaY)) return;     // колесо уходит содержимому
     e.preventDefault();
     if (locked || Math.abs(e.deltaY) < 8) return;
     if (e.deltaY > 0) next(); else prev();
@@ -490,18 +600,26 @@
 
   /* — тач — */
   var touchY = null;
+  var touchHost = null;
+
   window.addEventListener('touchstart', function (e) {
     touchY = e.touches[0].clientY;
+    touchHost = scrollHost(e.target);
   }, { passive: true });
 
   window.addEventListener('touchmove', function (e) {
-    if (!panelOpen) e.preventDefault();
+    if (panelOpen) return;
+    if (touchHost && canScroll(touchHost, touchY - e.touches[0].clientY)) return;
+    e.preventDefault();
   }, { passive: false });
 
   window.addEventListener('touchend', function (e) {
     if (panelOpen || touchY === null) return;
     var dy = touchY - e.changedTouches[0].clientY;
+    var host = touchHost;
     touchY = null;
+    touchHost = null;
+    if (canScroll(host, dy)) return;
     if (Math.abs(dy) < 50 || locked) return;
     if (dy > 0) next(); else prev();
   }, { passive: true });
@@ -514,8 +632,10 @@
     }
     switch (e.key) {
       case 'ArrowDown': case 'PageDown': case ' ':
+        if (canScroll(sections[current].querySelector('.js-scroll'), 1)) return;
         e.preventDefault(); next(); break;
       case 'ArrowUp': case 'PageUp':
+        if (canScroll(sections[current].querySelector('.js-scroll'), -1)) return;
         e.preventDefault(); prev(); break;
       case 'Home':
         e.preventDefault(); go(0); break;
