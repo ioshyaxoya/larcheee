@@ -25,12 +25,29 @@ window.MONTAGE = {
 /* Первый экран: фотография из макета и портреты Дарины, медленно
    сменяющие друг друга. Первой всегда идёт фотография со съёмки —
    с неё начинался исходный макет. */
-window.HERO = [
-  'assets/hero.jpg',
-  'assets/portraits/darina-01.jpg',
-  'assets/portraits/darina-02.jpg',
-  'assets/portraits/darina-03.jpg',
-];
+window.HERO = {
+  // Чёрно-белые портреты. У 01 и 02 Дарина оставила белые поля — они и держат
+  // склейки по два-три кадра: поля работают как промежуток между снимками.
+  photos: [
+    'assets/portraits/darina-01.jpg',
+    'assets/portraits/darina-02.jpg',
+    'assets/portraits/darina-03.jpg',
+  ],
+  // Склейки, по которым идёт первый экран. Первая — один кадр, крупный план.
+  // Дальше чередуются по два, по три и по одному. Числа — номера в photos.
+  sets: [
+    [2],
+    [0, 1],
+    [2, 0],
+    [1, 2, 0],
+    [0],
+    [1, 0],
+    [2, 1],
+    [0, 2, 1],
+    [1],
+    [0, 1, 2],
+  ],
+};
 
 /* Контакты. Пустой url — строка не показывается. */
 window.CONTACTS = [
@@ -42,6 +59,15 @@ window.CONTACTS = [
 window.FILMS = [
   {
     id: 'kirill', kind: 'short', year: 2026,
+    // бэкстейдж — открывается в описании фильма
+    bts: [
+      { cover: 'assets/wall/kirill-01.jpg' },
+      { cover: 'assets/wall/kirill-02.jpg' },
+      { cover: 'assets/wall/kirill-03.jpg' },
+      { cover: 'assets/wall/kirill-04.jpg' },
+      { cover: 'assets/wall/kirill-05.jpg' },
+      { cover: 'assets/wall/kirill-06.jpg' },
+    ],
     // Нарезка из мастера 5:53 (1920×1080, scope в кадре 16:9): срезан
     // letterbox (crop 1920:816:0:132), взят диапазон 19.5–331.0 — без
     // карточки курсовой, OrBox, «16+», заставки института и титров.
@@ -82,6 +108,17 @@ window.FILMS = [
   },
   {
     id: 'drive', kind: 'short', year: 2025,
+    // бэкстейдж — открывается в описании фильма
+    bts: [
+      { cover: 'assets/wall/drive-01.jpg' },
+      { cover: 'assets/wall/drive-02.jpg' },
+      { cover: 'assets/wall/drive-03.jpg' },
+      { cover: 'assets/wall/drive-04.jpg' },
+      { cover: 'assets/wall/drive-05.jpg' },
+      { cover: 'assets/wall/drive-06.jpg' },
+      { cover: 'assets/wall/drive-07.jpg' },
+      { cover: 'assets/wall/drive-08.jpg' },
+    ],
     // Нарезка из мастера 3:08, диапазон 19.0–182.5.
     prerendered: true,
     src: ['assets/films/drive.webm', 'assets/films/drive.mp4'],
@@ -151,6 +188,13 @@ window.FILMS = [
     artists: 'uniqe, nkeeei & ARTEM SHILOVETS',
     note: '',            // «13 октября», если Дарина выкладывает сама
     creditsKey: 'clipCredits',
+    bts: [
+      { cover: 'assets/wall/shoot-01.jpg', shot: 0 },
+      { cover: 'assets/wall/shoot-02.jpg', shot: 1 },
+      { cover: 'assets/wall/shoot-03.jpg', shot: 2 },
+      { cover: 'assets/wall/shoot-04.jpg', shot: 3 },
+      { cover: 'assets/wall/shoot-05.jpg', shot: 4 },
+    ],
     links: [],     // [{ label: 'VK Видео', url: '...' }, { label: 'YouTube', url: '...' }]
     // подложка — бэкстейдж со съёмок, сам клип не показывает
     src: ['assets/films/clip-teaser.webm', 'assets/films/clip-teaser.mp4'],
@@ -165,25 +209,6 @@ window.FILMS = [
   {
     wall: true,
     groups: [
-      // заголовок берётся из i18n: film → films[id], kind → kinds[kind]
-      { film: 'kirill', posts: [
-        { cover: 'assets/wall/kirill-01.jpg' },
-        { cover: 'assets/wall/kirill-02.jpg' },
-        { cover: 'assets/wall/kirill-03.jpg' },
-        { cover: 'assets/wall/kirill-04.jpg' },
-        { cover: 'assets/wall/kirill-05.jpg' },
-        { cover: 'assets/wall/kirill-06.jpg' },
-      ] },
-      { film: 'drive', posts: [
-        { cover: 'assets/wall/drive-01.jpg' },
-        { cover: 'assets/wall/drive-02.jpg' },
-        { cover: 'assets/wall/drive-03.jpg' },
-        { cover: 'assets/wall/drive-04.jpg' },
-        { cover: 'assets/wall/drive-05.jpg' },
-        { cover: 'assets/wall/drive-06.jpg' },
-        { cover: 'assets/wall/drive-07.jpg' },
-        { cover: 'assets/wall/drive-08.jpg' },
-      ] },
       // посты-анонсы с её аккаунта. Обложки скачаны, а не прилинкованы:
       // Instagram отдаёт их по подписанным ссылкам, которые протухают.
       // kind: 'video' рисует на плитке метку воспроизведения (рилсы).
@@ -194,15 +219,6 @@ window.FILMS = [
         { cover: 'assets/wall/ig-04.jpg', url: 'https://www.instagram.com/darinadanilyuk/p/DdpSVALjWU2/' },
         { cover: 'assets/wall/ig-05.jpg', url: 'https://www.instagram.com/darinadanilyuk/reel/Ddy96zFNdm2/', kind: 'video' },
         { cover: 'assets/wall/ig-06.jpg', url: 'https://www.instagram.com/darinadanilyuk/reel/DeMTNLxN-ly/', kind: 'video' },
-      ] },
-
-      // у съёмки клипа подписи есть: shot — номер в i18n.js → shots[]
-      { kind: 'mv', posts: [
-        { cover: 'assets/wall/shoot-01.jpg', shot: 0, url: '' },
-        { cover: 'assets/wall/shoot-02.jpg', shot: 1, url: '' },
-        { cover: 'assets/wall/shoot-03.jpg', shot: 2, url: '' },
-        { cover: 'assets/wall/shoot-04.jpg', shot: 3, url: '' },
-        { cover: 'assets/wall/shoot-05.jpg', shot: 4, url: '' },
       ] },
     ],
   },

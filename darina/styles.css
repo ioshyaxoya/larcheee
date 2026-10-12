@@ -76,19 +76,57 @@ a:hover { color: var(--accent); }
 
 /* ── 1. герой ────────────────────────────────────────────────────────────── */
 
-/* кадры первого экрана лежат стопкой и медленно сменяют друг друга */
-.hero-photo {
+/* Первый экран — склейки. В каждой один, два или три кадра: стоят в ряд во
+   всю высоту, ширина по пропорции, поэтому ничего не обрезается. Белые поля,
+   которые Дарина оставила на снимках, работают промежутком между кадрами.
+   Склейки сменяют друг друга плавно. */
+.hero-set {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  filter: grayscale(.15) contrast(1.05);
   z-index: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  overflow: hidden;
   opacity: 0;
   transition: opacity 1800ms ease-in-out;
 }
-.hero-photo.is-on { opacity: 1; }
+.hero-set.is-on { opacity: 1; }
+
+.hero-photo {
+  flex: 0 0 auto;
+  height: 100%;
+  width: auto;                    /* ширина по пропорции кадра */
+  object-fit: cover;
+  filter: grayscale(.15) contrast(1.05);
+  margin-inline: 0;
+}
+/* Кадры стыкуются вплотную: их белые поля и есть промежуток между снимками,
+   растушёвывать стык нельзя — лица начнут просвечивать друг через друга.
+   Размывается только внешний край ряда, чтобы он растворялся в подложке. */
+.hero-set > .hero-photo:first-child {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 9%, #000 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 9%, #000 100%);
+}
+.hero-set > .hero-photo:last-child {
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 91%, transparent 100%);
+  mask-image: linear-gradient(to right, #000 0, #000 91%, transparent 100%);
+}
+.hero-set > .hero-photo:only-child {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 9%, #000 91%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 9%, #000 91%, transparent 100%);
+}
+
+/* подложка: размытый кадр заполняет то, что осталось по бокам */
+.hero-blur {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(46px) grayscale(1) brightness(.6);
+  transform: scale(1.2);
+}
 
 /* под кремовым логотипом нужна тень: портреты сняты на светлом фоне */
 .section--hero::before {
@@ -112,6 +150,24 @@ a:hover { color: var(--accent); }
   z-index: 4;
 }
 .hero-logo img { display: block; width: 100%; height: auto; }
+
+/* вертикальный экран (телефон): из склейки показывается первый кадр во весь экран */
+@media (max-aspect-ratio: 1 / 1) {
+  .hero-blur { display: none; }
+  .hero-set { display: block; }
+  .hero-photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    margin-inline: 0;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  /* второй и третий кадр склейки на телефон не помещаются */
+  .hero-set > .hero-photo:not(:first-child) { display: none; }
+}
 
 /* ── боковые ссылки about / contact ──────────────────────────────────────── */
 
@@ -377,6 +433,9 @@ a.film-link,
   opacity: .5;
 }
 
+/* кнопка «о клипе» — тот же вид, что у фильмов */
+.soon-about { margin-top: 24px; }
+
 .soon-links {
   margin-top: 26px;
   display: flex;
@@ -442,9 +501,10 @@ body.is-rtl .wall-group { letter-spacing: 0; text-transform: none; }
 
 .wall-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  /* постов шесть: три колонки дают ровные 3×2 без одинокого хвоста */
+  grid-template-columns: repeat(3, 1fr);
   gap: 26px;
-  max-width: 1180px;
+  max-width: 860px;
   width: 100%;
   margin: 0 auto;
 }
@@ -467,7 +527,7 @@ body.is-rtl .wall-group { letter-spacing: 0; text-transform: none; }
 .wall-tile img {
   display: block;
   width: 100%;
-  height: 210px;
+  height: 330px;          /* ближе к вертикали инстаграмных постов */
   object-fit: cover;
   filter: grayscale(.2) contrast(1.04) brightness(.92);
   transition: filter 260ms ease;
@@ -493,6 +553,69 @@ a.wall-tile:hover .wall-cap { color: var(--accent); }
   overflow: hidden;
   text-overflow: ellipsis;
   transition: color 260ms ease;
+}
+
+/* бэкстейдж внутри описания работы: лента в один ряд.
+   Высота у кадров общая, ширина — по пропорции, поэтому ничего не режется. */
+.credits-shots {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  padding-bottom: 14px;
+  margin-top: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: #3a3a3a transparent;
+}
+.credits-shots::-webkit-scrollbar { height: 6px; }
+.credits-shots::-webkit-scrollbar-thumb { background: #3a3a3a; }
+
+.credits-shot {
+  flex: 0 0 auto;
+  margin: 0;
+  scroll-snap-align: start;
+  cursor: zoom-in;
+}
+.credits-shot img {
+  display: block;
+  height: 230px;          /* общая высота ряда */
+  width: auto;            /* ширина по пропорции — кадр не режется */
+  filter: grayscale(.2) contrast(1.04) brightness(.94);
+  transition: filter 220ms ease, transform 220ms ease;
+}
+.credits-shot:hover img { filter: none; transform: translateY(-3px); }
+
+/* справа кадры уходят под затемнение — видно, что ряд продолжается */
+.credits-shots-wrap { position: relative; }
+.credits-shots-wrap::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  width: 56px;
+  pointer-events: none;
+  background: linear-gradient(to left, rgba(11, 11, 11, .92), transparent);
+}
+body.is-rtl .credits-shots-wrap::after { background: linear-gradient(to right, rgba(11, 11, 11, .92), transparent); }
+.credits-shots-wrap.is-end::after { opacity: 0; transition: opacity 200ms ease; }
+.credits-shot figcaption {
+  margin-top: 7px;
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .7;
+}
+body.is-rtl .credits-shot figcaption { letter-spacing: 0; text-transform: none; }
+
+/* титры одной строкой — у клипа они не разложены по ролям */
+.credits-line {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink);
+  opacity: .9;
+  margin: 0 0 26px;
 }
 
 /* метка «это видео» */
@@ -644,7 +767,7 @@ body.is-rtl .film-credits { letter-spacing: 0; text-transform: none; }
 /* ── оверлей титров ──────────────────────────────────────────────────────── */
 
 .panel--credits .panel-inner {
-  max-width: 720px;
+  max-width: 1040px;
   width: 100%;
   max-height: 78vh;
   overflow-y: auto;
@@ -660,6 +783,7 @@ body.is-rtl .film-credits { letter-spacing: 0; text-transform: none; }
 }
 
 .credits-synopsis {
+  max-width: 680px;      /* строка остаётся читаемой, хотя панель шире */
   font-size: 14px;
   line-height: 1.75;
   margin-bottom: 30px;
@@ -698,6 +822,7 @@ body.is-rtl .credits-role { letter-spacing: 0; text-transform: none; }
 
 @media (max-width: 640px) {
   .credits-synopsis {
+  max-width: 680px;      /* строка остаётся читаемой, хотя панель шире */
   font-size: 14px;
   line-height: 1.75;
   margin-bottom: 30px;
@@ -780,7 +905,8 @@ body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
 
 @media (max-width: 640px) {
   .section { min-height: 0; }
-  .hero-logo { transform: translate(-50%, -132%); width: 78vw; }
+  /* на вертикальном экране лицо крупное: подпись уходит выше, на волосы */
+  .hero-logo { transform: translate(-50%, -235%); width: 76vw; }
   .side-start { inset-inline-start: 14px; }
   .side-end   { inset-inline-end: 14px; }
   .film-title { inset-inline-start: 14px; bottom: 54px; }
@@ -804,8 +930,8 @@ body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
 .wall-group:first-of-type { margin-top: 0; }
 body.is-rtl .wall-group { letter-spacing: 0; text-transform: none; }
 
-.wall-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; }
-  .wall-tile img { height: 160px; }
+.wall-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .wall-tile img { height: 230px; }
   .soon-badge { letter-spacing: .34em; text-indent: .34em; }
   .cuts i { width: 1px; }
 }
@@ -817,4 +943,128 @@ body.is-rtl .wall-group { letter-spacing: 0; text-transform: none; }
   .cue, .soon-badge, .soon-glow { animation: none; }
   .wall-tile { transform: none; }
   .section--film .cut-flash { display: none; }
+}
+
+
+/* ── просмотр кадра ──────────────────────────────────────────────────────── */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  /* почти непрозрачно: сквозь .96 читались титры под просмотрщиком */
+  background: rgba(8, 8, 8, .985);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 54px 54px 24px;
+}
+.lightbox[hidden] { display: none; }
+
+.lightbox-stage {
+  margin: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.lightbox-stage img {
+  display: block;
+  max-width: min(1180px, 92vw);
+  max-height: 72vh;
+  width: auto;
+  height: auto;           /* кадр целиком, без обрезки */
+  object-fit: contain;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .7);
+}
+.lightbox-stage figcaption {
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .7;
+  text-align: center;
+}
+body.is-rtl .lightbox-stage figcaption { letter-spacing: 0; text-transform: none; }
+
+.lightbox-bar {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  color: var(--ink-dim);
+}
+.lightbox-count {
+  font-size: 13px;
+  letter-spacing: .14em;
+  min-width: 68px;
+  text-align: center;
+}
+.lightbox-arrow {
+  background: none;
+  border: 0;
+  color: var(--ink-dim);
+  font-size: 20px;
+  line-height: 1;
+  padding: 6px 14px;
+  cursor: pointer;
+  opacity: .7;
+  transition: opacity 180ms ease, color 180ms ease;
+}
+.lightbox-arrow:hover { opacity: 1; color: var(--accent); }
+
+/* тёмная таблетка с управлением показом */
+.lightbox-pad {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(24, 24, 24, .9);
+  border-radius: 999px;
+  padding: 5px;
+}
+.lightbox-pad button {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--ink-dim);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease;
+}
+.lightbox-pad button:hover { background: rgba(255, 255, 255, .1); color: var(--ink); }
+.lightbox-pad .lb-play {
+  background: var(--ink);
+  color: #111;
+  font-size: 12px;
+}
+.lightbox-pad .lb-play:hover { background: #fff; color: #111; }
+
+.lightbox-close {
+  position: absolute;
+  top: 18px;
+  inset-inline-end: 22px;
+  background: none;
+  border: 0;
+  color: var(--ink);
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: .75;
+  transition: opacity 180ms ease;
+}
+.lightbox-close:hover { opacity: 1; }
+
+body.is-lightbox { overflow: hidden; }
+
+@media (max-width: 720px) {
+  .lightbox { padding: 48px 14px 18px; gap: 14px; }
+  .lightbox-stage img { max-height: 58vh; max-width: 94vw; }
+  .credits-shot img { height: 165px; }
+  .lightbox-bar { gap: 14px; }
 }

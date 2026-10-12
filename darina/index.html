@@ -3,10 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Дарина Данилюк</title>
+<title>Дарина Данилюк — режиссёр</title>
 <meta name="description" content="Дарина Данилюк — дипломированный режиссёр игрового и документального кино, хореограф.">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="preload" as="image" href="assets/hero.jpg">
+<link rel="icon" href="assets/favicon.ico" sizes="48x48">
+<link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="assets/favicon-16.png" type="image/png" sizes="16x16">
+<link rel="icon" href="assets/favicon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="assets/favicon-180.png">
+<link rel="preload" as="image" href="assets/portraits/darina-03.jpg">
 <link rel="preload" as="image" href="assets/logo-darina.svg">
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -24,7 +28,7 @@
 
   <!-- 1. герой — фотография из исходного макета -->
   <section class="section section--hero" data-anchor="1">
-    <img class="hero-photo" src="assets/hero.jpg" alt="">
+    <img class="hero-photo" src="assets/portraits/darina-03.jpg" alt="">
     <div class="grain"></div>
     <div class="vignette"></div>
     <div class="hero-logo">
@@ -65,6 +69,29 @@
     <h2 data-t="aboutFilm"></h2>
     <div class="credits-film"></div>
     <div class="panel-body"></div>
+  </div>
+</div>
+
+<!-- просмотр бэкстейджа: кадр целиком, счётчик и автопрокрутка -->
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" type="button">×</button>
+
+  <figure class="lightbox-stage">
+    <img alt="">
+    <figcaption></figcaption>
+  </figure>
+
+  <div class="lightbox-bar">
+    <button class="lightbox-arrow lb-prev" type="button">&#8592;</button>
+    <span class="lightbox-count"></span>
+    <button class="lightbox-arrow lb-next" type="button">&#8594;</button>
+  </div>
+
+  <div class="lightbox-pad">
+    <button class="lb-restart" type="button">&#8635;</button>
+    <button class="lb-step lb-prev" type="button">&#8249;</button>
+    <button class="lb-play" type="button"></button>
+    <button class="lb-step lb-next" type="button">&#8250;</button>
   </div>
 </div>
 

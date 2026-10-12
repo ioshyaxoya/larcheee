@@ -161,7 +161,7 @@
     if (film.year) sub.dataset.year = String(film.year);
     title.appendChild(sub);
 
-    if (creditsFor(film).length || tin('synopsis', film.id)) {
+    if (creditsFor(film).length || tin('synopsis', film.id) || (film.bts && film.bts.length)) {
       var cr = document.createElement('button');
       cr.type = 'button';
       cr.className = 'film-credits';
@@ -260,6 +260,15 @@
       inner.appendChild(cr);
     }
 
+    if ((film.bts && film.bts.length) || film.creditsKey) {
+      var ab = document.createElement('button');
+      ab.type = 'button';
+      ab.className = 'film-credits soon-about';
+      ab.dataset.t = 'aboutClip';
+      ab.addEventListener('click', function () { openCredits(film); });
+      inner.appendChild(ab);
+    }
+
     // появятся после премьеры: VK Видео первым, YouTube вторым
     if (film.links && film.links.length) {
       var row = document.createElement('div');
@@ -294,7 +303,7 @@
 
     var k = document.createElement('div');
     k.className = 'wall-kicker';
-    k.dataset.t = 'wall';
+    k.dataset.t = 'fromInstagram';
     inner.appendChild(k);
 
     // по группе на съёмку, заголовок берётся из словаря
@@ -302,7 +311,8 @@
     var seq = 0;
 
     groups.forEach(function (group) {
-      if (group.film || group.kind || group.key) {
+      // при единственной группе её заголовок повторял бы подпись экрана
+      if (groups.length > 1 && (group.film || group.kind || group.key)) {
         var h = document.createElement('div');
         h.className = 'wall-group';
         if (group.film) h.dataset.tFilm = group.film;
@@ -743,6 +753,9 @@
 
   /* — клавиатура — */
   window.addEventListener('keydown', function (e) {
+    // просмотрщик кадра выше панели: пока он открыт, клавиши его, не наши,
+    // иначе Escape закрывал бы заодно и описание под ним
+    if (lb.root && !lb.root.hidden) return;
     if (panelOpen) {
       if (e.key === 'Escape') closePanel();
       return;
@@ -825,22 +838,47 @@
     var first = hero && hero.querySelector('.hero-photo');
     if (!first) return;
 
-    var list = window.HERO || [first.getAttribute('src')];
-    first.src = list[0];
-    first.classList.add('is-on');
-    heroSlides = [first];
+    var cfg = window.HERO || {};
+    var photos = cfg.photos || (Array.isArray(cfg) ? cfg : [first.getAttribute('src')]);
+    var sets = cfg.sets || photos.map(function (_, i) { return [i]; });
 
-    var prev = first;
-    list.slice(1).forEach(function (src) {
-      var im = document.createElement('img');
-      im.className = 'hero-photo';
-      im.src = src;
-      im.alt = '';
-      im.loading = 'lazy';
-      hero.insertBefore(im, prev.nextSibling);
-      heroSlides.push(im);
-      prev = im;
+    // Первый экран — склейки: в каждой один, два или три кадра. Кадры стоят
+    // в ряд во всю высоту, ширина по пропорции, поэтому ничего не обрезается.
+    // Белые поля на снимках сами работают промежутком между ними.
+    var blur = document.createElement('div');
+    blur.className = 'hero-blur';
+    blur.style.backgroundImage = 'url("' + photos[sets[0][0]] + '")';
+    hero.insertBefore(blur, first);
+
+    heroSlides = [];
+    var frag = document.createDocumentFragment();
+
+    sets.forEach(function (set, n) {
+      var box = document.createElement('div');
+      box.className = 'hero-set' + (n === 0 ? ' is-on' : '');
+
+      set.forEach(function (idx, k) {
+        var im;
+        if (n === 0 && k === 0) {
+          im = first;                 // кадр из разметки переиспользуем
+          im.src = photos[idx];
+        } else {
+          im = document.createElement('img');
+          im.src = photos[idx];
+          im.alt = '';
+          // первые две склейки грузим сразу, остальные по мере показа
+          if (n > 1) im.loading = 'lazy';
+        }
+        im.className = 'hero-photo';
+        box.appendChild(im);
+      });
+
+      frag.appendChild(box);
+      heroSlides.push(box);
     });
+
+    // порядок в разметке: подложка, за ней склейки по порядку
+    hero.insertBefore(frag, blur.nextSibling);
   }
 
   function heroStart() {
@@ -878,11 +916,120 @@
     return Array.isArray(variant) ? variant : [];
   }
 
+  /* ── просмотр кадра: большой кадр, счётчик, автопрокрутка ──────────────── */
+
+  var LB_STEP = 3800;  // пауза между кадрами в автопрокрутке
+  var lb = {
+    root: null, img: null, cap: null, count: null, play: null,
+    shots: [], i: 0, timer: 0, playing: false, prev: null,
+  };
+
+  function lbStop() {
+    if (lb.timer) { clearInterval(lb.timer); lb.timer = 0; }
+    lb.playing = false;
+    if (lb.play) {
+      lb.play.textContent = '\u25B6';
+      lb.play.setAttribute('aria-label', t('play'));
+    }
+  }
+
+  function lbStart() {
+    lbStop();
+    lb.playing = true;
+    lb.play.textContent = '\u275A\u275A';
+    lb.play.setAttribute('aria-label', t('pause'));
+    lb.timer = setInterval(function () { lbGo(lb.i + 1); }, LB_STEP);
+  }
+
+  function lbGo(n) {
+    if (!lb.shots.length) return;
+    // по кругу: с последнего кадра возвращаемся к первому
+    lb.i = (n % lb.shots.length + lb.shots.length) % lb.shots.length;
+    var shot = lb.shots[lb.i];
+    lb.img.src = shot.cover;
+    lb.count.textContent = (lb.i + 1) + ' / ' + lb.shots.length;
+    if (shot.shot !== undefined) {
+      lb.cap.dataset.tShot = String(shot.shot);
+      lb.cap.textContent = tlist('shots')[shot.shot] || '';
+      lb.cap.hidden = false;
+    } else {
+      delete lb.cap.dataset.tShot;
+      lb.cap.textContent = '';
+      lb.cap.hidden = true;
+    }
+  }
+
+  function openLightbox(shots, i) {
+    if (!lb.root || !shots || !shots.length) return;
+    lb.shots = shots;
+    lb.prev = document.activeElement;
+    lb.root.hidden = false;
+    document.body.classList.add('is-lightbox');
+    lbGo(i || 0);
+    lbStop();
+    lb.root.focus();
+  }
+
+  function closeLightbox() {
+    if (!lb.root || lb.root.hidden) return;
+    lbStop();
+    lb.root.hidden = true;
+    document.body.classList.remove('is-lightbox');
+    if (lb.prev && lb.prev.focus) lb.prev.focus();
+  }
+
+  function buildLightbox() {
+    lb.root = document.getElementById('lightbox');
+    if (!lb.root) return;
+    lb.img = lb.root.querySelector('.lightbox-stage img');
+    lb.cap = lb.root.querySelector('.lightbox-stage figcaption');
+    lb.count = lb.root.querySelector('.lightbox-count');
+    lb.play = lb.root.querySelector('.lb-play');
+    lb.root.tabIndex = -1;
+
+    each('.lb-prev', function (b) {
+      b.addEventListener('click', function () { lbStop(); lbGo(lb.i - 1); });
+    });
+    each('.lb-next', function (b) {
+      b.addEventListener('click', function () { lbStop(); lbGo(lb.i + 1); });
+    });
+    lb.root.querySelector('.lb-restart').addEventListener('click', function () {
+      lbStop(); lbGo(0);
+    });
+    lb.play.addEventListener('click', function () {
+      lb.playing ? lbStop() : lbStart();
+    });
+    lb.root.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
+    // клик мимо кадра закрывает, по самому кадру — нет
+    lb.root.addEventListener('click', function (e) {
+      if (e.target === lb.root) closeLightbox();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (lb.root.hidden) return;
+      // Событие нужно погасить здесь. Иначе оно дойдёт до общего обработчика,
+      // а тот увидит уже закрытый просмотрщик и закроет заодно описание под ним.
+      if (e.key === 'Escape') { e.stopPropagation(); closeLightbox(); return; }
+      // в RTL стрелки меняются местами вместе с лентой
+      var back = document.body.classList.contains('is-rtl') ? 'ArrowRight' : 'ArrowLeft';
+      var fwd = back === 'ArrowLeft' ? 'ArrowRight' : 'ArrowLeft';
+      if (e.key === back || e.key === fwd || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (e.key === back) { lbStop(); lbGo(lb.i - 1); }
+      else if (e.key === fwd) { lbStop(); lbGo(lb.i + 1); }
+      else if (e.key === ' ') { lb.playing ? lbStop() : lbStart(); }
+    });
+  }
+
   function openCredits(film) {
     var body = document.querySelector('#panel-credits .panel-body');
     var head = document.querySelector('#panel-credits .credits-film');
+    var h2 = document.querySelector('#panel-credits h2');
     if (!body) return;
 
+    if (h2) h2.dataset.t = film.soon ? 'aboutClip' : 'aboutFilm';
     if (head) head.textContent = tin('films', film.id);
     body.textContent = '';
 
@@ -892,6 +1039,51 @@
       sp.className = 'credits-synopsis';
       sp.textContent = syn;
       body.appendChild(sp);
+    }
+
+    // бэкстейдж живёт при своей работе: лента внутри описания фильма.
+    // Высота у кадров общая, ширина — по пропорции, поэтому ничего не режется.
+    if (film.bts && film.bts.length) {
+      var bsub = document.createElement('div');
+      bsub.className = 'credits-sub';
+      bsub.textContent = t('wall');
+      body.appendChild(bsub);
+
+      var strip = document.createElement('div');
+      strip.className = 'credits-shots';
+
+      film.bts.forEach(function (shot, idx) {
+        if (!shot || !shot.cover) return;
+        var fig = document.createElement('figure');
+        fig.className = 'credits-shot';
+
+        var im = document.createElement('img');
+        im.src = shot.cover;
+        im.alt = '';
+        im.loading = 'lazy';
+        fig.appendChild(im);
+
+        if (shot.shot !== undefined) {
+          var cap = document.createElement('figcaption');
+          cap.dataset.tShot = String(shot.shot);
+          fig.appendChild(cap);
+        }
+
+        fig.addEventListener('click', function () { openLightbox(film.bts, idx); });
+        strip.appendChild(fig);
+      });
+
+      // обёртка нужна для затемнения справа: оно показывает, что ряд длиннее
+      var wrap = document.createElement('div');
+      wrap.className = 'credits-shots-wrap';
+      wrap.appendChild(strip);
+      var atEnd = function () {
+        var left = Math.abs(strip.scrollLeft);
+        wrap.classList.toggle('is-end', left + strip.clientWidth >= strip.scrollWidth - 2);
+      };
+      strip.addEventListener('scroll', atEnd);
+      requestAnimationFrame(atEnd);
+      body.appendChild(wrap);
     }
 
     var rows = creditsFor(film);
@@ -923,6 +1115,15 @@
       body.appendChild(line);
     });
 
+    // одной строкой — там, где титры не разложены по ролям (клип)
+    if (!rows.length && film.creditsKey) {
+      var one = document.createElement('p');
+      one.className = 'credits-line';
+      one.textContent = t(film.creditsKey);
+      body.appendChild(one);
+    }
+
+    applyLocale();
     openPanel('credits');
   }
 
@@ -981,6 +1182,11 @@
     }
 
     each('.panel-close', function (b) { b.setAttribute('aria-label', t('close')); });
+    each('.lightbox-close', function (b) { b.setAttribute('aria-label', t('close')); });
+    each('.lb-prev', function (b) { b.setAttribute('aria-label', t('prev')); });
+    each('.lb-next', function (b) { b.setAttribute('aria-label', t('next')); });
+    each('.lb-restart', function (b) { b.setAttribute('aria-label', t('replay')); });
+    if (lb.play) lb.play.setAttribute('aria-label', t(lb.playing ? 'pause' : 'play'));
     if (cueEl) cueEl.setAttribute('aria-label', t('next'));
 
     each('.lang-btn', function (b) {
@@ -1006,6 +1212,7 @@
   buildHero();
   buildSwitcher();
   buildContacts();
+  buildLightbox();
   applyLocale();
 
   var startAt = fromHash();
@@ -1022,5 +1229,7 @@
     setLocale: setLocale,
     engineBySection: engineBySection,
     playersBySection: playersBySection,
+    lightbox: lb,
+    openLightbox: openLightbox,
   };
 })();
