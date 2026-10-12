@@ -53,7 +53,9 @@
     v.setAttribute('webkit-playsinline', '');
     v.setAttribute('muted', '');
     v.preload = 'metadata';
-    v.loop = false;                            // цикл ведёт CutEngine
+    // у готовой нарезки склейки уже вшиты — она просто крутится по кругу;
+    // у исходного фильма цикл ведёт CutEngine
+    v.loop = !!film.prerendered;
 
     // film.src — строка или массив: браузер берёт первый формат, который умеет
     var srcs = Array.isArray(film.src) ? film.src : [film.src];
@@ -269,8 +271,11 @@
     this.video = section.querySelector('video');
     this.onCut = onCut || function () {};
 
+    // prerendered — файл уже собран из CUTS кусков и ускорен при кодировании:
+    // движку остаётся только крутить его и считать текущий кусок по таймкоду
+    this.prerendered = !!film.prerendered;
     this.cuts = film.cuts || CFG.CUTS;
-    this.rate = film.rate || CFG.RATE;
+    this.rate = this.prerendered ? 1 : (film.rate || CFG.RATE);
     this.cutSeconds = film.cutSeconds || CFG.CUT_SECONDS;
 
     this.index = 0;
@@ -374,6 +379,17 @@
     if (REDUCED) return;                       // без нарезки — играем подряд
 
     var t = this.video.currentTime;
+
+    if (this.prerendered) {
+      // склейки уже в файле: ничего не трогаем, только ведём индикатор
+      var idx = Math.min(this.cuts - 1, Math.max(0, Math.floor(t / this.segLen)));
+      if (idx !== this.index) {
+        this.index = idx;
+        this.onCut(idx, this.cuts);
+      }
+      return;
+    }
+
     var start = this.segStart(this.index);
 
     // кусок доиграл — режем на следующий;
@@ -399,7 +415,7 @@
     }
 
     this.video.playbackRate = this.rate;
-    this.goTo(this.index, true);
+    if (!this.prerendered) this.goTo(this.index, true);
 
     var self = this;
     var p = this.video.play();
