@@ -6,14 +6,18 @@
  *
  * Поля фильма:
  *   title      — название, печатается слева внизу
- *   subtitle   — вторая строка (роль, год, продакшн)
+ *   subtitle   — вторая строка (формат, год, продакшн)
  *   src        — путь к видео или массив путей (браузер возьмёт первый
  *                 формат, который умеет: webm — лёгкий, mp4 — для Safari)
  *   poster     — кадр-заглушка, показывается пока видео грузится
  *   link       — необязательная ссылка (Vimeo/YouTube) на полную версию
+ *   credits    — полные титры; пока нигде не выводятся, ждут оверлея
  *   cuts       — переопределить число кусков для этого фильма
  *   rate       — переопределить скорость для этого фильма
  *   cutSeconds — сколько секунд исходника показывать в одном куске
+ *
+ * Экран-анонс (без видео) описывается так:
+ *   { soon: true, kicker: '...', title: '...', note: '...', poster: '...' }
  * ------------------------------------------------------------------------ */
 
 window.MONTAGE = {
@@ -25,38 +29,33 @@ window.MONTAGE = {
 
 window.FILMS = [
   {
-    title: 'Красный свет',
-    subtitle: 'dir. Darina Danilyuk',
+    title: 'Кирилл, моя любовь',
+    subtitle: 'короткий метр',
+    // ЗАГЛУШКА: заменить на нарезку из мастера
     src: ['assets/films/film-01.webm', 'assets/films/film-01.mp4'],
-    poster: 'assets/hero.jpg',
+    poster: 'assets/films/kirill-poster.jpg',
     link: '',
+    credits: 'Режиссёр и автор идеи Дарина Данилюк · сценарист Валерия Саксонова · '
+           + 'оператор-постановщик Артём Золотов · звукорежиссёр Александр Вязаничев · '
+           + 'продюсер Мария Головина · художник-постановщик Алиса Кац · '
+           + 'второй режиссёр Яна Ованесянц · ассистент режиссёра Анастасия Лапидус. '
+           + 'В ролях: Григорий Баев, Арина Лигай, Арина Попова, Дмитрий Савогин. '
+           + 'Институт кино и телевидения.',
   },
   {
-    title: 'Ночная смена',
-    subtitle: 'short · dir. Darina Danilyuk',
+    title: 'Драйв',
+    subtitle: 'короткий метр',
+    // ЗАГЛУШКА: заменить на нарезку из мастера
     src: ['assets/films/film-02.webm', 'assets/films/film-02.mp4'],
-    poster: 'assets/hero.jpg',
+    poster: 'assets/films/drive-poster.jpg',
     link: '',
+    credits: '',   // титры пока не присланы
   },
   {
-    title: 'Отражение',
-    subtitle: 'music video · dir. Darina Danilyuk',
-    src: ['assets/films/film-03.webm', 'assets/films/film-03.mp4'],
-    poster: 'assets/hero.jpg',
-    link: '',
-  },
-  {
-    title: 'Backstage',
-    subtitle: 'doc · dir. Darina Danilyuk',
-    src: ['assets/films/film-04.webm', 'assets/films/film-04.mp4'],
-    poster: 'assets/hero.jpg',
-    link: '',
-  },
-  {
-    title: 'Тихий свет',
-    subtitle: 'short · dir. Darina Danilyuk',
-    src: ['assets/films/film-05.webm', 'assets/films/film-05.mp4'],
-    poster: 'assets/hero.jpg',
-    link: '',
+    soon: true,
+    kicker: 'музыкальный клип',
+    title: '',     // впишите название, когда можно раскрыть
+    note: '',      // например «премьера — осень 2026»; можно оставить пустым
+    poster: '',    // кадр для фона, если захотите показать
   },
 ];

@@ -99,8 +99,57 @@
     return s;
   }
 
+  /** Экран-анонс: без видео и без нарезки — только типографика поверх свечения. */
+  function buildSoonSection(film, i) {
+    var s = document.createElement('section');
+    s.className = 'section section--soon' + (film.title ? '' : ' soon-untitled');
+    s.dataset.anchor = String(i + 2);
+
+    if (film.poster) {
+      var ph = document.createElement('img');
+      ph.className = 'soon-poster';
+      ph.src = film.poster;
+      ph.alt = '';
+      s.appendChild(ph);
+    }
+
+    var glow = document.createElement('div');
+    glow.className = 'soon-glow';
+    s.appendChild(glow);
+
+    var grain = document.createElement('div');
+    grain.className = 'grain';
+    s.appendChild(grain);
+
+    var inner = document.createElement('div');
+    inner.className = 'soon-inner';
+
+    [['soon-kicker', film.kicker], ['soon-title', film.title]].forEach(function (pair) {
+      if (!pair[1]) return;
+      var el = document.createElement('div');
+      el.className = pair[0];
+      el.textContent = pair[1];
+      inner.appendChild(el);
+    });
+
+    var badge = document.createElement('div');
+    badge.className = 'soon-badge';
+    badge.textContent = 'soon';
+    inner.appendChild(badge);
+
+    if (film.note) {
+      var nt = document.createElement('div');
+      nt.className = 'soon-note';
+      nt.textContent = film.note;
+      inner.appendChild(nt);
+    }
+
+    s.appendChild(inner);
+    return s;
+  }
+
   FILMS.forEach(function (film, i) {
-    deckEl.appendChild(buildFilmSection(film, i));
+    deckEl.appendChild(film.soon ? buildSoonSection(film, i) : buildFilmSection(film, i));
   });
 
   var sections = Array.prototype.slice.call(deckEl.querySelectorAll('.section'));
@@ -305,11 +354,16 @@
    * 4. Deck — постраничная прокрутка
    * ==================================================================== */
 
-  var engines = FILMS.map(function (film, i) {
-    return new CutEngine(sections[i + 1], film, function (index, total) {
-      if (current === i + 1) paintTicks(index, total);
+  // движок на каждую секцию; у экрана-анонса его нет, поэтому карта по индексу
+  var engineBySection = [];
+  FILMS.forEach(function (film, i) {
+    var si = i + 1;
+    if (film.soon) { engineBySection[si] = null; return; }
+    engineBySection[si] = new CutEngine(sections[si], film, function (index, total) {
+      if (current === si) paintTicks(index, total);
     });
   });
+  var engines = engineBySection.filter(Boolean);
 
   var current = 0;
   var locked = false;
@@ -337,16 +391,17 @@
     sections.forEach(function (s, n) { s.classList.toggle('is-active', n === i); });
 
     // видео: играет только активный экран, соседи — прогреваются
-    engines.forEach(function (e, n) {
-      var si = n + 1;
+    engineBySection.forEach(function (e, si) {
+      if (!e) return;
       if (si === i) { e.start(); return; }
       e.stop();
       if (Math.abs(si - i) === 1) e.warm();
     });
 
-    var onFilm = i >= 1 && i <= engines.length;
-    cutsEl.classList.toggle('is-on', onFilm);
-    if (onFilm) paintTicks(engines[i - 1].index, engines[i - 1].cuts);
+    // индикатор нарезки — только там, где реально есть фильм
+    var eng = engineBySection[i] || null;
+    cutsEl.classList.toggle('is-on', !!eng);
+    if (eng) paintTicks(eng.index, eng.cuts);
 
     cueEl.classList.toggle('is-hidden', i === sections.length - 1);
 
@@ -472,5 +527,6 @@
     deck: { go: go, next: next, prev: prev, get current() { return current; } },
     sections: sections,
     engines: engines,
+    engineBySection: engineBySection,
   };
 })();

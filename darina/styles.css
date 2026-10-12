@@ -199,6 +199,120 @@ a:hover { color: var(--accent); }
   opacity: .55;
 }
 
+/* ── экран-анонс (клип, который ещё не вышел) ────────────────────────────── */
+
+.section--soon {
+  background: #070707;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* кадр фоном, если он есть: сильно затемнён и размыт — читается настроение,
+   но не сам кадр */
+.section--soon .soon-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(.35) brightness(.32) blur(13px);
+  transform: scale(1.08);
+  z-index: 0;
+}
+
+/* медленное красное свечение — чтобы пустой экран не читался как пустой */
+.soon-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  /* крупнее экрана, чтобы край растворялся за кадром, а не кольцом */
+  background: radial-gradient(78% 60% at 50% 52%,
+    rgba(255, 42, 18, .26) 0%,
+    rgba(255, 42, 18, .13) 38%,
+    rgba(255, 42, 18, .05) 62%,
+    transparent 100%);
+  animation: breathe 7.5s ease-in-out infinite;
+}
+
+/* плавный градиент на почти чёрном даёт кольца — забиваем их шумом */
+.section--soon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  /* overlay вместо прямого наложения: тени остаются чёрными, рябь ложится
+     только туда, где есть свечение — именно там и видны кольца */
+  mix-blend-mode: overlay;
+  opacity: .75;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: .55; transform: scale(1);    }
+  50%      { opacity: 1;   transform: scale(1.06); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: .72 }
+  50%      { opacity: 1 }
+}
+
+.soon-inner {
+  position: relative;
+  z-index: 5;
+  text-align: center;
+  padding: 0 24px;
+  max-width: 860px;
+}
+
+.soon-kicker {
+  font-size: 11px;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .6;
+}
+
+.soon-title {
+  margin-top: 18px;
+  font-size: clamp(24px, 4.4vw, 46px);
+  line-height: 1.14;
+  text-shadow: 0 2px 16px #000;
+}
+
+/* «soon» — подпись под названием… */
+.soon-badge {
+  margin-top: 26px;
+  display: inline-block;
+  font-size: 13px;
+  letter-spacing: .44em;
+  text-indent: .44em;            /* компенсируем трекинг последней буквы */
+  text-transform: uppercase;
+  color: var(--accent);
+  animation: pulse 3s ease-in-out infinite;
+  text-shadow: 0 0 28px rgba(255, 42, 18, .5);
+}
+
+/* …а если название ещё не раскрыто — само «soon» и есть заголовок */
+.section--soon.soon-untitled .soon-badge {
+  margin-top: 22px;
+  font-size: clamp(34px, 7.4vw, 78px);
+  letter-spacing: .3em;
+  text-indent: .3em;
+}
+
+.soon-note {
+  margin-top: 18px;
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .45;
+}
+
 /* ── стрелка вниз ────────────────────────────────────────────────────────── */
 
 .cue {
@@ -304,6 +418,7 @@ a:hover { color: var(--accent); }
   .side-right { right: 14px; }
   .film-title { left: 14px; bottom: 54px; }
   .cuts { right: 14px; bottom: 56px; gap: 2px; }
+  .soon-badge { letter-spacing: .34em; text-indent: .34em; }
   .cuts i { width: 1px; }
 }
 
@@ -311,6 +426,6 @@ a:hover { color: var(--accent); }
 
 @media (prefers-reduced-motion: reduce) {
   .deck { transition: none; }
-  .cue { animation: none; }
+  .cue, .soon-badge, .soon-glow { animation: none; }
   .section--film .cut-flash { display: none; }
 }
