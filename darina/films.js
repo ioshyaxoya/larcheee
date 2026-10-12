@@ -33,8 +33,13 @@ window.FILMS = [
   {
     title: 'Кирилл, моя любовь',
     subtitle: 'короткий метр · 2026',
-    // ЗАГЛУШКА: заменить на нарезку из мастера
-    src: ['assets/films/film-01.webm', 'assets/films/film-01.mp4'],
+    // Готовая нарезка: мастер 5:53 (1920×1080 с letterbox) обрезан до
+    // 19.5–331.0 с — без титульной карточки курсовой, OrBox, «16+»,
+    // заставки института и финальных титров. Срезан letterbox
+    // (crop 1920:816:0:132), ширина 1280. Верхняя граница 331, а не 338:
+    // иначе один из кусков попадал в чёрную паузу на 183–186 с.
+    prerendered: true,
+    src: ['assets/films/kirill.webm', 'assets/films/kirill.mp4'],
     poster: 'assets/films/kirill-poster.jpg',
     // полная версия на канале: название на экране становится ссылкой
     link: 'https://www.youtube.com/watch?v=JHgzOetLiqM',
@@ -56,7 +61,7 @@ window.FILMS = [
     prerendered: true,
     src: ['assets/films/drive.webm', 'assets/films/drive.mp4'],
     poster: 'assets/films/drive-poster.jpg',
-    link: 'https://www.youtube.com/watch?v=wyoZQYFn0bE',
+    link: 'https://www.youtube.com/watch?v=9tVdzKuggLU',   // перезалит, старая ссылка мертва
     credits: '',   // титры пока не присланы
   },
   /* ----------------------------------------------------------------------
