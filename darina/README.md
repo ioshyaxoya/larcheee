@@ -188,7 +188,12 @@ ffmpeg -i source.mov -c:v libvpx-vp9 -crf 33 -b:v 0 -row-mt 1 -an moy-film.webm
 
 ## Локальный запуск
 
-Нужен http-сервер: из `file://` браузер не перематывает видео.
+Пока все фильмы с `prerendered: true`, сайт открывается просто двойным
+кликом по `index.html` — перемотки нет, значит и сервер не нужен.
+
+Сервер понадобится, как только появится фильм без `prerendered`: такой
+движок режет в браузере через `currentTime`, а из `file://` перемотка
+не работает.
 
 ```bash
 cd darina && python3 -m http.server 8000   # → http://localhost:8000
