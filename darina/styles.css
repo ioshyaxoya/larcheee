@@ -576,6 +576,70 @@ body.is-rtl .panel-inner { text-align: start; }
 .cuts i.done { opacity: .5; }
 .cuts i.now  { opacity: 1; height: 13px; background: var(--accent); }
 
+/* ── кнопка «титры» под подписью фильма ──────────────────────────────────── */
+
+.film-credits {
+  display: block;
+  margin-top: 9px;
+  padding: 0;
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .6;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  cursor: pointer;
+  transition: color 200ms ease, opacity 200ms ease;
+}
+.film-credits:hover { color: var(--accent); opacity: 1; }
+body.is-rtl .film-credits { letter-spacing: 0; text-transform: none; }
+
+/* ── оверлей титров ──────────────────────────────────────────────────────── */
+
+.panel--credits .panel-inner {
+  max-width: 720px;
+  width: 100%;
+  max-height: 78vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2a2a transparent;
+}
+
+.credits-film {
+  font-size: clamp(17px, 2.4vw, 23px);
+  margin-bottom: 26px;
+  color: var(--ink);
+}
+
+.credits-row {
+  display: grid;
+  grid-template-columns: minmax(130px, 38%) 1fr;
+  gap: 10px 22px;
+  padding: 7px 0;
+  border-top: 1px solid rgba(243, 241, 234, .08);
+}
+
+.credits-role {
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .5;
+  padding-top: 2px;
+}
+body.is-rtl .credits-role { letter-spacing: 0; text-transform: none; }
+
+.credits-names { display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
+
+@media (max-width: 640px) {
+  .credits-row { grid-template-columns: 1fr; gap: 4px; }
+  .panel--credits .panel-inner { max-height: 82vh; }
+}
+
 /* ── оверлеи about / contact ─────────────────────────────────────────────── */
 
 .panel {

@@ -10,7 +10,8 @@
  *   link        — ссылка на полную версию, название станет кликабельным
  *   prerendered — файл уже нарезан и ускорен (tools/montage.py), движок его
  *                 не перематывает, а крутит по кругу
- *   credits     — полные титры; ждут отдельного оверлея
+ *   credits     — титры: { ru: [[роль, [имена]], …], en: [[…]] }.
+ *                 ru показывается на русском, en — на остальных языках
  *   cuts / rate / cutSeconds — переопределить параметры нарезки
  * ------------------------------------------------------------------------ */
 
@@ -32,12 +33,35 @@ window.FILMS = [
     src: ['assets/films/kirill.webm', 'assets/films/kirill.mp4'],
     poster: 'assets/films/kirill-poster.jpg',
     link: 'https://www.youtube.com/watch?v=JHgzOetLiqM',
-    credits: 'Режиссёр и автор идеи Дарина Данилюк · сценарист Валерия Саксонова · '
-           + 'оператор-постановщик Артём Золотов · звукорежиссёр Александр Вязаничев · '
-           + 'продюсер Мария Головина · художник-постановщик Алиса Кац · '
-           + 'второй режиссёр Яна Ованесянц · ассистент режиссёра Анастасия Лапидус. '
-           + 'В ролях: Григорий Баев, Арина Лигай, Арина Попова, Дмитрий Савогин. '
-           + 'Институт кино и телевидения.',
+    // титры с постера; ru — как в фильме, en — латиницей для остальных языков
+    credits: {
+      ru: [
+        ['Режиссёр и автор идеи', ['Дарина Данилюк']],
+        ['Сценарист',             ['Валерия Саксонова']],
+        ['Оператор-постановщик',  ['Артём Золотов']],
+        ['Звукорежиссёр',         ['Александр Вязаничев']],
+        ['Продюсер',              ['Мария Головина']],
+        ['Художник-постановщик',  ['Алиса Кац']],
+        ['Второй режиссёр',       ['Яна Ованесянц']],
+        ['Ассистент режиссёра',   ['Анастасия Лапидус']],
+        ['В ролях',               ['Григорий Баев', 'Арина Лигай',
+                                   'Арина Попова', 'Дмитрий Савогин']],
+        ['Производство',          ['Институт кино и телевидения']],
+      ],
+      en: [
+        ['Director, original idea', ['Darina Danilyuk']],
+        ['Screenwriter',            ['Valeria Saksonova']],
+        ['Director of photography',  ['Artem Zolotov']],
+        ['Sound designer',          ['Alexander Vyazanichev']],
+        ['Producer',                ['Maria Golovina']],
+        ['Production designer',     ['Alisa Katz']],
+        ['Second unit director',    ['Yana Ovanesyants']],
+        ['Assistant director',      ['Anastasia Lapidus']],
+        ['Cast',                    ['Grigory Baev', 'Arina Ligay',
+                                     'Arina Popova', 'Dmitry Savogin']],
+        ['Production',              ['Institute of Cinema and Television']],
+      ],
+    },
   },
   {
     id: 'drive', kind: 'short', year: 2025,
@@ -46,7 +70,42 @@ window.FILMS = [
     src: ['assets/films/drive.webm', 'assets/films/drive.mp4'],
     poster: 'assets/films/drive-poster.jpg',
     link: 'https://www.youtube.com/watch?v=9tVdzKuggLU',   // перезалит
-    credits: '',   // титры пока не присланы
+    credits: {
+      ru: [
+        ['Режиссёр',            ['Дарина Данилюк']],
+        ['Оператор',            ['Артём Золотов']],
+        ['Звукорежиссёр',       ['Александр Вязаничев']],
+        ['Продюсер',            ['Ярослав Гусев']],
+        ['Второй режиссёр',     ['Алина Веремей']],
+        ['Помощник режиссёра',  ['Анастасия Лапидус']],
+        ['Каскадёр',            ['Тимофей Беленький']],
+        ['В ролях',             ['Евгений Канунников — Парень',
+                                 'Александра Золотова — Женщина',
+                                 'Вячеслав Мелешин — Охранник',
+                                 'Ева Мелешина — Ребёнок']],
+        ['Отдельная благодарность', ['Лариса Данилюк', 'Алексей Золотов',
+                                     'Николай Кривов', 'Карина Мелешина']],
+        ['Мастерские',          ['Б. П. Моргунов', 'Р. В. Иванов', 'Р. Э. Минлишев',
+                                 'Д. Ю. Бобров', 'Е. В. Мустафина', 'П. В. Кириллов']],
+      ],
+      en: [
+        ['Director',              ['Darina Danilyuk']],
+        ['Cinematographer',       ['Artem Zolotov']],
+        ['Sound designer',        ['Alexander Vyazanichev']],
+        ['Producer',              ['Yaroslav Gusev']],
+        ['Second unit director',  ['Alina Veremey']],
+        ['Assistant director',    ['Anastasia Lapidus']],
+        ['Stunt performer',       ['Timofey Belenkiy']],
+        ['Cast',                  ['Evgeny Kanunnikov — the young man',
+                                   'Alexandra Zolotova — the woman',
+                                   'Vyacheslav Meleshin — the guard',
+                                   'Eva Meleshina — the child']],
+        ['Special thanks',        ['Larisa Danilyuk', 'Alexey Zolotov',
+                                   'Nikolay Krivov', 'Karina Meleshina']],
+        ['Workshops',             ['B. P. Morgunov', 'R. V. Ivanov', 'R. E. Minlishev',
+                                   'D. Yu. Bobrov', 'E. V. Mustafina', 'P. V. Kirillov']],
+      ],
+    },
   },
 
   /* ----------------------------------------------------------------------

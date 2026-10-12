@@ -160,6 +160,15 @@
     sub.dataset.tKind = film.kind || '';
     if (film.year) sub.dataset.year = String(film.year);
     title.appendChild(sub);
+
+    if (creditsFor(film).length) {
+      var cr = document.createElement('button');
+      cr.type = 'button';
+      cr.className = 'film-credits';
+      cr.dataset.t = 'credits';
+      cr.addEventListener('click', function () { openCredits(film); });
+      title.appendChild(cr);
+    }
     s.appendChild(title);
 
     return s;
@@ -779,6 +788,47 @@
       if (e.target === p || e.target.classList.contains('panel-close')) closePanel();
     });
   });
+
+  /** Титры на языке посетителя: русские для русского, латиница для прочих. */
+  function creditsFor(film) {
+    var c = film && film.credits;
+    if (!c) return [];
+    if (Array.isArray(c)) return c;                  // старый плоский формат
+    var variant = (locale === 'ru' ? c.ru : c.en) || c.en || c.ru;
+    return Array.isArray(variant) ? variant : [];
+  }
+
+  function openCredits(film) {
+    var body = document.querySelector('#panel-credits .panel-body');
+    var head = document.querySelector('#panel-credits .credits-film');
+    if (!body) return;
+
+    if (head) head.textContent = tin('films', film.id);
+    body.textContent = '';
+
+    creditsFor(film).forEach(function (row) {
+      var line = document.createElement('div');
+      line.className = 'credits-row';
+
+      var role = document.createElement('span');
+      role.className = 'credits-role';
+      role.textContent = row[0];
+      line.appendChild(role);
+
+      var names = document.createElement('span');
+      names.className = 'credits-names';
+      (row[1] || []).forEach(function (nm) {
+        var one = document.createElement('span');
+        one.textContent = nm;
+        names.appendChild(one);
+      });
+      line.appendChild(names);
+
+      body.appendChild(line);
+    });
+
+    openPanel('credits');
+  }
 
   /* ======================================================================
    * 5b. Язык: подстановка строк и переключатель
