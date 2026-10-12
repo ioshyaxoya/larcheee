@@ -232,6 +232,17 @@ a:hover { color: var(--accent); }
 .section--film video { z-index: 1; opacity: 0; transition: opacity 400ms linear; }
 .section--film.is-playing video { opacity: 1; }
 
+/* Вертикальный экран видит узкую полосу кадра. Куда её ставить — решает кусок
+   нарезки: движок кладёт в --fx готовое значение (films.js → focus), и у каждого
+   куска окно стоит там, где герой. Без --fx остаётся середина, как раньше.
+   На горизонтальных экранах правило не работает — кадр там виден целиком. */
+@media (max-aspect-ratio: 1 / 1) {
+  .section--film video,
+  .section--film .film-poster {
+    object-position: var(--fx, 50%) 50%;
+  }
+}
+
 /* мгновенная «склейка» между кусками */
 .section--film .cut-flash {
   position: absolute;
@@ -1299,8 +1310,30 @@ body.is-lightbox { overflow: hidden; }
    На Windows с Office почти все эти шрифты есть, на других системах
    подхватится запасной. Русский остаётся на Verdana, как было.            */
 
+/* Английский: настоящий Comic Sans есть на компьютерах (Windows, macOS), но не на
+   телефонах — на iPhone вместо него подставлялся Papyrus, на Android системный
+   «cursive», и английский выглядел там совсем иначе. Comic Neue — свободный
+   (OFL) шрифт того же рисунка; он лежит в assets/fonts и подключается только там,
+   где Comic Sans MS нет: браузер скачивает его, лишь когда до него доходит стек.
+   Файлы в подпапке сайта открываются и с file://.
+   font-display: block — пока файл едет, текст не показывается, а не мелькает
+   запасным шрифтом: на iPhone это был бы Papyrus, и первый кадр выглядел бы чужим. */
+@font-face {
+  font-family: 'Comic Neue';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('assets/fonts/comic-neue-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Comic Neue';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url('assets/fonts/comic-neue-700.woff2') format('woff2');
+}
 html[lang="en-GB"] body {
-  font-family: 'Comic Sans MS', 'Comic Sans', Papyrus, 'Chalkboard SE', 'Comic Neue', cursive;
+  font-family: 'Comic Sans MS', 'Comic Sans', 'Comic Neue', Papyrus, 'Chalkboard SE', cursive;
 }
 /* Испанский: основной набор — Optima (флейтовые гротески с римскими пропорциями),
    а Jokerman остаётся только в заголовках. Optima родная для macOS и iOS, на

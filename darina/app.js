@@ -396,6 +396,16 @@
     this.rate = this.prerendered ? 1 : (film.rate || CFG.RATE);
     this.cutSeconds = film.cutSeconds || CFG.CUT_SECONDS;
 
+    // Вертикальный экран видит узкую полосу кадра, и середина — не всегда то место,
+    // где герой. focus — по числу на кусок (films.js): центр полосы, % ширины кадра.
+    // cutTimes — где в файле на самом деле начинаются куски (tools/cuts.py): файл
+    // не делится на равные доли, и без них кадрирование менялось бы раньше склейки.
+    this.focus = film.focus || null;
+    this.cutTimes = film.cutTimes || null;
+    this.poster = section.querySelector('.film-poster');
+    this.fx = null;
+    this.frameCb = null;
+
     this.index = 0;
     this.duration = 0;
     this.segLen = 0;
@@ -412,8 +422,13 @@
     this.video.addEventListener('loadedmetadata', function () {
       clearTimeout(self._loadTimer);
       self.measure();
+      self.setFocus(self.index);               // теперь известны пропорции кадра
       if (self.active) self.start();
     });
+    if (this.poster) {
+      this.poster.addEventListener('load', function () { self.setFocus(self.index); });
+    }
+    this.setFocus(0);
 
     this.video.addEventListener('error', function () { self.fail(); });
 
@@ -450,6 +465,45 @@
     return i * this.segLen;
   };
 
+  /** Номер куска, в котором находится момент pos готового файла. */
+  CutEngine.prototype.cutAt = function (pos) {
+    var ct = this.cutTimes;
+    if (ct && ct.length === this.cuts - 1) {
+      var n = 0;
+      while (n < ct.length && pos >= ct[n] - 0.002) n++;
+      return n;
+    }
+    return Math.min(this.cuts - 1, Math.max(0, Math.floor(pos / this.segLen)));
+  };
+
+  /** Какая доля ширины кадра видна на экране, когда кадр закрывает его целиком (cover). */
+  CutEngine.prototype.visibleWidth = function () {
+    var v = this.video, p = this.poster;
+    var aw = v.videoWidth || (p && p.naturalWidth) || 16;
+    var ah = v.videoHeight || (p && p.naturalHeight) || 9;
+    var bw = this.section.clientWidth, bh = this.section.clientHeight;
+    if (!bw || !bh) return 1;
+    return Math.min(1, (bw / bh) / (aw / ah));
+  };
+
+  /**
+   * Ставит кадрирование куска idx. Центр полосы c (доля ширины кадра) переводится
+   * в object-position: окно слева = (1 − w) · p, значит p = (c − w/2) / (1 − w).
+   * Прямое «c %» не годится — оно сдвигает окно к центру, и герой у края
+   * попадал бы на самую границу. Значение читает css, но только на вертикальном экране.
+   */
+  CutEngine.prototype.setFocus = function (idx) {
+    if (!this.focus) return;
+    var c = this.focus[idx];
+    c = (typeof c === 'number' && isFinite(c)) ? Math.max(0, Math.min(100, c)) / 100 : 0.5;
+    var w = this.visibleWidth();
+    var p = w >= 1 ? 0.5 : Math.max(0, Math.min(1, (c - w / 2) / (1 - w)));
+    var v = Math.round(p * 1000) / 10;
+    if (v === this.fx) return;
+    this.fx = v;
+    this.section.style.setProperty('--fx', v + '%');
+  };
+
   CutEngine.prototype.fail = function () {
     if (this.failed) return;
     this.failed = true;
@@ -482,6 +536,7 @@
     try { this.video.currentTime = target; } catch (e) { /* not seekable yet */ }
     if (this.video.playbackRate !== this.rate) this.video.playbackRate = this.rate;
     if (!silent) this.flash();
+    this.setFocus(this.index);
     this.onCut(this.index, this.cuts);
   };
 
@@ -495,16 +550,22 @@
 
     if (!this.active || !this.ready || this.failed) return;
     if (this.video.paused || this.video.seeking) return;
-    if (REDUCED) return;                       // без нарезки — играем подряд
+    if (REDUCED) {                             // без нарезки — играем подряд
+      // у готового файла склейки вшиты и играют всё равно — окно должно за ними идти
+      if (this.prerendered && this.frameCb === null) this.setFocus(this.cutAt(this.video.currentTime));
+      return;
+    }
 
     var pos = this.video.currentTime;
 
     if (this.prerendered) {
       // склейки уже в файле: ничего не трогаем, только ведём индикатор
-      var idx = Math.min(this.cuts - 1, Math.max(0, Math.floor(pos / this.segLen)));
+      var idx = this.cutAt(pos);
       if (idx !== this.index) {
         this.index = idx;
         this.onCut(idx, this.cuts);
+        // там, где есть requestVideoFrameCallback, кадрирование ведёт он — по самому кадру
+        if (this.frameCb === null) this.setFocus(idx);
       }
       return;
     }
@@ -547,13 +608,33 @@
       this.section.classList.add('is-playing');
     }
 
+    if (this.frameCb === null) this.watchFrames();
     if (this.raf === null) this.tick();
+  };
+
+  /**
+   * Кадрирование меняется в тот же кадр, что и склейка: requestVideoFrameCallback
+   * отдаёт время именно того кадра, который сейчас покажут. По currentTime можно
+   * ошибиться на кадр-два, и перед склейкой картинка дёрнулась бы в сторону.
+   */
+  CutEngine.prototype.watchFrames = function () {
+    var v = this.video, self = this;
+    if (!this.focus || !this.prerendered || !v.requestVideoFrameCallback) return;
+    var cb = function (now, meta) {
+      self.setFocus(self.cutAt(meta.mediaTime));
+      self.frameCb = v.requestVideoFrameCallback(cb);
+    };
+    this.frameCb = v.requestVideoFrameCallback(cb);
   };
 
   CutEngine.prototype.stop = function () {
     this.active = false;
     this.section.classList.remove('is-active');
     this.video.pause();
+    if (this.frameCb !== null) {
+      this.video.cancelVideoFrameCallback(this.frameCb);
+      this.frameCb = null;
+    }
     if (this.raf !== null) { cancelAnimationFrame(this.raf); this.raf = null; }
   };
 
@@ -645,6 +726,11 @@
     playersBySection[si] = eng;
   });
   var engines = engineBySection.filter(Boolean);
+
+  // поворот телефона и смена размера окна меняют, какая часть кадра видна
+  window.addEventListener('resize', function () {
+    engines.forEach(function (e) { e.setFocus(e.index); });
+  });
 
   var current = 0;
   var locked = false;

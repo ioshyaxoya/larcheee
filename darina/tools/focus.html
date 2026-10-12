@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кадрирование кусков для телефона</title>
+<!--
+  Рабочий инструмент, на сайт не попадает. Открывается двойным щелчком (file://).
+
+  Фильм нарезан на 29 кусков. На вертикальном экране виден узкий срез кадра,
+  и «середина» не всегда там, где герой. Здесь для каждого куска двигается окно
+  телефона — и получается строка focus для films.js.
+
+    ← → сдвинуть окно на 1 % (Shift — на 5 %)      ↑ ↓ или PgUp PgDn — другой кусок
+    начало / середина / конец — посмотреть кусок в три момента (люди двигаются)
+-->
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px 18px 28px; background: #141414; color: #ddd;
+         font: 14px/1.4 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+  h1 { margin: 0 0 12px; font-size: 16px; font-weight: 600; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-bottom: 12px; }
+  select, button, textarea { font: inherit; color: inherit; background: #262626;
+         border: 1px solid #444; border-radius: 4px; padding: 5px 10px; }
+  button { cursor: pointer; }
+  button:hover { background: #333; }
+  button.on { background: #f2c230; color: #111; border-color: #f2c230; }
+  .main { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+  .stage { position: relative; width: min(900px, 100%); background: #000; user-select: none; touch-action: none; cursor: ew-resize; }
+  .stage video { display: block; width: 100%; height: auto; }
+  .shade { position: absolute; top: 0; bottom: 0; background: rgba(0, 0, 0, .62); pointer-events: none; }
+  .win { position: absolute; top: 0; bottom: 0; border: 2px solid #fff; pointer-events: none; }
+  .win::after { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; border-left: 1px dashed rgba(255, 220, 0, .8); }
+  .phone { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+  .phone canvas { display: block; background: #000; height: min(62vh, 520px); width: auto; border: 2px solid #555; border-radius: 6px; }
+  .strip { display: flex; flex-wrap: wrap; gap: 4px; margin: 14px 0; }
+  .strip button { min-width: 44px; padding: 4px 6px; font-size: 12px; line-height: 1.2; }
+  .strip button small { display: block; opacity: .7; }
+  .strip button.dirty { border-color: #f2c230; }
+  .strip button.cur { background: #f2c230; color: #111; border-color: #f2c230; }
+  .info { min-width: 220px; }
+  #out { width: 100%; min-height: 150px; font: 12px/1.5 ui-monospace, Menlo, Consolas, monospace; white-space: pre; }
+  .hint { color: #999; font-size: 12px; max-width: 70ch; }
+  .err { color: #ff8a80; }
+</style>
+</head>
+<body>
+<h1>Кадрирование кусков для телефона</h1>
+
+<div class="bar">
+  <label>Фильм <select id="film"></select></label>
+  <label>Экран телефона
+    <select id="aspect">
+      <option value="0.46">узкий, 390×844 (по умолчанию)</option>
+      <option value="0.56">с панелями браузера, 390×700</option>
+      <option value="0.75">планшет, 3:4</option>
+    </select>
+  </label>
+  <span>
+    <button type="button" id="p0">начало</button>
+    <button type="button" id="p5" class="on">середина</button>
+    <button type="button" id="p9">конец</button>
+  </span>
+  <span id="status" class="hint"></span>
+</div>
+
+<div class="main">
+  <div>
+    <div class="stage" id="stage">
+      <video id="vid" muted playsinline preload="auto"></video>
+      <div class="shade" id="shL"></div>
+      <div class="shade" id="shR"></div>
+      <div class="win" id="win"></div>
+    </div>
+    <div class="hint" style="margin-top:6px">Тяните мышью по кадру — окно встаёт центром под курсор. Жёлтая пунктирная линия — центр.</div>
+  </div>
+  <div class="phone">
+    <canvas id="phone" width="230" height="500"></canvas>
+    <div id="info" class="info"></div>
+  </div>
+</div>
+
+<div class="strip" id="strip"></div>
+
+<p class="hint">Готовая строка для films.js — в поле ниже. Жёлтая рамка у куска — значение изменено относительно films.js. Правки хранятся в браузере, пока вы не вставите строку в films.js.</p>
+<textarea id="out" readonly></textarea>
+<div class="bar" style="margin-top:8px">
+  <button type="button" id="copy">Скопировать</button>
+  <button type="button" id="reset">Сбросить к films.js</button>
+  <span id="copied" class="hint"></span>
+</div>
+
+<script src="../films.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var CUTS = (window.MONTAGE && window.MONTAGE.CUTS) || 29;
+  var films = (window.FILMS || []).filter(function (f) { return f.prerendered && f.id; });
+
+  var $ = function (id) { return document.getElementById(id); };
+  var vid = $('vid'), stage = $('stage'), win = $('win'), shL = $('shL'), shR = $('shR');
+  var phone = $('phone'), pctx = phone.getContext('2d');
+
+  var state = { film: null, cut: 0, pos: 0.5, aspect: 0.46, focus: [], base: [] };
+
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  function lsKey() { return 'focus:' + state.film.id; }
+
+  function loadFocus(f) {
+    var base = [];
+    for (var i = 0; i < CUTS; i++) {
+      var c = f.focus && typeof f.focus[i] === 'number' ? f.focus[i] : 50;
+      base.push(c);
+    }
+    state.base = base;
+    // Черновик берём, только если films.js с тех пор не менялся: в нём лежит и то, от чего
+    // правили. Иначе после вставки строки в films.js здесь остались бы чужие старые числа.
+    var saved = null;
+    try { saved = JSON.parse(store(lsKey()) || 'null'); } catch (e) { saved = null; }
+    var fresh = saved && saved.focus && saved.base && saved.focus.length === CUTS &&
+                saved.base.length === CUTS && saved.base.join() === base.join();
+    state.focus = fresh ? saved.focus.map(Number) : base.slice();
+  }
+
+  function saveFocus() {
+    // совпадает с films.js — хранить нечего
+    if (state.focus.join() === state.base.join()) { try { localStorage.removeItem(lsKey()); } catch (e) { /* без хранилища */ } return; }
+    store(lsKey(), JSON.stringify({ base: state.base, focus: state.focus }));
+  }
+
+  /* ── геометрия ─────────────────────────────────────────────────────────── */
+
+  function frameAspect() { return (vid.videoWidth && vid.videoHeight) ? vid.videoWidth / vid.videoHeight : 16 / 9; }
+  function winFrac() { return Math.min(1, state.aspect / frameAspect()); }
+  /** левый край окна (доля ширины) при центре c (доля) */
+  function leftOf(c, w) { return Math.max(0, Math.min(1 - w, c - w / 2)); }
+
+  function cutRange(i) {
+    var ct = state.film.cutTimes, d = vid.duration || 0;
+    var a = i === 0 ? 0 : (ct && ct.length === CUTS - 1 ? ct[i - 1] : i * d / CUTS);
+    var b = i === CUTS - 1 ? d : (ct && ct.length === CUTS - 1 ? ct[i] : (i + 1) * d / CUTS);
+    return [a, b];
+  }
+
+  function seek() {
+    if (!vid.duration) return;
+    var r = cutRange(state.cut);
+    // чуть отступаем от краёв: на стыке кадр ещё соседнего куска
+    var t = r[0] + (r[1] - r[0]) * (state.pos === 0 ? 0.06 : state.pos === 1 ? 0.94 : state.pos);
+    vid.currentTime = Math.min(vid.duration - 0.02, Math.max(0, t));
+  }
+
+  /* ── отрисовка ─────────────────────────────────────────────────────────── */
+
+  function paint() {
+    var w = winFrac(), c = state.focus[state.cut] / 100;
+    var left = leftOf(c, w);
+    win.style.left = (left * 100) + '%';
+    win.style.width = (w * 100) + '%';
+    shL.style.left = '0'; shL.style.width = (left * 100) + '%';
+    shR.style.left = ((left + w) * 100) + '%'; shR.style.width = ((1 - left - w) * 100) + '%';
+
+    // что увидит телефон: тот же срез кадра на холсте нужной пропорции
+    var vw = vid.videoWidth, vh = vid.videoHeight;
+    if (vw && vh) {
+      phone.height = 500;
+      phone.width = Math.round(500 * state.aspect);
+      try { pctx.drawImage(vid, left * vw, 0, w * vw, vh, 0, 0, phone.width, phone.height); } catch (e) { /* ещё не декодирован */ }
+    }
+    $('info').innerHTML = 'Кусок <b>' + state.cut + '</b> из ' + (CUTS - 1) +
+      '<br>центр окна: <b>' + state.focus[state.cut] + '</b> %' +
+      '<br>окно: ' + Math.round(left * 100) + '–' + Math.round((left + w) * 100) + ' % ширины кадра';
+    paintStrip();
+    paintOut();
+  }
+
+  function paintStrip() {
+    var bs = $('strip').children;
+    for (var i = 0; i < bs.length; i++) {
+      bs[i].className = (i === state.cut ? 'cur ' : '') + (state.focus[i] !== state.base[i] ? 'dirty' : '');
+      bs[i].lastChild.textContent = state.focus[i];
+    }
+  }
+
+  function paintOut() {
+    var rows = [];
+    for (var i = 0; i < CUTS; i += 10) rows.push('      ' + state.focus.slice(i, i + 10).join(', '));
+    $('out').value = 'focus: [   // ' + state.film.id + ': центр окна каждого куска, % ширины кадра\n' + rows.join(',\n') + ',\n    ],';
+  }
+
+  function buildStrip() {
+    var s = $('strip'); s.textContent = '';
+    for (var i = 0; i < CUTS; i++) {
+      (function (i) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.appendChild(document.createTextNode(String(i)));
+        var sm = document.createElement('small'); b.appendChild(sm);
+        b.addEventListener('click', function () { go(i); });
+        s.appendChild(b);
+      })(i);
+    }
+  }
+
+  /* ── управление ────────────────────────────────────────────────────────── */
+
+  function go(i) {
+    state.cut = (i + CUTS) % CUTS;
+    seek();
+    paint();
+  }
+
+  function setFocus(v) {
+    v = Math.round(Math.max(0, Math.min(100, v)));
+    if (state.focus[state.cut] === v) return;
+    state.focus[state.cut] = v;
+    saveFocus();
+    paint();
+  }
+
+  function setPos(p) {
+    state.pos = p;
+    ['p0', 'p5', 'p9'].forEach(function (id) { $(id).className = ''; });
+    $(p === 0 ? 'p0' : p === 1 ? 'p9' : 'p5').className = 'on';
+    seek();
+  }
+
+  function pointerPct(e) {
+    var r = stage.getBoundingClientRect();
+    return (e.clientX - r.left) / r.width * 100;
+  }
+
+  var dragging = false;
+  stage.addEventListener('pointerdown', function (e) {
+    dragging = true;
+    try { stage.setPointerCapture(e.pointerId); } catch (err) { /* необязательно */ }
+    setFocus(pointerPct(e));
+  });
+  stage.addEventListener('pointermove', function (e) { if (dragging) setFocus(pointerPct(e)); });
+  stage.addEventListener('pointerup', function () { dragging = false; });
+  stage.addEventListener('pointercancel', function () { dragging = false; });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;          // «назад», переключение вкладок — браузеру
+    if (e.target && /^(SELECT|TEXTAREA|INPUT)$/.test(e.target.tagName)) return;
+    var step = e.shiftKey ? 5 : 1;
+    if (e.key === 'ArrowLeft')  { setFocus(state.focus[state.cut] - step); e.preventDefault(); }
+    else if (e.key === 'ArrowRight') { setFocus(state.focus[state.cut] + step); e.preventDefault(); }
+    else if (e.key === 'ArrowUp' || e.key === 'PageUp') { go(state.cut - 1); e.preventDefault(); }
+    else if (e.key === 'ArrowDown' || e.key === 'PageDown') { go(state.cut + 1); e.preventDefault(); }
+  });
+
+  $('p0').addEventListener('click', function () { setPos(0); });
+  $('p5').addEventListener('click', function () { setPos(0.5); });
+  $('p9').addEventListener('click', function () { setPos(1); });
+  // после выбора в списке фокус остаётся на нём, и стрелки листали бы сам список
+  $('aspect').addEventListener('change', function () { state.aspect = parseFloat(this.value); paint(); this.blur(); });
+  $('film').addEventListener('change', function () { openFilm(films[this.selectedIndex]); this.blur(); });
+
+  $('copy').addEventListener('click', function () {
+    var ta = $('out'), done = function () { $('copied').textContent = 'скопировано'; setTimeout(function () { $('copied').textContent = ''; }, 1800); };
+    ta.select();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ta.value).then(done, function () { document.execCommand('copy'); done(); });
+    } else { document.execCommand('copy'); done(); }
+  });
+  $('reset').addEventListener('click', function () {
+    state.focus = state.base.slice(); saveFocus(); paint();
+  });
+
+  vid.addEventListener('seeked', paint);
+  vid.addEventListener('loadeddata', function () { seek(); paint(); });
+  vid.addEventListener('error', function () {
+    $('status').innerHTML = '<span class="err">видео не открылось — проверьте, что рядом лежит папка assets/films</span>';
+  });
+
+  function openFilm(f) {
+    state.film = f;
+    loadFocus(f);
+    state.cut = 0;
+    $('status').textContent = 'открываю ' + f.id + ' …';
+    vid.removeAttribute('src');
+    // webm в начале списка — его открывают все браузеры, включая Chromium без H.264
+    var srcs = Array.isArray(f.src) ? f.src : [f.src];
+    var pick = srcs.filter(function (u) { return vid.canPlayType('video/' + u.split('.').pop()); })[0] || srcs[0];
+    vid.src = '../' + pick;
+    vid.load();
+    vid.addEventListener('loadedmetadata', function once() {
+      vid.removeEventListener('loadedmetadata', once);
+      $('status').textContent = f.id + ': ' + vid.videoWidth + '×' + vid.videoHeight +
+        (f.cutTimes ? '' : ' — нет cutTimes, куски поделены поровну (python3 tools/cuts.py …)');
+    });
+  }
+
+  if (!films.length) {
+    $('status').innerHTML = '<span class="err">в films.js нет готовых нарезок (prerendered)</span>';
+    return;
+  }
+  films.forEach(function (f) {
+    var o = document.createElement('option'); o.textContent = f.id; $('film').appendChild(o);
+  });
+  buildStrip();
+  openFilm(films[0]);
+})();
+</script>
+</body>
+</html>
