@@ -615,6 +615,23 @@ body.is-rtl .film-credits { letter-spacing: 0; text-transform: none; }
   color: var(--ink);
 }
 
+.credits-synopsis {
+  font-size: 14px;
+  line-height: 1.75;
+  margin-bottom: 30px;
+  color: var(--ink);
+  opacity: .92;
+}
+
+.credits-sub {
+  font-size: 10px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
+
 .credits-row {
   display: grid;
   grid-template-columns: minmax(130px, 38%) 1fr;
@@ -636,7 +653,24 @@ body.is-rtl .credits-role { letter-spacing: 0; text-transform: none; }
 .credits-names { display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
 
 @media (max-width: 640px) {
-  .credits-row { grid-template-columns: 1fr; gap: 4px; }
+  .credits-synopsis {
+  font-size: 14px;
+  line-height: 1.75;
+  margin-bottom: 30px;
+  color: var(--ink);
+  opacity: .92;
+}
+
+.credits-sub {
+  font-size: 10px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
+
+.credits-row { grid-template-columns: 1fr; gap: 4px; }
   .panel--credits .panel-inner { max-height: 82vh; }
 }
 

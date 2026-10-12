@@ -161,11 +161,11 @@
     if (film.year) sub.dataset.year = String(film.year);
     title.appendChild(sub);
 
-    if (creditsFor(film).length) {
+    if (creditsFor(film).length || tin('synopsis', film.id)) {
       var cr = document.createElement('button');
       cr.type = 'button';
       cr.className = 'film-credits';
-      cr.dataset.t = 'credits';
+      cr.dataset.t = 'aboutFilm';
       cr.addEventListener('click', function () { openCredits(film); });
       title.appendChild(cr);
     }
@@ -789,6 +789,21 @@
     });
   });
 
+  /** Контакты из CONTACTS: пустые пропускаем, пока ссылки нет. */
+  function buildContacts() {
+    var box = document.querySelector('#panel-contact .contacts');
+    if (!box) return;
+    box.textContent = '';
+    (window.CONTACTS || []).forEach(function (c) {
+      if (!c || !c.url) return;
+      var a = document.createElement('a');
+      a.href = c.url;
+      a.textContent = c.text || c.url;
+      if (c.url.indexOf('mailto:') !== 0) { a.target = '_blank'; a.rel = 'noopener'; }
+      box.appendChild(a);
+    });
+  }
+
   /** Титры на языке посетителя: русские для русского, латиница для прочих. */
   function creditsFor(film) {
     var c = film && film.credits;
@@ -806,7 +821,23 @@
     if (head) head.textContent = tin('films', film.id);
     body.textContent = '';
 
-    creditsFor(film).forEach(function (row) {
+    var syn = tin('synopsis', film.id);
+    if (syn) {
+      var sp = document.createElement('p');
+      sp.className = 'credits-synopsis';
+      sp.textContent = syn;
+      body.appendChild(sp);
+    }
+
+    var rows = creditsFor(film);
+    if (syn && rows.length) {
+      var sub = document.createElement('div');
+      sub.className = 'credits-sub';
+      sub.textContent = t('credits');
+      body.appendChild(sub);
+    }
+
+    rows.forEach(function (row) {
       var line = document.createElement('div');
       line.className = 'credits-row';
 
@@ -908,6 +939,7 @@
    * ==================================================================== */
 
   buildSwitcher();
+  buildContacts();
   applyLocale();
 
   var startAt = fromHash();

@@ -22,6 +22,15 @@ window.MONTAGE = {
   SCROLL_SPEED: 700, // мс на перелистывание экрана (как на референсе)
 };
 
+/* Контакты. Пустой url — строка не показывается.
+   Инстаграм: вписать ник Дарины, проверить его я не могу — Instagram
+   отдаёт серверу редирект на вход, а угадывать ник в контактах нельзя. */
+window.CONTACTS = [
+  { text: 't.me/darinadanilyuk',   url: 'https://t.me/darinadanilyuk' },
+  { text: 'instagram',             url: '' },   // ← https://instagram.com/<ник>
+  { text: 'danilyukk.dar@mail.ru', url: 'mailto:danilyukk.dar@mail.ru' },
+];
+
 window.FILMS = [
   {
     id: 'kirill', kind: 'short', year: 2026,
