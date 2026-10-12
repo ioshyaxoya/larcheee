@@ -184,7 +184,7 @@ window.FILMS = [
                                    'Vyacheslav Meleshin — the guard',
                                    'Eva Meleshina — the child']],
         ['Special thanks',        ['Larisa Danilyuk', 'Alexey Zolotov',
-                                   'Nikolay Krivov', 'Karina Meleshina']],
+                                   'Nikolai Krivov', 'Karina Meleshina']],
         ['Workshops',             ['B. P. Morgunov', 'R. V. Ivanov', 'R. E. Minlishev',
                                    'D. Yu. Bobrov', 'E. V. Mustafina', 'P. V. Kirillov']],
       ],
