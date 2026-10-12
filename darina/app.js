@@ -19,6 +19,70 @@
   );
   var FILMS = window.FILMS || [];
 
+  /* ── язык ──────────────────────────────────────────────────────────── */
+
+  var I18N = window.I18N || {};
+  var ORDER = window.I18N_ORDER || Object.keys(I18N);
+  var FALLBACK = window.I18N_FALLBACK || [];
+  var STORE_KEY = 'darina.lang';
+
+  /** Сохранённый выбор, иначе язык браузера, иначе первый в списке. */
+  function pickLocale() {
+    try {
+      var saved = localStorage.getItem(STORE_KEY);
+      if (saved && I18N[saved]) return saved;
+    } catch (e) { /* приватный режим — просто идём дальше */ }
+
+    var langs = navigator.languages || [navigator.language || ''];
+    for (var i = 0; i < langs.length; i++) {
+      var tag = String(langs[i]);
+      if (I18N[tag]) return tag;
+      var base = tag.split('-')[0].toLowerCase();
+      for (var j = 0; j < ORDER.length; j++) {
+        if (ORDER[j].split('-')[0].toLowerCase() === base) return ORDER[j];
+      }
+    }
+    return ORDER[0];
+  }
+
+  var locale = pickLocale();
+  var dict = function (code) { return I18N[code] || {}; };
+
+  /** Строка с откатом на запасные языки. */
+  function t(key) {
+    var chain = [locale].concat(FALLBACK);
+    for (var i = 0; i < chain.length; i++) {
+      var v = dict(chain[i])[key];
+      if (v !== undefined && v !== '') return v;
+    }
+    return '';
+  }
+
+  /** Строка из вложенной группы (kinds, films). */
+  function tin(group, key) {
+    if (!key) return '';
+    var chain = [locale].concat(FALLBACK);
+    for (var i = 0; i < chain.length; i++) {
+      var g = dict(chain[i])[group];
+      if (g && g[key] !== undefined && g[key] !== '') return g[key];
+    }
+    return '';
+  }
+
+  /** Массив строк с откатом (aboutText, shots). */
+  function tlist(key) {
+    var chain = [locale].concat(FALLBACK);
+    for (var i = 0; i < chain.length; i++) {
+      var v = dict(chain[i])[key];
+      if (Array.isArray(v) && v.length) return v;
+    }
+    return [];
+  }
+
+  function each(sel, fn) {
+    Array.prototype.forEach.call(document.querySelectorAll(sel), fn);
+  }
+
   var REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var SEEK_EPS = 0.04;   // чтобы попасть в декодируемый кадр, а не на стык
   var FLASH_MS = 90;     // длительность затемнения на склейке
@@ -85,17 +149,17 @@
 
     var title = document.createElement('div');
     title.className = 'film-title';
-    var t = document.createElement(film.link ? 'a' : 'span');
-    t.className = 't';
-    t.textContent = film.title || '';
-    if (film.link) { t.href = film.link; t.target = '_blank'; t.rel = 'noopener'; }
-    title.appendChild(t);
-    if (film.subtitle) {
-      var sub = document.createElement('span');
-      sub.className = 's';
-      sub.textContent = film.subtitle;
-      title.appendChild(sub);
-    }
+    var tt = document.createElement(film.link ? 'a' : 'span');
+    tt.className = 't';
+    tt.dataset.tFilm = film.id || '';
+    if (film.link) { tt.href = film.link; tt.target = '_blank'; tt.rel = 'noopener'; }
+    title.appendChild(tt);
+
+    var sub = document.createElement('span');
+    sub.className = 's';
+    sub.dataset.tKind = film.kind || '';
+    if (film.year) sub.dataset.year = String(film.year);
+    title.appendChild(sub);
     s.appendChild(title);
 
     return s;
@@ -104,7 +168,7 @@
   /** Экран-анонс: без видео и без нарезки — только типографика поверх свечения. */
   function buildSoonSection(film, i) {
     var s = document.createElement('section');
-    s.className = 'section section--soon' + (film.title ? '' : ' soon-untitled');
+    s.className = 'section section--soon' + (film.id ? '' : ' soon-untitled');
     s.dataset.anchor = String(i + 2);
 
     if (film.poster) {
@@ -149,17 +213,23 @@
     var inner = document.createElement('div');
     inner.className = 'soon-inner';
 
-    [['soon-kicker', film.kicker], ['soon-title', film.title]].forEach(function (pair) {
-      if (!pair[1]) return;
-      var el = document.createElement('div');
-      el.className = pair[0];
-      el.textContent = pair[1];
-      inner.appendChild(el);
-    });
+    // сверху — имена артистов, когда их можно назвать, иначе вид работы
+    var kicker = document.createElement('div');
+    kicker.className = 'soon-kicker';
+    if (film.artists) kicker.textContent = film.artists;
+    else kicker.dataset.tKind = film.kind || '';
+    inner.appendChild(kicker);
+
+    if (film.id) {
+      var st = document.createElement('div');
+      st.className = 'soon-title';
+      st.dataset.tFilm = film.id;
+      inner.appendChild(st);
+    }
 
     var badge = document.createElement('div');
     badge.className = 'soon-badge';
-    badge.textContent = 'soon';
+    badge.dataset.t = 'soon';
     inner.appendChild(badge);
 
     if (film.note) {
@@ -208,12 +278,10 @@
     var inner = document.createElement('div');
     inner.className = 'wall-inner';
 
-    if (film.kicker) {
-      var k = document.createElement('div');
-      k.className = 'wall-kicker';
-      k.textContent = film.kicker;
-      inner.appendChild(k);
-    }
+    var k = document.createElement('div');
+    k.className = 'wall-kicker';
+    k.dataset.t = 'wall';
+    inner.appendChild(k);
 
     var grid = document.createElement('div');
     grid.className = 'wall-grid';
@@ -228,7 +296,7 @@
 
       var img = document.createElement('img');
       img.src = post.cover;
-      img.alt = post.caption || '';
+      img.alt = '';
       img.loading = 'lazy';
       tile.appendChild(img);
 
@@ -238,12 +306,10 @@
         pl.setAttribute('aria-hidden', 'true');
         tile.appendChild(pl);
       }
-      if (post.caption) {
-        var cap = document.createElement('span');
-        cap.className = 'wall-cap';
-        cap.textContent = post.caption;
-        tile.appendChild(cap);
-      }
+      var cap = document.createElement('span');
+      cap.className = 'wall-cap';
+      cap.dataset.tShot = String(n);
+      tile.appendChild(cap);
       grid.appendChild(tile);
     });
 
@@ -339,7 +405,8 @@
     if (!this.section.querySelector('.film-missing')) {
       var m = document.createElement('div');
       m.className = 'film-missing';
-      m.textContent = 'видео не найдено';
+      m.dataset.t = 'missing';
+      m.textContent = t('missing');
       this.section.appendChild(m);
     }
   };
@@ -378,11 +445,11 @@
     if (this.video.paused || this.video.seeking) return;
     if (REDUCED) return;                       // без нарезки — играем подряд
 
-    var t = this.video.currentTime;
+    var pos = this.video.currentTime;
 
     if (this.prerendered) {
       // склейки уже в файле: ничего не трогаем, только ведём индикатор
-      var idx = Math.min(this.cuts - 1, Math.max(0, Math.floor(t / this.segLen)));
+      var idx = Math.min(this.cuts - 1, Math.max(0, Math.floor(pos / this.segLen)));
       if (idx !== this.index) {
         this.index = idx;
         this.onCut(idx, this.cuts);
@@ -394,7 +461,7 @@
 
     // кусок доиграл — режем на следующий;
     // ушли назад (loop/сбой перемотки) — тоже пересобираемся
-    if (t >= start + this.hold || t < start - 0.5) this.advance();
+    if (pos >= start + this.hold || pos < start - 0.5) this.advance();
   };
 
   CutEngine.prototype.start = function () {
@@ -491,9 +558,9 @@
     cutsEl.textContent = '';
     ticks = [];
     for (var i = 0; i < n; i++) {
-      var t = document.createElement('i');
-      cutsEl.appendChild(t);
-      ticks.push(t);
+      var tick = document.createElement('i');
+      cutsEl.appendChild(tick);
+      ticks.push(tick);
     }
   }
 
@@ -714,8 +781,84 @@
   });
 
   /* ======================================================================
+   * 5b. Язык: подстановка строк и переключатель
+   * ==================================================================== */
+
+  var langEl = document.getElementById('lang');
+
+  function buildSwitcher() {
+    if (!langEl) return;
+    langEl.textContent = '';
+    ORDER.forEach(function (code) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'lang-btn';
+      b.dataset.lang = code;
+      b.lang = code;
+      b.textContent = dict(code).label || code;
+      b.addEventListener('click', function () { setLocale(code); });
+      langEl.appendChild(b);
+    });
+  }
+
+  /** Раскладывает строки текущего языка по разметке. */
+  function applyLocale() {
+    var d = dict(locale);
+    var rtl = d.dir === 'rtl';
+
+    document.documentElement.lang = locale;
+    document.documentElement.dir = d.dir || 'ltr';
+    document.title = t('title');
+
+    var meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute('content', t('description'));
+
+    each('[data-t]', function (el) { el.textContent = t(el.dataset.t); });
+    each('[data-t-film]', function (el) { el.textContent = tin('films', el.dataset.tFilm); });
+    each('[data-t-kind]', function (el) {
+      var kind = tin('kinds', el.dataset.tKind);
+      var year = el.dataset.year;
+      el.textContent = year ? kind + ' · ' + year : kind;
+    });
+    var shots = tlist('shots');
+    each('[data-t-shot]', function (el) { el.textContent = shots[+el.dataset.tShot] || ''; });
+
+    // текст «о себе» — абзацами
+    var aboutBody = document.querySelector('#panel-about .panel-body');
+    if (aboutBody) {
+      aboutBody.textContent = '';
+      tlist('aboutText').forEach(function (para) {
+        var pp = document.createElement('p');
+        pp.textContent = para;
+        aboutBody.appendChild(pp);
+      });
+    }
+
+    each('.panel-close', function (b) { b.setAttribute('aria-label', t('close')); });
+    if (cueEl) cueEl.setAttribute('aria-label', t('next'));
+
+    each('.lang-btn', function (b) {
+      var on = b.dataset.lang === locale;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-current', on ? 'true' : 'false');
+    });
+
+    document.body.classList.toggle('is-rtl', rtl);
+  }
+
+  function setLocale(code) {
+    if (!I18N[code] || code === locale) return;
+    locale = code;
+    try { localStorage.setItem(STORE_KEY, code); } catch (e) { /* приватный режим */ }
+    applyLocale();
+  }
+
+  /* ======================================================================
    * 6. Старт
    * ==================================================================== */
+
+  buildSwitcher();
+  applyLocale();
 
   var startAt = fromHash();
   go(startAt >= 0 ? startAt : 0, true);
@@ -726,6 +869,8 @@
     deck: { go: go, next: next, prev: prev, get current() { return current; } },
     sections: sections,
     engines: engines,
+    get locale() { return locale; },
+    setLocale: setLocale,
     engineBySection: engineBySection,
     playersBySection: playersBySection,
   };

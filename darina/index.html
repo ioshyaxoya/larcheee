@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Darina Danilyuk</title>
-<meta name="description" content="Darina Danilyuk — director. Showreel.">
+<title>Дарина Данилюк</title>
+<meta name="description" content="Дарина Данилюк — режиссёр. Шоурил.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="image" href="assets/hero.jpg">
 <link rel="preload" as="image" href="assets/logo-darina.svg">
@@ -12,14 +12,17 @@
 </head>
 <body>
 
-<!-- ── fixed chrome ─────────────────────────────────────────────── -->
-<a class="side side-left" href="#about" data-panel="about">about</a>
-<a class="side side-right" href="#contact" data-panel="contact">contact</a>
+<!-- ── переключатель языка ──────────────────────────────────────────── -->
+<nav class="lang" id="lang" aria-label="Язык"></nav>
 
-<!-- ── the deck: one full-viewport section per screen ───────────── -->
+<!-- ── фиксированные ссылки ─────────────────────────────────────────── -->
+<a class="side side-start" href="#about" data-panel="about" data-t="about"></a>
+<a class="side side-end" href="#contact" data-panel="contact" data-t="contact"></a>
+
+<!-- ── дека: по экрану на весь вьюпорт ──────────────────────────────── -->
 <main id="deck" class="deck">
 
-  <!-- 1. hero — the photo, exactly as in the source design -->
+  <!-- 1. герой — фотография из исходного макета -->
   <section class="section section--hero" data-anchor="1">
     <img class="hero-photo" src="assets/hero.jpg" alt="">
     <div class="grain"></div>
@@ -29,35 +32,36 @@
     </div>
   </section>
 
-  <!-- 2..N. film sections are generated from films.js -->
+  <!-- 2..N. экраны фильмов, анонса и стены собираются из films.js -->
 
 </main>
 
-<!-- ── scroll cue ───────────────────────────────────────────────── -->
-<button class="cue" id="cue" aria-label="Дальше">↓</button>
+<!-- ── стрелка вниз ─────────────────────────────────────────────────── -->
+<button class="cue" id="cue">↓</button>
 
-<!-- ── 29-cut indicator ─────────────────────────────────────────── -->
+<!-- ── индикатор нарезки ────────────────────────────────────────────── -->
 <div class="cuts" id="cuts" aria-hidden="true"></div>
 
-<!-- ── overlay panels ───────────────────────────────────────────── -->
+<!-- ── оверлеи ──────────────────────────────────────────────────────── -->
 <div class="panel" id="panel-about" hidden>
-  <button class="panel-close" aria-label="Закрыть">×</button>
+  <button class="panel-close">×</button>
   <div class="panel-inner">
-    <h2>about</h2>
-    <p>Darina Danilyuk — режиссёр.</p>
-    <p class="muted">Замените этот текст в <code>index.html</code>.</p>
+    <h2 data-t="about"></h2>
+    <div class="panel-body"></div>
   </div>
 </div>
 
 <div class="panel" id="panel-contact" hidden>
-  <button class="panel-close" aria-label="Закрыть">×</button>
+  <button class="panel-close">×</button>
   <div class="panel-inner">
-    <h2>contact</h2>
-    <p><a href="mailto:hello@example.com">hello@example.com</a></p>
-    <p class="muted">Замените контакты в <code>index.html</code>.</p>
+    <h2 data-t="contact"></h2>
+    <div class="panel-body">
+      <p><a href="mailto:hello@example.com">hello@example.com</a></p>
+    </div>
   </div>
 </div>
 
+<script src="i18n.js"></script>
 <script src="films.js"></script>
 <script src="app.js"></script>
 </body>

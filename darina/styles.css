@@ -19,7 +19,7 @@ html, body {
   overflow: hidden;                    /* прокрутку ведёт JS, как на референсе */
   background: var(--bg);
   color: var(--ink);
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-family: Verdana, Tahoma, 'Geeza Pro', 'Noto Sans Arabic', Geneva, sans-serif;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
 }
@@ -102,6 +102,7 @@ a:hover { color: var(--accent); }
 .side {
   position: fixed;
   top: 50%;
+  inset-inline: auto;
   transform: translateY(-50%);
   font-size: 11px;
   color: var(--ink-dim);
@@ -114,8 +115,8 @@ a:hover { color: var(--accent); }
   cursor: pointer;
   font-family: inherit;
 }
-.side-left  { left: 22px; }
-.side-right { right: 22px; }
+.side-start { inset-inline-start: 22px; }
+.side-end   { inset-inline-end: 22px; }
 
 /* ── 2..N. экраны с фильмами ─────────────────────────────────────────────── */
 
@@ -157,8 +158,9 @@ a:hover { color: var(--accent); }
 /* подпись фильма */
 .film-title {
   position: absolute;
-  left: 22px;
+  inset-inline-start: 22px;
   bottom: 26px;
+  text-align: start;
   z-index: 6;
   max-width: min(70vw, 640px);
   text-shadow: 0 1px 3px #000;
@@ -497,11 +499,63 @@ a.wall-tile:hover .wall-cap { color: var(--accent); }
 .cue:hover { color: var(--accent); }
 .cue.is-hidden { opacity: 0; pointer-events: none; }
 
+/* ── переключатель языка ─────────────────────────────────────────────────── */
+
+.lang {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 70;
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: calc(100vw - 24px);
+}
+
+.lang-btn {
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .5;
+  background: none;
+  border: 0;
+  padding: 4px 7px;
+  cursor: pointer;
+  text-shadow: 0 1px 2px #000;
+  transition: opacity 200ms ease, color 200ms ease;
+}
+.lang-btn:hover { opacity: 1; }
+.lang-btn.is-on { opacity: 1; color: var(--accent); }
+
+/* арабские буквы соединяются — разрядка и капитель их ломают */
+.lang-btn[lang^='ar'] { letter-spacing: 0; text-transform: none; font-size: 12px; }
+
+body.is-rtl .side,
+body.is-rtl .film-title .s,
+body.is-rtl .soon-kicker,
+body.is-rtl .soon-badge,
+body.is-rtl .soon-note,
+body.is-rtl .wall-kicker,
+body.is-rtl .wall-cap,
+body.is-rtl .film-missing,
+body.is-rtl .panel-inner h2,
+body.is-rtl .soon-links a {
+  letter-spacing: 0;
+  text-transform: none;
+  text-indent: 0;
+}
+
+body.is-rtl .panel-inner { text-align: start; }
+
 /* ── индикатор 29 кусков ─────────────────────────────────────────────────── */
 
 .cuts {
   position: fixed;
-  right: 22px;
+  inset-inline-end: 22px;
   bottom: 28px;
   z-index: 60;
   display: flex;
@@ -560,7 +614,7 @@ a.wall-tile:hover .wall-cap { color: var(--accent); }
 .panel-close {
   position: absolute;
   top: 18px;
-  right: 24px;
+  inset-inline-end: 24px;
   font-size: 26px;
   line-height: 1;
   color: var(--ink-dim);
@@ -576,13 +630,17 @@ a.wall-tile:hover .wall-cap { color: var(--accent); }
 @media (max-width: 640px) {
   .section { min-height: 0; }
   .hero-logo { transform: translate(-50%, -132%); width: 78vw; }
-  .side-left  { left: 14px; }
-  .side-right { right: 14px; }
-  .film-title { left: 14px; bottom: 54px; }
-  .cuts { right: 14px; bottom: 56px; gap: 2px; }
-  /* запас по бокам: наклон плитки расширяет её габариты на пару пикселей,
-     иначе угол достаёт до фиксированных about/contact */
-  .wall-inner { padding: 72px 52px 86px; }
+  .side-start { inset-inline-start: 14px; }
+  .side-end   { inset-inline-end: 14px; }
+  .film-title { inset-inline-start: 14px; bottom: 54px; }
+  .cuts { inset-inline-end: 14px; bottom: 56px; gap: 2px; }
+  .lang { top: 10px; gap: 0; }
+  .lang-btn { padding: 4px 5px; font-size: 9px; }
+  /* запас по бокам под фиксированные about/contact: подписи у разных
+     языков сильно разной длины («о себе» короче, чем «niri buruz»),
+     поэтому место считаем по самой длинной. На узком экране сетка
+     схлопывается в одну колонку — стена прокручивается внутри себя. */
+  .wall-inner { padding: 72px 78px 86px; }
   .wall-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; }
   .wall-tile img { height: 160px; }
   .soon-badge { letter-spacing: .34em; text-indent: .34em; }
