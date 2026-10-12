@@ -36,7 +36,8 @@ window.FILMS = [
     // ЗАГЛУШКА: заменить на нарезку из мастера
     src: ['assets/films/film-01.webm', 'assets/films/film-01.mp4'],
     poster: 'assets/films/kirill-poster.jpg',
-    link: '',
+    // полная версия на канале: название на экране становится ссылкой
+    link: 'https://www.youtube.com/watch?v=JHgzOetLiqM',
     credits: 'Режиссёр и автор идеи Дарина Данилюк · сценарист Валерия Саксонова · '
            + 'оператор-постановщик Артём Золотов · звукорежиссёр Александр Вязаничев · '
            + 'продюсер Мария Головина · художник-постановщик Алиса Кац · '
@@ -55,7 +56,7 @@ window.FILMS = [
     prerendered: true,
     src: ['assets/films/drive.webm', 'assets/films/drive.mp4'],
     poster: 'assets/films/drive-poster.jpg',
-    link: '',
+    link: 'https://www.youtube.com/watch?v=wyoZQYFn0bE',
     credits: '',   // титры пока не присланы
   },
   /* ----------------------------------------------------------------------
