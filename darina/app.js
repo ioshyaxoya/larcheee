@@ -292,37 +292,54 @@
     k.dataset.t = 'wall';
     inner.appendChild(k);
 
-    var grid = document.createElement('div');
-    grid.className = 'wall-grid';
+    // по группе на съёмку, заголовок берётся из словаря
+    var groups = film.groups || [{ posts: film.posts || [] }];
+    var seq = 0;
 
-    (film.posts || []).forEach(function (post, n) {
-      if (!post || !post.cover) return;
-      var tile = document.createElement(post.url ? 'a' : 'div');
-      tile.className = 'wall-tile';
-      if (post.url) { tile.href = post.url; tile.target = '_blank'; tile.rel = 'noopener'; }
-      // лёгкий детерминированный наклон — читается как приколотые постеры
-      tile.style.setProperty('--tilt', ((((n * 37) % 9) - 4) * 0.4).toFixed(2) + 'deg');
-
-      var img = document.createElement('img');
-      img.src = post.cover;
-      img.alt = '';
-      img.loading = 'lazy';
-      tile.appendChild(img);
-
-      if (post.kind === 'video') {
-        var pl = document.createElement('span');
-        pl.className = 'wall-play';
-        pl.setAttribute('aria-hidden', 'true');
-        tile.appendChild(pl);
+    groups.forEach(function (group) {
+      if (group.film || group.kind) {
+        var h = document.createElement('div');
+        h.className = 'wall-group';
+        if (group.film) h.dataset.tFilm = group.film;
+        else h.dataset.tKind = group.kind;
+        inner.appendChild(h);
       }
-      var cap = document.createElement('span');
-      cap.className = 'wall-cap';
-      cap.dataset.tShot = String(n);
-      tile.appendChild(cap);
-      grid.appendChild(tile);
-    });
 
-    inner.appendChild(grid);
+      var grid = document.createElement('div');
+      grid.className = 'wall-grid';
+
+      (group.posts || []).forEach(function (post) {
+        if (!post || !post.cover) return;
+        var tile = document.createElement(post.url ? 'a' : 'div');
+        tile.className = 'wall-tile' + (post.shot === undefined ? ' wall-tile--bare' : '');
+        if (post.url) { tile.href = post.url; tile.target = '_blank'; tile.rel = 'noopener'; }
+        // лёгкий детерминированный наклон — читается как приколотые снимки
+        tile.style.setProperty('--tilt', ((((seq * 37) % 9) - 4) * 0.4).toFixed(2) + 'deg');
+        seq++;
+
+        var img = document.createElement('img');
+        img.src = post.cover;
+        img.alt = '';
+        img.loading = 'lazy';
+        tile.appendChild(img);
+
+        if (post.kind === 'video') {
+          var pl = document.createElement('span');
+          pl.className = 'wall-play';
+          pl.setAttribute('aria-hidden', 'true');
+          tile.appendChild(pl);
+        }
+        if (post.shot !== undefined) {
+          var cap = document.createElement('span');
+          cap.className = 'wall-cap';
+          cap.dataset.tShot = String(post.shot);
+          tile.appendChild(cap);
+        }
+        grid.appendChild(tile);
+      });
+
+      inner.appendChild(grid);
+    });
     scroll.appendChild(inner);
     s.appendChild(scroll);
     return s;
@@ -642,6 +659,8 @@
       if (Math.abs(si - i) === 1) pl.warm();
     });
 
+    if (i === 0) heroStart(); else heroStop();
+
     // индикатор нарезки — только там, где реально есть фильм
     var eng = engineBySection[i] || null;
     cutsEl.classList.toggle('is-on', !!eng);
@@ -788,6 +807,46 @@
       if (e.target === p || e.target.classList.contains('panel-close')) closePanel();
     });
   });
+
+  /* ── первый экран: фотография макета и портреты, сменяющие друг друга ── */
+
+  var heroTimer = null;
+  var heroIdx = 0;
+  var heroSlides = [];
+
+  function buildHero() {
+    var hero = sections[0];
+    var first = hero && hero.querySelector('.hero-photo');
+    if (!first) return;
+
+    var list = window.HERO || [first.getAttribute('src')];
+    first.src = list[0];
+    first.classList.add('is-on');
+    heroSlides = [first];
+
+    var prev = first;
+    list.slice(1).forEach(function (src) {
+      var im = document.createElement('img');
+      im.className = 'hero-photo';
+      im.src = src;
+      im.alt = '';
+      im.loading = 'lazy';
+      hero.insertBefore(im, prev.nextSibling);
+      heroSlides.push(im);
+      prev = im;
+    });
+  }
+
+  function heroStart() {
+    if (REDUCED || heroSlides.length < 2 || heroTimer) return;
+    heroTimer = setInterval(function () {
+      heroSlides[heroIdx].classList.remove('is-on');
+      heroIdx = (heroIdx + 1) % heroSlides.length;
+      heroSlides[heroIdx].classList.add('is-on');
+    }, 6500);
+  }
+
+  function heroStop() { clearInterval(heroTimer); heroTimer = null; }
 
   /** Контакты из CONTACTS: пустые пропускаем, пока ссылки нет. */
   function buildContacts() {
@@ -938,6 +997,7 @@
    * 6. Старт
    * ==================================================================== */
 
+  buildHero();
   buildSwitcher();
   buildContacts();
   applyLocale();
@@ -951,6 +1011,7 @@
     deck: { go: go, next: next, prev: prev, get current() { return current; } },
     sections: sections,
     engines: engines,
+    get heroSlides() { return heroSlides.length; },
     get locale() { return locale; },
     setLocale: setLocale,
     engineBySection: engineBySection,

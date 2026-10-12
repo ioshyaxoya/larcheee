@@ -76,6 +76,7 @@ a:hover { color: var(--accent); }
 
 /* ── 1. герой ────────────────────────────────────────────────────────────── */
 
+/* кадры первого экрана лежат стопкой и медленно сменяют друг друга */
 .hero-photo {
   position: absolute;
   inset: 0;
@@ -84,6 +85,21 @@ a:hover { color: var(--accent); }
   object-fit: cover;
   filter: grayscale(.15) contrast(1.05);
   z-index: 1;
+  opacity: 0;
+  transition: opacity 1800ms ease-in-out;
+}
+.hero-photo.is-on { opacity: 1; }
+
+/* под кремовым логотипом нужна тень: портреты сняты на светлом фоне */
+.section--hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(11,11,11,.55) 0%,
+                                      rgba(11,11,11,.22) 42%,
+                                      rgba(11,11,11,.42) 100%);
 }
 
 .hero-logo {
@@ -392,6 +408,8 @@ a.film-link,
   flex-direction: column;
   justify-content: center;
 }
+/* когда групп много, прижимаем к верху — иначе центрирование режет первую */
+.wall-scroll .wall-inner:has(.wall-group) { justify-content: flex-start; }
 
 .wall-kicker {
   font-size: 11px;
@@ -402,6 +420,18 @@ a.film-link,
   text-align: center;
   margin-bottom: 34px;
 }
+
+.wall-group {
+  font-size: 11px;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .45;
+  text-align: center;
+  margin: 34px 0 18px;
+}
+.wall-group:first-of-type { margin-top: 0; }
+body.is-rtl .wall-group { letter-spacing: 0; text-transform: none; }
 
 .wall-grid {
   display: grid;
@@ -423,6 +453,10 @@ a.film-link,
   transform: rotate(var(--tilt));
   transition: transform 260ms ease, box-shadow 260ms ease;
 }
+/* плитка без подписи — без нижнего поля под неё; правило обязано стоять
+   после .wall-tile: специфичность та же, выигрывает последнее */
+.wall-tile--bare { padding-bottom: 9px; }
+
 .wall-tile img {
   display: block;
   width: 100%;
@@ -748,7 +782,19 @@ body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
      поэтому место считаем по самой длинной. На узком экране сетка
      схлопывается в одну колонку — стена прокручивается внутри себя. */
   .wall-inner { padding: 72px 78px 86px; }
-  .wall-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; }
+  .wall-group {
+  font-size: 11px;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .45;
+  text-align: center;
+  margin: 34px 0 18px;
+}
+.wall-group:first-of-type { margin-top: 0; }
+body.is-rtl .wall-group { letter-spacing: 0; text-transform: none; }
+
+.wall-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; }
   .wall-tile img { height: 160px; }
   .soon-badge { letter-spacing: .34em; text-indent: .34em; }
   .cuts i { width: 1px; }

@@ -22,12 +22,20 @@ window.MONTAGE = {
   SCROLL_SPEED: 700, // мс на перелистывание экрана (как на референсе)
 };
 
-/* Контакты. Пустой url — строка не показывается.
-   Инстаграм: вписать ник Дарины, проверить его я не могу — Instagram
-   отдаёт серверу редирект на вход, а угадывать ник в контактах нельзя. */
+/* Первый экран: фотография из макета и портреты Дарины, медленно
+   сменяющие друг друга. Первой всегда идёт фотография со съёмки —
+   с неё начинался исходный макет. */
+window.HERO = [
+  'assets/hero.jpg',
+  'assets/portraits/darina-01.jpg',
+  'assets/portraits/darina-02.jpg',
+  'assets/portraits/darina-03.jpg',
+];
+
+/* Контакты. Пустой url — строка не показывается. */
 window.CONTACTS = [
   { text: 't.me/darinadanilyuk',   url: 'https://t.me/darinadanilyuk' },
-  { text: 'instagram',             url: '' },   // ← https://instagram.com/<ник>
+  { text: 'instagram.com/darinadanilyuk', url: 'https://www.instagram.com/darinadanilyuk' },
   { text: 'danilyukk.dar@mail.ru', url: 'mailto:danilyukk.dar@mail.ru' },
 ];
 
@@ -153,18 +161,41 @@ window.FILMS = [
   },
 
   /* ----------------------------------------------------------------------
-   * Стена: кадры со съёмок и посты-анонсы из инстаграма.
-   * Подписи плиток — в i18n.js → shots[], по порядку.
-   * url у плитки делает её ссылкой на пост.
+   * Стена: бэкстейдж со всех трёх съёмок, по группе на работу.
+   * Подписи плиток необязательны: shot — номер в i18n.js → shots[].
+   * url у плитки делает её ссылкой на пост в инстаграме.
    * -------------------------------------------------------------------- */
   {
     wall: true,
-    posts: [
-      { cover: 'assets/wall/shoot-01.jpg', url: '' },
-      { cover: 'assets/wall/shoot-02.jpg', url: '' },
-      { cover: 'assets/wall/shoot-03.jpg', url: '' },
-      { cover: 'assets/wall/shoot-04.jpg', url: '' },
-      { cover: 'assets/wall/shoot-05.jpg', url: '' },
+    groups: [
+      // заголовок берётся из i18n: film → films[id], kind → kinds[kind]
+      { film: 'kirill', posts: [
+        { cover: 'assets/wall/kirill-01.jpg' },
+        { cover: 'assets/wall/kirill-02.jpg' },
+        { cover: 'assets/wall/kirill-03.jpg' },
+        { cover: 'assets/wall/kirill-04.jpg' },
+        { cover: 'assets/wall/kirill-05.jpg' },
+        { cover: 'assets/wall/kirill-06.jpg' },
+      ] },
+      { film: 'drive', posts: [
+        { cover: 'assets/wall/drive-01.jpg' },
+        { cover: 'assets/wall/drive-02.jpg' },
+        { cover: 'assets/wall/drive-03.jpg' },
+        { cover: 'assets/wall/drive-04.jpg' },
+        { cover: 'assets/wall/drive-05.jpg' },
+        { cover: 'assets/wall/drive-06.jpg' },
+        { cover: 'assets/wall/drive-07.jpg' },
+        { cover: 'assets/wall/drive-08.jpg' },
+      ] },
+      // у клипа подписи есть: shot — номер в i18n.js → shots[]
+      // url сделает плитку ссылкой на пост, когда ссылки появятся
+      { kind: 'mv', posts: [
+        { cover: 'assets/wall/shoot-01.jpg', shot: 0, url: '' },
+        { cover: 'assets/wall/shoot-02.jpg', shot: 1, url: '' },
+        { cover: 'assets/wall/shoot-03.jpg', shot: 2, url: '' },
+        { cover: 'assets/wall/shoot-04.jpg', shot: 3, url: '' },
+        { cover: 'assets/wall/shoot-05.jpg', shot: 4, url: '' },
+      ] },
     ],
   },
 ];
