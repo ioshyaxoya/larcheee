@@ -1066,10 +1066,37 @@ html[lang="it"] .clip-story-text p { line-height: 1.45; margin-bottom: 10px; }
 body.is-rtl .clip-story-media figcaption { letter-spacing: 0; text-transform: none; }
 
 @media (max-width: 720px) {
-  .panel--clip .clip-story { grid-template-columns: 1fr; }
-  .clip-story-media { order: -1; margin-bottom: 12px; }
-  .clip-story-media video { aspect-ratio: auto; height: min(17vh, 150px); }
-  .clip-story-media figcaption { margin-top: 6px; }
+  /* Кадр из клипа сверху, под ним текст. Кадру достаётся всё место, что осталось
+     после текста: на высоком экране он 16:9 по ширине, на низком ужимается
+     (обрезается по высоте), но не пропадает. Раньше на низких телефонах он
+     исчезал совсем — а это самое живое на странице. */
+  .panel--clip .clip-story { display: flex; flex-direction: column; }
+  .clip-story-text { flex: none; }
+  .clip-story-media {
+    order: -1;
+    flex: 0 1 auto;
+    min-height: 92px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+  }
+  .clip-story-media video {
+    flex: 1 1 auto;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+    height: auto;
+  }
+  .clip-story-media figcaption { flex: none; margin-top: 6px; }
+}
+/* низкий телефон: подпись «кадр из клипа» уступает место самому кадру и тексту */
+@media (max-width: 720px) and (max-height: 760px) {
+  .clip-story-media figcaption { display: none; }
+  .clip-story-media { min-height: 64px; margin-bottom: 8px; }
+  .clip-story-text p { line-height: 1.5; margin-bottom: 8px; }
+  html[lang="it"] .clip-story-text p { line-height: 1.38; margin-bottom: 7px; }
+  .clip-story-text .clip-story-end { margin-top: 10px; }
+}
+@media (max-width: 720px) {
   /* на телефоне история должна уместиться без прокрутки: плотнее набор и отступы */
   .clip-story-text p { margin-bottom: 10px; line-height: 1.58; font-size: calc(13px * var(--tx, 1)); }
   .clip-story-text .clip-story-end { margin-top: 14px; }
@@ -1077,10 +1104,6 @@ body.is-rtl .clip-story-media figcaption { letter-spacing: 0; text-transform: no
   .panel--clip .credits-film { margin-bottom: 6px; }
   .panel--clip .credits-line { margin-bottom: 4px; }
   .panel-tabs { margin-bottom: 10px; }
-}
-/* совсем низкий телефон: кадр из клипа уступает место тексту */
-@media (max-width: 720px) and (max-height: 700px) {
-  .clip-story-media { display: none; }
 }
 
 body.is-script .clip-story-text .clip-story-end,
@@ -1208,7 +1231,10 @@ body.is-script .car-count {
 .lightbox-stage img {
   display: block;
   max-width: min(1180px, 92vw);
-  max-height: 72vh;
+  /* 276px — всё, что стоит вокруг кадра: поля, подпись, счётчик и таблетка управления;
+     без вычета кадр на невысоком окне налезал на счётчик */
+  max-height: min(72vh, calc(100vh - 276px));
+  max-height: min(72vh, calc(100dvh - 276px));
   width: auto;
   height: auto;           /* кадр целиком, без обрезки */
   object-fit: contain;
@@ -1227,7 +1253,7 @@ body.is-rtl .lightbox-stage figcaption { letter-spacing: 0; text-transform: none
 .lightbox-bar {
   display: flex;
   align-items: center;
-  gap: 26px;
+  justify-content: center;
   color: var(--ink-dim);
 }
 .lightbox-count {
@@ -1236,45 +1262,39 @@ body.is-rtl .lightbox-stage figcaption { letter-spacing: 0; text-transform: none
   min-width: 68px;
   text-align: center;
 }
-.lightbox-arrow {
-  background: none;
-  border: 0;
-  color: var(--ink-dim);
-  font-size: calc(20px * var(--tx, 1));
-  line-height: 1;
-  padding: 6px 14px;
-  cursor: pointer;
-  opacity: .7;
-  transition: opacity 180ms ease, color 180ms ease;
-}
-.lightbox-arrow:hover { opacity: 1; color: var(--accent); }
 
-/* тёмная таблетка с управлением показом */
+/* Единственное управление просмотром: тёмная таблетка «заново · назад · пуск ·
+   вперёд». Раньше над ней стояли ещё две стрелки — те же «назад» и «вперёд»
+   дважды. Кнопки крупные (≥ 56px, WCAG 2.2: цель нажатия от 44px), а
+   «пуск» ещё больше — по нему тянется палец чаще всего. */
 .lightbox-pad {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   background: rgba(24, 24, 24, .9);
   border-radius: 999px;
-  padding: 5px;
+  padding: 8px;
 }
 .lightbox-pad button {
-  width: 34px;
-  height: 34px;
+  width: 56px;
+  height: 56px;
   border: 0;
   border-radius: 50%;
   background: none;
   color: var(--ink-dim);
-  font-size: calc(13px * var(--tx, 1));
+  font-size: calc(26px * var(--tx, 1));
   line-height: 1;
   cursor: pointer;
   transition: background 180ms ease, color 180ms ease;
 }
 .lightbox-pad button:hover { background: rgba(255, 255, 255, .1); color: var(--ink); }
+.lightbox-pad .lb-step { font-size: calc(38px * var(--tx, 1)); padding-bottom: 4px; }   /* ‹ › — у них большой пробел под глифом */
 .lightbox-pad .lb-play {
+  width: 68px;
+  height: 68px;
   background: var(--ink);
   color: #111;
-  font-size: calc(12px * var(--tx, 1));
+  font-size: calc(20px * var(--tx, 1));
 }
 .lightbox-pad .lb-play:hover { background: #fff; color: #111; }
 
@@ -1296,10 +1316,20 @@ body.is-rtl .lightbox-stage figcaption { letter-spacing: 0; text-transform: none
 body.is-lightbox { overflow: hidden; }
 
 @media (max-width: 720px) {
-  .lightbox { padding: 48px 14px 18px; gap: 14px; }
-  .lightbox-stage img { max-height: 58vh; max-width: 94vw; }
+  .lightbox { padding: 48px 14px 18px; gap: 12px; }
+  .lightbox-stage img { max-height: 54vh; max-width: 94vw; }
   .credits-shot img { height: 165px; }
-  .lightbox-bar { gap: 14px; }
+}
+/* низкое окно (телефон на боку, невысокий ноутбук): те же кнопки, но компактнее,
+   иначе таблетка съедает полэкрана и кадру остаётся полоска */
+@media (max-height: 560px) {
+  .lightbox { padding: 40px 14px 12px; gap: 8px; }
+  .lightbox-stage { gap: 8px; }
+  .lightbox-stage img { max-height: calc(100vh - 196px); max-height: calc(100dvh - 196px); }
+  .lightbox-pad { gap: 6px; padding: 5px; }
+  .lightbox-pad button { width: 48px; height: 48px; font-size: calc(22px * var(--tx, 1)); }
+  .lightbox-pad .lb-step { font-size: calc(32px * var(--tx, 1)); padding-bottom: 3px; }
+  .lightbox-pad .lb-play { width: 56px; height: 56px; font-size: calc(17px * var(--tx, 1)); }
 }
 
 /* ── шрифт по языку ──────────────────────────────────────────────────────────
