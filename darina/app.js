@@ -309,11 +309,17 @@
       if (c.url.indexOf('mailto:') !== 0) { a.target = '_blank'; a.rel = 'noopener'; }
       top.appendChild(a);
     });
-    f.appendChild(top);
+    var upper = document.createElement('div');
+    upper.className = 'foot-upper';
+    upper.appendChild(top);
 
     var rule = document.createElement('div');
     rule.className = 'foot-rule';
-    f.appendChild(rule);
+    upper.appendChild(rule);
+    f.appendChild(upper);
+
+    var lower = document.createElement('div');
+    lower.className = 'foot-lower';
 
     // правовые документы — открываются оверлеем, как «о себе»
     var nav = document.createElement('nav');
@@ -325,17 +331,18 @@
       btn.addEventListener('click', function () { openLegal(key); });
       nav.appendChild(btn);
     });
-    f.appendChild(nav);
+    lower.appendChild(nav);
 
     var who = document.createElement('p');
     who.className = 'foot-who';
     who.dataset.t = 'footWho';
-    f.appendChild(who);
+    lower.appendChild(who);
 
     var copy = document.createElement('p');
     copy.className = 'foot-copy';
     copy.dataset.year = String(new Date().getFullYear());
-    f.appendChild(copy);
+    lower.appendChild(copy);
+    f.appendChild(lower);
 
     // имя во всю ширину, уходит вниз в тень
     var mark = document.createElement('div');

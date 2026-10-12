@@ -12,6 +12,14 @@
   --ease: cubic-bezier(0.66, 0, 0.16, 1);
 }
 
+/* Множитель кегля по языку. У Monotype Corsiva (итальянский) и Mistral
+   (французский) очень маленький строчный рост: при тех же 10–15px, что у
+   Verdana, текст не читается. Каждый font-size в файле умножается на --tx,
+   у остальных языков он равен 1. Подбирать здесь, по языку отдельно. */
+:root { --tx: 1; }
+html[lang="it"] { --tx: 1.4; }
+html[lang="fr"] { --tx: 1.4; }
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
@@ -178,7 +186,7 @@ a:hover { color: var(--accent); }
   top: 50%;
   inset-inline: auto;
   transform: translateY(-50%);
-  font-size: 15px;
+  font-size: calc(15px * var(--tx, 1));
   /* Поля доводят область нажатия до 44×44 — это усиленный уровень WCAG 2.2
      (2.5.5); минимум по 2.5.8 вдвое меньше. Сам текст не двигается:
      отступ от края уменьшен ровно на величину бокового поля. */
@@ -250,13 +258,13 @@ a:hover { color: var(--accent); }
 
 .film-title .t {
   display: block;
-  font-size: clamp(15px, 2.1vw, 22px);
+  font-size: calc(clamp(15px, 2.1vw, 22px) * var(--tx, 1));
   letter-spacing: .02em;
 }
 .film-title .s {
   display: block;
   margin-top: 6px;
-  font-size: 11px;
+  font-size: calc(11px * var(--tx, 1));
   letter-spacing: .18em;
   text-transform: uppercase;
   color: var(--ink-dim);
@@ -278,7 +286,7 @@ a.film-link,
   transform: translate(-50%, -50%);
   z-index: 5;
   text-align: center;
-  font-size: 11px;
+  font-size: calc(11px * var(--tx, 1));
   letter-spacing: .18em;
   text-transform: uppercase;
   color: var(--ink-dim);
@@ -378,7 +386,7 @@ a.film-link,
 }
 
 .soon-kicker {
-  font-size: 11px;
+  font-size: calc(11px * var(--tx, 1));
   letter-spacing: .3em;
   text-transform: uppercase;
   color: var(--ink-dim);
@@ -394,7 +402,7 @@ a.film-link,
 
 .soon-title {
   margin-top: 18px;
-  font-size: clamp(24px, 4.4vw, 46px);
+  font-size: calc(clamp(24px, 4.4vw, 46px) * var(--tx, 1));
   line-height: 1.14;
   text-shadow: 0 2px 16px #000;
 }
@@ -403,7 +411,7 @@ a.film-link,
 .soon-badge {
   margin-top: 26px;
   display: inline-block;
-  font-size: 13px;
+  font-size: calc(13px * var(--tx, 1));
   letter-spacing: .44em;
   text-indent: .44em;            /* компенсируем трекинг последней буквы */
   text-transform: uppercase;
@@ -415,14 +423,14 @@ a.film-link,
 /* …а если название ещё не раскрыто — само «soon» и есть заголовок */
 .section--soon.soon-untitled .soon-badge {
   margin-top: 22px;
-  font-size: clamp(34px, 7.4vw, 78px);
+  font-size: calc(clamp(34px, 7.4vw, 78px) * var(--tx, 1));
   letter-spacing: .3em;
   text-indent: .3em;
 }
 
 .soon-note {
   margin-top: 18px;
-  font-size: 11px;
+  font-size: calc(11px * var(--tx, 1));
   letter-spacing: .16em;
   text-transform: uppercase;
   color: var(--ink-dim);
@@ -433,7 +441,7 @@ a.film-link,
 
 .soon-credits {
   margin-top: 16px;
-  font-size: 11px;
+  font-size: calc(11px * var(--tx, 1));
   letter-spacing: .1em;
   color: var(--ink-dim);
   opacity: .5;
@@ -455,7 +463,7 @@ a.film-link,
   flex-wrap: wrap;
 }
 .soon-links a {
-  font-size: 11px;
+  font-size: calc(11px * var(--tx, 1));
   letter-spacing: .2em;
   text-transform: uppercase;
   text-decoration: underline;
@@ -514,7 +522,7 @@ body.is-rtl .credits-shots-wrap::after { background: linear-gradient(to right, r
 .credits-shots-wrap.is-end::after { opacity: 0; transition: opacity 200ms ease; }
 .credits-shot figcaption {
   margin-top: 7px;
-  font-size: 10px;
+  font-size: calc(10px * var(--tx, 1));
   letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ink-dim);
@@ -524,7 +532,7 @@ body.is-rtl .credits-shot figcaption { letter-spacing: 0; text-transform: none; 
 
 /* титры одной строкой — у клипа они не разложены по ролям */
 .credits-line {
-  font-size: 13px;
+  font-size: calc(13px * var(--tx, 1));
   line-height: 1.7;
   color: var(--ink);
   opacity: .9;
@@ -563,7 +571,7 @@ body.is-rtl .credits-shot figcaption { letter-spacing: 0; text-transform: none; 
   transform: translateX(-50%);
   z-index: 60;
   font-family: inherit;
-  font-size: 11px;
+  font-size: calc(11px * var(--tx, 1));
   letter-spacing: .24em;
   text-transform: uppercase;
   color: var(--ink-dim);
@@ -595,7 +603,7 @@ body.is-rtl .credits-shot figcaption { letter-spacing: 0; text-transform: none; 
 
 .lang-btn {
   font-family: inherit;
-  font-size: 10px;
+  font-size: calc(10px * var(--tx, 1));
   letter-spacing: .14em;
   text-transform: uppercase;
   color: var(--ink-dim);
@@ -611,7 +619,7 @@ body.is-rtl .credits-shot figcaption { letter-spacing: 0; text-transform: none; 
 .lang-btn.is-on { opacity: 1; color: var(--accent); }
 
 /* арабские буквы соединяются — разрядка и капитель их ломают */
-.lang-btn[lang^='ar'] { letter-spacing: 0; text-transform: none; font-size: 12px; }
+.lang-btn[lang^='ar'] { letter-spacing: 0; text-transform: none; font-size: calc(12px * var(--tx, 1)); }
 
 body.is-rtl .side,
 body.is-rtl .film-title .s,
@@ -660,7 +668,7 @@ body.is-rtl .panel-inner { text-align: start; }
   margin-top: 9px;
   padding: 0;
   font-family: inherit;
-  font-size: 10px;
+  font-size: calc(10px * var(--tx, 1));
   letter-spacing: .2em;
   text-transform: uppercase;
   color: var(--ink-dim);
@@ -687,14 +695,14 @@ body.is-rtl .film-credits { letter-spacing: 0; text-transform: none; }
 }
 
 .credits-film {
-  font-size: clamp(17px, 2.4vw, 23px);
+  font-size: calc(clamp(17px, 2.4vw, 23px) * var(--tx, 1));
   margin-bottom: 26px;
   color: var(--ink);
 }
 
 .credits-synopsis {
   max-width: 680px;      /* строка остаётся читаемой, хотя панель шире */
-  font-size: 14px;
+  font-size: calc(14px * var(--tx, 1));
   line-height: 1.75;
   margin-bottom: 30px;
   color: var(--ink);
@@ -702,7 +710,7 @@ body.is-rtl .film-credits { letter-spacing: 0; text-transform: none; }
 }
 
 .credits-sub {
-  font-size: 10px;
+  font-size: calc(10px * var(--tx, 1));
   letter-spacing: .24em;
   text-transform: uppercase;
   color: var(--accent);
@@ -719,7 +727,7 @@ body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
 }
 
 .credits-role {
-  font-size: 10px;
+  font-size: calc(10px * var(--tx, 1));
   letter-spacing: .16em;
   text-transform: uppercase;
   color: var(--ink-dim);
@@ -728,12 +736,12 @@ body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
 }
 body.is-rtl .credits-role { letter-spacing: 0; text-transform: none; }
 
-.credits-names { display: flex; flex-direction: column; gap: 3px; font-size: 13px; }
+.credits-names { display: flex; flex-direction: column; gap: 3px; font-size: calc(13px * var(--tx, 1)); }
 
 @media (max-width: 640px) {
   .credits-synopsis {
   max-width: 680px;      /* строка остаётся читаемой, хотя панель шире */
-  font-size: 14px;
+  font-size: calc(14px * var(--tx, 1));
   line-height: 1.75;
   margin-bottom: 30px;
   color: var(--ink);
@@ -741,7 +749,7 @@ body.is-rtl .credits-role { letter-spacing: 0; text-transform: none; }
 }
 
 .credits-sub {
-  font-size: 10px;
+  font-size: calc(10px * var(--tx, 1));
   letter-spacing: .24em;
   text-transform: uppercase;
   color: var(--accent);
@@ -773,10 +781,10 @@ body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
   max-width: 560px;
   padding: 0 32px;
   line-height: 1.75;
-  font-size: 13px;
+  font-size: calc(13px * var(--tx, 1));
 }
 .panel-inner h2 {
-  font-size: 11px;
+  font-size: calc(11px * var(--tx, 1));
   letter-spacing: .24em;
   text-transform: uppercase;
   color: var(--accent);
@@ -784,7 +792,7 @@ body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
   margin-bottom: 18px;
 }
 .panel-inner p { margin-bottom: 12px; }
-.panel-inner .muted { color: var(--ink-dim); opacity: .45; font-size: 11px; }
+.panel-inner .muted { color: var(--ink-dim); opacity: .45; font-size: calc(11px * var(--tx, 1)); }
 .panel-inner code { font-family: ui-monospace, monospace; }
 .panel-inner a { text-decoration: underline; text-underline-offset: 3px; }
 
@@ -793,7 +801,7 @@ body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
   flex-direction: column;
   gap: 12px;
   align-items: flex-start;
-  font-size: 14px;
+  font-size: calc(14px * var(--tx, 1));
 }
 .contacts a { text-underline-offset: 5px; }
 
@@ -801,7 +809,7 @@ body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
   position: absolute;
   top: 18px;
   inset-inline-end: 24px;
-  font-size: 26px;
+  font-size: calc(26px * var(--tx, 1));
   line-height: 1;
   color: var(--ink-dim);
   background: none;
@@ -823,7 +831,7 @@ body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
   .film-title { inset-inline-start: 14px; bottom: 54px; }
   .cuts { inset-inline-end: 14px; bottom: 56px; gap: 2px; }
   .lang { top: 10px; gap: 0; }
-  .lang-btn { padding: 4px 5px; font-size: 9px; }
+  .lang-btn { padding: 4px 5px; font-size: calc(9px * var(--tx, 1)); }
   /* запас по бокам под фиксированные about/contact: подписи у разных
      языков сильно разной длины («о себе» короче, чем «niri buruz»),
      поэтому место считаем по самой длинной. На узком экране сетка
@@ -877,7 +885,7 @@ body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
   box-shadow: 0 24px 60px rgba(0, 0, 0, .7);
 }
 .lightbox-stage figcaption {
-  font-size: 11px;
+  font-size: calc(11px * var(--tx, 1));
   letter-spacing: .16em;
   text-transform: uppercase;
   color: var(--ink-dim);
@@ -893,7 +901,7 @@ body.is-rtl .lightbox-stage figcaption { letter-spacing: 0; text-transform: none
   color: var(--ink-dim);
 }
 .lightbox-count {
-  font-size: 13px;
+  font-size: calc(13px * var(--tx, 1));
   letter-spacing: .14em;
   min-width: 68px;
   text-align: center;
@@ -902,7 +910,7 @@ body.is-rtl .lightbox-stage figcaption { letter-spacing: 0; text-transform: none
   background: none;
   border: 0;
   color: var(--ink-dim);
-  font-size: 20px;
+  font-size: calc(20px * var(--tx, 1));
   line-height: 1;
   padding: 6px 14px;
   cursor: pointer;
@@ -927,7 +935,7 @@ body.is-rtl .lightbox-stage figcaption { letter-spacing: 0; text-transform: none
   border-radius: 50%;
   background: none;
   color: var(--ink-dim);
-  font-size: 13px;
+  font-size: calc(13px * var(--tx, 1));
   line-height: 1;
   cursor: pointer;
   transition: background 180ms ease, color 180ms ease;
@@ -936,7 +944,7 @@ body.is-rtl .lightbox-stage figcaption { letter-spacing: 0; text-transform: none
 .lightbox-pad .lb-play {
   background: var(--ink);
   color: #111;
-  font-size: 12px;
+  font-size: calc(12px * var(--tx, 1));
 }
 .lightbox-pad .lb-play:hover { background: #fff; color: #111; }
 
@@ -947,7 +955,7 @@ body.is-rtl .lightbox-stage figcaption { letter-spacing: 0; text-transform: none
   background: none;
   border: 0;
   color: var(--ink);
-  font-size: 30px;
+  font-size: calc(30px * var(--tx, 1));
   line-height: 1;
   cursor: pointer;
   opacity: .75;
@@ -975,10 +983,13 @@ body.is-lightbox { overflow: hidden; }
 html[lang="en-GB"] body {
   font-family: 'Comic Sans MS', 'Comic Sans', Papyrus, 'Chalkboard SE', 'Comic Neue', cursive;
 }
-/* Испанский: основной набор — Algerian (гравированные капители), а Jokerman
-   остаётся только в заголовках. Запасные к Algerian — того же рисунка. */
+/* Испанский: основной набор — Optima (флейтовые гротески с римскими пропорциями),
+   а Jokerman остаётся только в заголовках. Optima родная для macOS и iOS, на
+   Windows её по умолчанию нет — там подставится Segoe UI, гуманистический
+   гротеск близкого духа. Candara сюда не ставим намеренно: она стоит запасной
+   у немецкого, и на машине без обоих основных шрифтов языки выглядели бы одинаково. */
 html[lang="es"] body {
-  font-family: Algerian, 'Copperplate Gothic Bold', 'Copperplate Gothic', Copperplate, 'Engravers MT', 'Trajan Pro', serif;
+  font-family: Optima, 'Optima LT Std', 'Optima nova', 'Zapf Humanist 601 BT', 'URW Classico', 'Segoe UI', Calibri, sans-serif;
 }
 html[lang="es"] .film-title .t,
 html[lang="es"] .soon-title,
@@ -999,7 +1010,7 @@ html[lang="fr"] body {
 }
 html[lang="de"] body {
   /* Rotis SemiSerif — гуманистический полусерифный; запасные того же склада */
-  font-family: 'Rotis SemiSerif', 'Rotis SemiSerif Std', 'Rotis Semi Serif', 'Rotis Serif', Candara, Optima, 'Gill Sans MT', 'Trebuchet MS', sans-serif;
+  font-family: 'Rotis SemiSerif', 'Rotis SemiSerif Std', 'Rotis Semi Serif', 'Rotis Serif', Candara, 'Gill Sans MT', 'Trebuchet MS', sans-serif;
 }
 html[lang="ar-SA"] body {
   font-family: 'Simplified Arabic', 'Traditional Arabic', 'Arial Arabic', 'Arabic Transparent', Tahoma, 'Geeza Pro', 'Noto Naskh Arabic', 'Noto Sans Arabic', sans-serif;
@@ -1027,11 +1038,6 @@ body.is-script .panel-inner h2 {
   text-indent: 0;
 }
 
-/* рукописное мельче читается — чуть крупнее основной кегль */
-html[lang="fr"] .panel-inner,
-html[lang="it"] .panel-inner { font-size: 15px; }
-html[lang="fr"] .credits-synopsis,
-html[lang="it"] .credits-synopsis { font-size: 16px; }
 
 /* Переключатель — это коды языков, он должен выглядеть одинаково на всех
    языках, поэтому капитель с него не снимаем. А вот арабской метке разрядка
@@ -1060,8 +1066,14 @@ html[lang="it"] .credits-synopsis { font-size: 16px; }
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 0 clamp(16px, 5vw, 54px) clamp(18px, 4vh, 44px);
+  /* Боковые ссылки стоят у краёв (fixed, по центру высоты), поэтому текст не
+     должен заходить в их зону. Нужный отступ = зона минус внешнее поле блока:
+     на широком экране поле само больше зоны и ничего не меняется. */
+  padding: 0 max(clamp(16px, 5vw, 54px), calc(104px * var(--tx, 1) - max(0px, (100vw - 1180px) / 2))) clamp(18px, 4vh, 44px);
 }
+
+.foot-upper, .foot-lower { min-width: 0; }
+.foot-lower { margin-top: clamp(18px, 3vh, 28px); }
 
 .foot-top {
   display: flex;
@@ -1072,7 +1084,7 @@ html[lang="it"] .credits-synopsis { font-size: 16px; }
 .foot-pill {
   display: inline-block;
   padding: 8px 0;
-  font-size: 15px;
+  font-size: calc(15px * var(--tx, 1));
   color: var(--ink);
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -1083,7 +1095,7 @@ html[lang="it"] .credits-synopsis { font-size: 16px; }
 .foot-rule {
   height: 1px;
   background: rgba(243, 241, 234, .14);
-  margin: clamp(26px, 5vh, 46px) 0 clamp(18px, 3vh, 28px);
+  margin: clamp(26px, 5vh, 46px) 0 0;
 }
 
 .foot-links {
@@ -1096,7 +1108,7 @@ html[lang="it"] .credits-synopsis { font-size: 16px; }
   border: 0;
   background: none;
   font-family: inherit;
-  font-size: 12px;
+  font-size: calc(12px * var(--tx, 1));
   color: var(--ink);
   opacity: .85;
   cursor: pointer;
@@ -1107,14 +1119,14 @@ html[lang="it"] .credits-synopsis { font-size: 16px; }
 .foot-who {
   margin: clamp(18px, 3vh, 30px) 0 0;
   max-width: 64ch;
-  font-size: 12px;
+  font-size: calc(12px * var(--tx, 1));
   line-height: 1.7;
   color: var(--ink-dim);
   opacity: .5;
 }
 .foot-copy {
   margin: 8px 0 0;
-  font-size: 12px;
+  font-size: calc(12px * var(--tx, 1));
   color: var(--ink-dim);
   opacity: .32;
 }
@@ -1156,14 +1168,38 @@ html[lang="it"] .credits-synopsis { font-size: 16px; }
 }
 .panel--legal .panel-body p {
   margin-bottom: 16px;
-  font-size: 13px;
+  font-size: calc(13px * var(--tx, 1));
   line-height: 1.8;
   color: var(--ink);
   opacity: .88;
 }
 
 @media (max-width: 720px) {
-  .section--footer { padding-top: clamp(96px, 14vh, 140px); }  /* переключатель в две строки */
-  .foot-pill { font-size: 14px; }
-  .foot-who, .foot-copy, .foot-links button { font-size: 11px; }
+  /* Телефон: боковые ссылки стоят по центру высоты и занимают почти всю ширину
+     экрана, увести от них текст по горизонтали нечем. Поэтому подвал — две
+     группы: контакты над полосой ссылок, документы под ней. Полоса — средний
+     ряд сетки, и он по высоте симметричен экрану, как и сами ссылки. */
+  .section--footer { padding-top: 0; }
+  .foot {
+    position: absolute;
+    inset: 0;
+    flex: none;
+    display: grid;
+    grid-template-rows: 1fr calc(84px + 20px * var(--tx, 1)) 1fr;
+    max-width: none;
+    margin: 0;
+    padding: 0 16px;
+  }
+  .foot-upper { grid-row: 1; align-self: end; }
+  .foot-lower { grid-row: 3; align-self: start; margin-top: 0; }
+  .foot-rule { margin-top: 20px; }
+  /* имя уходит под текст фоном: на телефоне места под ним в потоке нет */
+  .foot-mark {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    max-height: none;
+  }
+  .foot-pill { font-size: calc(14px * var(--tx, 1)); }
+  .foot-who, .foot-copy, .foot-links button { font-size: calc(11px * var(--tx, 1)); }
 }
