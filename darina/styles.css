@@ -323,6 +323,13 @@ a.film-link,
   opacity: .6;
 }
 
+/* Псевдонимы пишутся строчными — это часть написания имени, а не оформление.
+   На странице трека так и стоит: uniqe, nkeeei и ARTEM SHILOVETS капсом. */
+.soon-kicker--names {
+  text-transform: none;
+  letter-spacing: .2em;
+}
+
 .soon-title {
   margin-top: 18px;
   font-size: clamp(24px, 4.4vw, 46px);

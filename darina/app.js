@@ -225,8 +225,13 @@
     // сверху — имена артистов, когда их можно назвать, иначе вид работы
     var kicker = document.createElement('div');
     kicker.className = 'soon-kicker';
-    if (film.artists) kicker.textContent = film.artists;
-    else kicker.dataset.tKind = film.kind || '';
+    if (film.artists) {
+      // регистр псевдонимов не трогаем — он взят со страницы трека
+      kicker.className += ' soon-kicker--names';
+      kicker.textContent = film.artists;
+    } else {
+      kicker.dataset.tKind = film.kind || '';
+    }
     inner.appendChild(kicker);
 
     if (film.id) {
@@ -248,10 +253,10 @@
       inner.appendChild(nt);
     }
 
-    if (film.credits) {
+    if (film.creditsKey) {
       var cr = document.createElement('div');
       cr.className = 'soon-credits';
-      cr.textContent = film.credits;
+      cr.dataset.t = film.creditsKey;
       inner.appendChild(cr);
     }
 
