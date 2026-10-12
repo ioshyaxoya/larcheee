@@ -13,12 +13,14 @@
 }
 
 /* Множитель кегля по языку. У Monotype Corsiva (итальянский) и Mistral
-   (французский) очень маленький строчный рост: при тех же 10–15px, что у
-   Verdana, текст не читается. Каждый font-size в файле умножается на --tx,
-   у остальных языков он равен 1. Подбирать здесь, по языку отдельно. */
+   (французские заголовки) очень маленький строчный рост: при тех же 10–15px,
+   что у Verdana, текст не читается. Каждый font-size в файле умножается на --tx,
+   у остальных языков он равен 1. Подбирать здесь, по языку отдельно.
+   Французский основной текст набран Didot — у неё нормальный рост, но тонкие
+   волоски, поэтому прибавка мягкая; заголовки на Mistral — 1.4 (см. ниже). */
 :root { --tx: 1; }
 html[lang="it"] { --tx: 1.4; }
-html[lang="fr"] { --tx: 1.4; }
+html[lang="fr"] { --tx: 1.15; }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -385,47 +387,80 @@ a.film-link,
   max-width: 860px;
 }
 
+/* Анонс читается сверху вниз: «скоро» крупно над всем, под ним название — оно же
+   кнопка, открывающая страницу клипа, — и мелко «by …» с исполнителями. Больше
+   на экране ничего нет: режиссёры и подробности живут на странице клипа.      */
+
+.soon-badge {
+  display: block;                /* своя строка: над названием, а не рядом с ним */
+  font-size: calc(clamp(30px, 5.4vw, 64px) * var(--tx, 1));
+  line-height: 1;
+  letter-spacing: .34em;
+  text-indent: .34em;            /* компенсируем трекинг последней буквы */
+  text-transform: uppercase;
+  color: var(--accent);
+  animation: pulse 3s ease-in-out infinite;
+  text-shadow: 0 0 36px rgba(255, 42, 18, .6), 0 2px 12px rgba(0, 0, 0, .55);
+}
+
+/* название ещё не раскрыто — «скоро» одно и есть заголовок, ещё крупнее */
+.section--soon.soon-untitled .soon-badge {
+  font-size: calc(clamp(34px, 7.4vw, 78px) * var(--tx, 1));
+  letter-spacing: .3em;
+  text-indent: .3em;
+}
+
+.soon-title {
+  display: block;
+  width: fit-content;            /* нажимается надпись, а не вся ширина экрана */
+  margin: clamp(14px, 2.4vh, 24px) auto 0;
+  padding: 6px;                  /* область нажатия больше самих букв */
+  background: none;
+  border: 0;
+  font-family: inherit;
+  /* Множитель --tx здесь не нужен: название набрано одними заглавными, а он
+     введён ради строчных букв у Corsiva и Mistral. С ним на телефоне название
+     не помещалось между боковыми ссылками. */
+  font-size: clamp(24px, 4.4vw, 46px);
+  line-height: 1.14;
+  color: var(--ink);
+  text-shadow: 0 2px 16px #000;
+  cursor: pointer;
+  /* ссылки на сайте подчёркнуты; здесь подчёркивание едва заметно, чтобы не
+     спорить с крупными буквами, и загорается красным при наведении */
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: rgba(243, 241, 234, .3);
+  text-underline-offset: .2em;
+  transition: color 200ms ease, text-decoration-color 200ms ease;
+}
+.soon-title:hover,
+.soon-title:focus-visible {
+  color: #fff;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+}
+.soon-title:focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+
+/* «by …»: имена исполнителей пишутся как на странице трека — строчными тоже
+   (uniqe, nkeeei), это часть написания, а не оформление */
+.soon-by {
+  margin-top: 12px;
+  font-size: calc(12px * var(--tx, 1));
+  letter-spacing: .2em;
+  color: var(--ink-dim);
+  opacity: .72;
+}
+.soon-by-word { opacity: .7; }
+
+/* если исполнители не названы — под названием вид работы */
 .soon-kicker {
+  margin-top: 14px;
   font-size: calc(11px * var(--tx, 1));
   letter-spacing: .3em;
   text-transform: uppercase;
   color: var(--ink-dim);
   opacity: .6;
-}
-
-/* Псевдонимы пишутся строчными — это часть написания имени, а не оформление.
-   На странице трека так и стоит: uniqe, nkeeei и ARTEM SHILOVETS капсом. */
-.soon-kicker--names {
-  text-transform: none;
-  letter-spacing: .2em;
-}
-
-.soon-title {
-  margin-top: 18px;
-  font-size: calc(clamp(24px, 4.4vw, 46px) * var(--tx, 1));
-  line-height: 1.14;
-  text-shadow: 0 2px 16px #000;
-}
-
-/* «soon» — подпись под названием… */
-.soon-badge {
-  margin-top: 26px;
-  display: inline-block;
-  font-size: calc(13px * var(--tx, 1));
-  letter-spacing: .44em;
-  text-indent: .44em;            /* компенсируем трекинг последней буквы */
-  text-transform: uppercase;
-  color: var(--accent);
-  animation: pulse 3s ease-in-out infinite;
-  text-shadow: 0 0 28px rgba(255, 42, 18, .5);
-}
-
-/* …а если название ещё не раскрыто — само «soon» и есть заголовок */
-.section--soon.soon-untitled .soon-badge {
-  margin-top: 22px;
-  font-size: calc(clamp(34px, 7.4vw, 78px) * var(--tx, 1));
-  letter-spacing: .3em;
-  text-indent: .3em;
 }
 
 .soon-note {
@@ -437,23 +472,7 @@ a.film-link,
   opacity: .45;
 }
 
-/* ── подписи и ссылки анонса после премьеры ──────────────────────────────── */
-
-.soon-credits {
-  margin-top: 16px;
-  font-size: calc(11px * var(--tx, 1));
-  letter-spacing: .1em;
-  color: var(--ink-dim);
-  opacity: .5;
-}
-
-/* Кнопка «о клипе» — тот же вид, что у фильмов, но на анонсе всё по центру.
-   .film-credits блочная: она сжимается по содержимому и встаёт слева, а
-   text-align родителя на блок не действует. Здесь делаем её строчным блоком. */
-.soon-inner .soon-about {
-  display: inline-block;      /* вес селектора выше .film-credits ниже по файлу */
-  margin-top: 24px;
-}
+/* ── ссылки анонса после премьеры ────────────────────────────────────────── */
 
 .soon-links {
   margin-top: 26px;
@@ -761,6 +780,306 @@ body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
   .panel--credits .panel-inner { max-height: 82vh; }
 }
 
+/* ── листалка: ряд кадров со стрелками вместо полосы прокрутки ───────────────
+   Ряд лежит в окне с overflow:hidden и сдвигается на целый кадр. Высота кадров
+   — вся высота окна, ширина по пропорции, поэтому ничего не режется.        */
+
+.car {
+  display: flex;
+  flex-direction: column;
+}
+.car-view {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  touch-action: pan-y;         /* вертикальный жест остаётся за страницей */
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.car.is-drag .car-view,
+.car.is-drag .car-view * { cursor: grabbing; }
+
+/* ряд привязан к началу окна и может быть шире него; в RTL начало справа */
+.car-track {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  inset-inline-start: 0;
+  display: flex;
+  gap: 14px;
+  width: max-content;
+  transition: transform 560ms cubic-bezier(.22, .7, .2, 1);
+  will-change: transform;
+}
+.car.is-drag .car-track { transition: none; }
+
+/* край, за которым ряд продолжается, уходит в тень */
+.car.has-next .car-view {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 80px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 80px), transparent);
+}
+.car.has-prev .car-view {
+  -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 80px), transparent);
+  mask-image: linear-gradient(to left, #000 calc(100% - 80px), transparent);
+}
+.car.has-prev.has-next .car-view {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 80px, #000 calc(100% - 80px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 80px, #000 calc(100% - 80px), transparent);
+}
+body.is-rtl .car.has-next .car-view {
+  -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 80px), transparent);
+  mask-image: linear-gradient(to left, #000 calc(100% - 80px), transparent);
+}
+body.is-rtl .car.has-prev .car-view {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 80px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 80px), transparent);
+}
+
+.car-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 8px;
+}
+.car-bar[hidden] { display: none; }
+
+.car-arrow {
+  width: 60px;
+  height: 44px;                /* область нажатия — усиленный уровень WCAG 2.2 */
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--ink);
+  font-family: 'Segoe UI Symbol', 'Segoe UI', Arial, sans-serif;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  transition: opacity 180ms ease, color 180ms ease;
+}
+.car-arrow:hover:not(:disabled) { color: var(--accent); }
+.car-arrow:disabled { opacity: .22; cursor: default; }
+.car-prev::before { content: '\2190'; }
+.car-next::before { content: '\2192'; }
+body.is-rtl .car-prev::before { content: '\2192'; }
+body.is-rtl .car-next::before { content: '\2190'; }
+
+.car-count {
+  min-width: 72px;
+  text-align: center;
+  font-size: calc(13px * var(--tx, 1));
+  letter-spacing: .14em;
+  color: var(--ink-dim);
+}
+
+/* кадр ряда клипа: высота — вся высота окна, ширина по пропорции */
+.panel--clip .credits-shot {
+  position: relative;          /* якорь для метки рилса и подписи */
+  flex: none;
+  height: 100%;
+  margin: 0;
+  cursor: zoom-in;
+}
+.panel--clip .credits-shot--cap { padding-bottom: 30px; }
+.panel--clip .credits-shot img {
+  display: block;
+  height: 100%;
+  width: auto;                 /* ширина по пропорции — кадр не режется */
+  max-width: none;
+  filter: grayscale(.2) contrast(1.04) brightness(.94);
+  transition: filter 220ms ease;
+  -webkit-user-drag: none;
+}
+.panel--clip .credits-shot:hover img { filter: none; transform: none; }
+.panel--clip .credits-post { display: block; cursor: pointer; }
+.panel--clip .credits-shot figcaption {
+  margin: 0;
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 30px;
+  display: flex;
+  align-items: flex-end;
+  font-size: calc(11px * var(--tx, 1));
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .7;
+}
+body.is-rtl .panel--clip .credits-shot figcaption {
+  margin: 0; letter-spacing: 0; text-transform: none; }
+
+/* ── описание клипа: страница без прокрутки ──────────────────────────────────
+   Только у клипа (класс panel--clip на оверлее). Заголовок и вводная строка
+   занимают сколько им нужно, всё остальное место отдано вкладке, а ряд кадров
+   растягивается по высоте на оставшееся: при любом окне и размере шрифта
+   видно всё сразу. У снятых фильмов остался прежний вид — синопсис, лента
+   кадров и титры списком, — он описан выше.                                  */
+
+.panel--clip .panel-inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 1080px;
+  height: min(92vh, 860px);
+  max-height: none;
+  padding-top: clamp(12px, 3vh, 36px);
+  /* страховка на совсем низком окне: прокрутка остаётся, а полосы нет */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.panel--clip .panel-inner::-webkit-scrollbar { display: none; }
+.panel--clip .panel-inner > h2,
+.panel--clip .credits-film { flex: none; }
+
+.panel--clip .panel-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel--clip .credits-film { margin-bottom: 14px; }
+.panel--clip .credits-line { flex: none; margin: 0 0 14px; }
+
+/* вкладки: «как это снималось» · «из инстаграма» · «титры» */
+.panel-tabs {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 clamp(18px, 3vw, 34px);
+  margin: 2px 0 clamp(12px, 2vh, 20px);
+  border-bottom: 1px solid rgba(243, 241, 234, .12);
+}
+.panel-tab {
+  min-height: 44px;            /* область нажатия — усиленный уровень WCAG 2.2 */
+  padding: 0 2px;
+  margin-bottom: -1px;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  font-family: inherit;
+  font-size: calc(11px * var(--tx, 1));
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .55;
+  cursor: pointer;
+  transition: color 180ms ease, opacity 180ms ease, border-color 180ms ease;
+}
+.panel-tab:hover { opacity: .9; }
+.panel-tab.is-on {
+  color: var(--ink);
+  opacity: 1;
+  border-bottom-color: var(--accent);
+}
+body.is-rtl .panel-tab { letter-spacing: 0; text-transform: none; }
+
+/* место вкладки: всё, что осталось под вводным текстом */
+.panel-tabbody {
+  flex: 1 1 auto;
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+}
+.panel-pane { flex: 1 1 auto; min-height: 0; }
+.panel-pane[hidden],
+.panel--clip .panel-pane[hidden] { display: none; }   /* второй селектор — против display:grid у .clip-story */
+
+@media (max-width: 720px) {
+  .panel--clip .panel-inner {
+    height: min(94vh, 860px);
+    padding-inline: 18px;
+  }
+  .car-arrow { width: 52px; }
+}
+
+/* ── история клипа: слова Дарины и кусок самого клипа ───────────────────────
+   Текст слева, видео справа; видео без звука и по кругу. На телефоне — кадр
+   сверху, под ним текст.                                                    */
+
+.panel--clip .clip-story {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 46%);
+  gap: 0 clamp(28px, 4.5vw, 64px);
+  align-content: start;
+  /* страховка на низком окне: прокрутка остаётся, полосы нет */
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.panel--clip .clip-story::-webkit-scrollbar { display: none; }
+
+.clip-story-text p {
+  max-width: 60ch;
+  margin: 0 0 14px;
+  font-size: calc(14px * var(--tx, 1));
+  line-height: 1.7;
+  color: var(--ink);
+  opacity: .92;
+}
+/* последняя строка — «премьера скоро»: набрана как плашка «скоро» на экране анонса */
+.clip-story-text .clip-story-end {
+  margin-top: 20px;
+  font-size: calc(11px * var(--tx, 1));
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 1;
+}
+body.is-rtl .clip-story-text .clip-story-end { letter-spacing: 0; text-transform: none; }
+
+/* у курсива Corsiva и так просторный межстрочный; при кегле ×1.4 история
+   иначе не помещалась на низких окнах и на телефоне */
+html[lang="it"] .clip-story-text p { line-height: 1.45; margin-bottom: 10px; }
+
+.clip-story-media { margin: 0; align-self: start; }
+.clip-story-media video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: #000;
+}
+.clip-story-media figcaption {
+  margin-top: 9px;
+  font-size: calc(10px * var(--tx, 1));
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: .6;
+}
+body.is-rtl .clip-story-media figcaption { letter-spacing: 0; text-transform: none; }
+
+@media (max-width: 720px) {
+  .panel--clip .clip-story { grid-template-columns: 1fr; }
+  .clip-story-media { order: -1; margin-bottom: 12px; }
+  .clip-story-media video { aspect-ratio: auto; height: min(17vh, 150px); }
+  .clip-story-media figcaption { margin-top: 6px; }
+  /* на телефоне история должна уместиться без прокрутки: плотнее набор и отступы */
+  .clip-story-text p { margin-bottom: 10px; line-height: 1.58; font-size: calc(13px * var(--tx, 1)); }
+  .clip-story-text .clip-story-end { margin-top: 14px; }
+  .panel--clip .panel-inner { padding-top: 10px; }
+  .panel--clip .credits-film { margin-bottom: 6px; }
+  .panel--clip .credits-line { margin-bottom: 4px; }
+  .panel-tabs { margin-bottom: 10px; }
+}
+/* совсем низкий телефон: кадр из клипа уступает место тексту */
+@media (max-width: 720px) and (max-height: 700px) {
+  .clip-story-media { display: none; }
+}
+
+body.is-script .clip-story-text .clip-story-end,
+body.is-script .clip-story-media figcaption,
+body.is-script .panel-tab,
+body.is-script .car-count {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 /* ── оверлеи about / contact ─────────────────────────────────────────────── */
 
 .panel {
@@ -1005,9 +1324,21 @@ html[lang="eu"] body {
 html[lang="it"] body {
   font-family: 'Monotype Corsiva', 'Brush Script MT', 'Lucida Handwriting', 'Apple Chancery', 'Segoe Script', cursive;
 }
+/* Французский — по модели испанского: заголовки остаются на Mistral, всё остальное
+   на Didot. Didot родной для macOS; на Windows её нет, там ближайший родственник —
+   Bodoni MT из Office. Запасные не пересекаются с другими языками. */
 html[lang="fr"] body {
-  font-family: Mistral, 'Segoe Script', 'Bradley Hand', 'Bradley Hand ITC', 'Snell Roundhand', cursive;
+  font-family: Didot, 'Didot LT STD', 'Linotype Didot', 'GFS Didot', 'Bodoni MT', 'Bodoni 72', 'Bodoni 72 Oldstyle', 'Bodoni Std', Bodoni, 'Times New Roman', serif;
 }
+html[lang="fr"] .film-title .t,
+html[lang="fr"] .soon-title,
+html[lang="fr"] .credits-film,
+html[lang="fr"] .panel-inner h2 {
+  font-family: Mistral, 'Segoe Script', 'Bradley Hand', 'Bradley Hand ITC', 'Snell Roundhand', cursive;
+  --tx: 1.4;                   /* у Mistral крошечный строчный рост — заголовки крупнее */
+}
+/* Mistral — связное письмо: прописные и разрядка рвут его */
+html[lang="fr"] .panel-inner h2 { text-transform: none; letter-spacing: 0; }
 html[lang="de"] body {
   /* Rotis SemiSerif — гуманистический полусерифный; запасные того же склада */
   font-family: 'Rotis SemiSerif', 'Rotis SemiSerif Std', 'Rotis Semi Serif', 'Rotis Serif', Candara, 'Gill Sans MT', 'Trebuchet MS', sans-serif;

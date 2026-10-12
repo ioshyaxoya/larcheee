@@ -193,9 +193,18 @@ window.FILMS = [
     // Порядок имён сверен со страницей ИМЕННО этого трека в Apple Music:
     // у «MPMGA OUTRO» первым идёт uniqe. На других треках альбома порядок
     // другой — по памяти ставить нельзя.
-    artists: 'uniqe, nkeeei & ARTEM SHILOVETS',
+    artists: 'uniqe, nkeeei & ARTEM SHILOVETS',   // на экране — «by …» под названием
     note: '',            // «13 октября», если Дарина выкладывает сама
-    creditsKey: 'clipCredits',
+    creditsKey: 'clipCredits',   // строка «Режиссёры: …» — на странице клипа, не на экране анонса
+    // история клипа: сам текст лежит в i18n.js (clipStory), здесь — вкладка и кусок
+    // видео из клипа (вырезан из присланного файла с первого непустого кадра)
+    story: {
+      text: 'clipStory',
+      tab: 'clipStoryTab',
+      caption: 'clipFrame',
+      src: ['assets/films/clip-excerpt.webm', 'assets/films/clip-excerpt.mp4'],
+      poster: 'assets/films/clip-excerpt-poster.jpg',
+    },
     // посты-анонсы с её аккаунта: обложки скачаны, а не прилинкованы —
     // инстаграм отдаёт их по подписанным ссылкам, которые протухают
     posts: [

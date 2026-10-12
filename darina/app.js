@@ -222,51 +222,65 @@
     var inner = document.createElement('div');
     inner.className = 'soon-inner';
 
-    // сверху — имена артистов, когда их можно назвать, иначе вид работы
-    var kicker = document.createElement('div');
-    kicker.className = 'soon-kicker';
-    if (film.artists) {
-      // регистр псевдонимов не трогаем — он взят со страницы трека
-      kicker.className += ' soon-kicker--names';
-      kicker.textContent = film.artists;
-    } else {
-      kicker.dataset.tKind = film.kind || '';
-    }
-    inner.appendChild(kicker);
-
-    if (film.id) {
-      var st = document.createElement('div');
-      st.className = 'soon-title';
-      st.dataset.tFilm = film.id;
-      inner.appendChild(st);
-    }
-
+    // Сверху вниз: «скоро» крупно над всем, название — оно же открывает страницу
+    // клипа, — и мелко «by …» с исполнителями. Режиссёры и подробности живут на
+    // странице клипа; на экране анонса их нет, чтобы он не был перегружен.
     var badge = document.createElement('div');
     badge.className = 'soon-badge';
     badge.dataset.t = 'soon';
     inner.appendChild(badge);
+
+    var opener = badge;                 // пока названия нет, страницу открывает «скоро»
+    if (film.id) {
+      var st = document.createElement('button');
+      st.type = 'button';
+      st.className = 'soon-title';
+      st.dataset.tFilm = film.id;
+      inner.appendChild(st);
+      opener = st;
+    }
+
+    // у работы есть что показать — открывающий элемент становится нажимаемым
+    if ((film.bts && film.bts.length) || (film.posts && film.posts.length) || film.story || film.creditsKey) {
+      opener.addEventListener('click', function () { openCredits(film); });
+      if (opener === badge) {
+        badge.setAttribute('role', 'button');
+        badge.tabIndex = 0;
+        badge.style.cursor = 'pointer';
+        badge.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCredits(film); }
+        });
+      }
+    }
+
+    // под названием — кто исполняет: «by …». Регистр имён не трогаем: он взят со
+    // страницы трека. dir=ltr — имена латиницей, и в арабской раскладке они не плывут.
+    if (film.artists) {
+      var by = document.createElement('div');
+      by.className = 'soon-by';
+      by.dir = 'ltr';
+      var bw = document.createElement('span');
+      bw.className = 'soon-by-word';
+      bw.dataset.t = 'soonBy';
+      by.appendChild(bw);
+      by.appendChild(document.createTextNode(' '));
+      var bn = document.createElement('span');
+      bn.className = 'soon-by-names';
+      bn.textContent = film.artists;
+      by.appendChild(bn);
+      inner.appendChild(by);
+    } else {
+      var kicker = document.createElement('div');
+      kicker.className = 'soon-kicker';
+      kicker.dataset.tKind = film.kind || '';
+      inner.appendChild(kicker);
+    }
 
     if (film.note) {
       var nt = document.createElement('div');
       nt.className = 'soon-note';
       nt.textContent = film.note;
       inner.appendChild(nt);
-    }
-
-    if (film.creditsKey) {
-      var cr = document.createElement('div');
-      cr.className = 'soon-credits';
-      cr.dataset.t = film.creditsKey;
-      inner.appendChild(cr);
-    }
-
-    if ((film.bts && film.bts.length) || film.creditsKey) {
-      var ab = document.createElement('button');
-      ab.type = 'button';
-      ab.className = 'film-credits soon-about';
-      ab.dataset.t = 'aboutClip';
-      ab.addEventListener('click', function () { openCredits(film); });
-      inner.appendChild(ab);
     }
 
     // появятся после премьеры: VK Видео первым, YouTube вторым
@@ -753,7 +767,14 @@
     // иначе Escape закрывал бы заодно и описание под ним
     if (lb.root && !lb.root.hidden) return;
     if (panelOpen) {
-      if (e.key === 'Escape') closePanel();
+      if (e.key === 'Escape') { closePanel(); return; }
+      if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && creditsUI && panelOpen.id === 'panel-credits') {
+        var car = creditsUI.activeCar();
+        if (car) {
+          e.preventDefault();
+          car.step((e.key === 'ArrowRight') !== document.body.classList.contains('is-rtl') ? 1 : -1);
+        }
+      }
       return;
     }
     switch (e.key) {
@@ -807,6 +828,7 @@
     var el = panelOpen;
     panelOpen = null;
     el.classList.remove('is-open');
+    Array.prototype.forEach.call(el.querySelectorAll('video'), function (v) { v.pause(); });
     setTimeout(function () { if (!el.classList.contains('is-open')) el.hidden = true; }, 320);
   }
 
@@ -1035,7 +1057,441 @@
     openPanel('legal');
   }
 
-  function openCredits(film) {
+  /* ── листалка ─────────────────────────────────────────────────────────────
+     Ряд кадров, который переходит стрелками, а не прокручивается. Нативная
+     полоса прокрутки на тёмной странице выглядела грубо и выдавала, что блок
+     «с прокруткой». Ряд лежит в окне с overflow:hidden и сдвигается на целый
+     кадр; под ним стрелки и счётчик, как в референсе. Тянется мышью и пальцем,
+     листается колесом вбок и стрелками клавиатуры. */
+
+  var DRAG_PX = 6;
+
+  function buildCarousel(items) {
+    var root = document.createElement('div');
+    root.className = 'car';
+
+    var view = document.createElement('div');
+    view.className = 'car-view';
+    var track = document.createElement('div');
+    track.className = 'car-track';
+    items.forEach(function (it) { track.appendChild(it); });
+    view.appendChild(track);
+    root.appendChild(view);
+
+    var bar = document.createElement('div');
+    bar.className = 'car-bar';
+    var prev = document.createElement('button');
+    prev.type = 'button';
+    prev.className = 'car-arrow car-prev';
+    var count = document.createElement('span');
+    count.className = 'car-count';
+    var next = document.createElement('button');
+    next.type = 'button';
+    next.className = 'car-arrow car-next';
+    bar.appendChild(prev);
+    bar.appendChild(count);
+    bar.appendChild(next);
+    root.appendChild(bar);
+
+    var starts = [];      // где начинается каждый кадр, считая от начала ряда
+    var idx = 0;          // кадр, с которого сейчас показан ряд
+    var last = 0;         // последняя позиция: дальше ряд упирается в край окна
+    var maxOff = 0;       // на сколько ряд длиннее окна
+    var cur = 0;          // текущий сдвиг в пикселях
+    var raf = 0;
+
+    // LTR: ряд уезжает влево (−), RTL: вправо (+)
+    function sign() { return document.body.classList.contains('is-rtl') ? 1 : -1; }
+
+    function state() {
+      count.textContent = (idx + 1) + ' / ' + (last + 1);
+      prev.disabled = idx <= 0;
+      next.disabled = idx >= last;
+      root.classList.toggle('has-prev', idx > 0);
+      root.classList.toggle('has-next', idx < last);
+      bar.hidden = last === 0;      // всё помещается — листать нечего
+    }
+
+    function place(animate) {
+      var target = Math.min(starts[idx] || 0, maxOff);
+      cur = target;
+      if (animate === false) track.style.transition = 'none';
+      track.style.transform = 'translate3d(' + (sign() * target) + 'px,0,0)';
+      if (animate === false) {
+        void track.offsetWidth;
+        track.style.transition = '';
+      }
+      state();
+    }
+
+    function measure() {
+      var kids = track.children;
+      var rtl = sign() === 1;
+      var tw = track.offsetWidth;
+      var vw = view.clientWidth;
+      starts = [];
+      for (var i = 0; i < kids.length; i++) {
+        var k = kids[i];
+        starts.push(rtl ? tw - k.offsetLeft - k.offsetWidth : k.offsetLeft);
+      }
+      maxOff = Math.max(0, tw - vw);
+      last = Math.max(0, kids.length - 1);
+      if (maxOff <= 1) {
+        last = 0;
+      } else {
+        // первая позиция, при которой ряд уже упёрся в край, — и есть последняя
+        for (var j = 0; j < starts.length; j++) {
+          if (starts[j] >= maxOff - 1) { last = j; break; }
+        }
+      }
+      idx = Math.min(idx, last);
+      place(false);
+    }
+
+    function go(i) {
+      idx = Math.max(0, Math.min(last, i));
+      place(true);
+    }
+
+    function schedule() {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(measure);
+    }
+
+    prev.addEventListener('click', function () { go(idx - 1); });
+    next.addEventListener('click', function () { go(idx + 1); });
+
+    // перетаскивание: мышью и пальцем
+    var drag = null;
+    var swallow = false;
+
+    view.addEventListener('dragstart', function (e) { e.preventDefault(); });
+
+    view.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      drag = { x: e.clientX, base: cur, idx0: idx, moved: false, id: e.pointerId };
+    });
+
+    view.addEventListener('pointermove', function (e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      var dx = e.clientX - drag.x;
+      if (!drag.moved && Math.abs(dx) > DRAG_PX) {
+        drag.moved = true;
+        try { view.setPointerCapture(e.pointerId); } catch (err) { /* не критично */ }
+        root.classList.add('is-drag');
+      }
+      if (drag.moved) {
+        var off = Math.max(0, Math.min(maxOff, drag.base + sign() * dx));
+        track.style.transform = 'translate3d(' + (sign() * off) + 'px,0,0)';
+      }
+    });
+
+    function endDrag(e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      var d = drag;
+      drag = null;
+      root.classList.remove('is-drag');
+      if (!d.moved) return;
+
+      // клик, которым закончилось перетаскивание, кадр не открывает
+      swallow = true;
+      setTimeout(function () { swallow = false; }, 0);
+
+      var delta = sign() * (e.clientX - d.x);      // > 0 — вперёд
+      var off = Math.max(0, Math.min(maxOff, d.base + delta));
+      var best = 0;
+      var dist = Infinity;
+      for (var i = 0; i <= last; i++) {
+        var dd = Math.abs(starts[i] - off);
+        if (dd < dist) { dist = dd; best = i; }
+      }
+      // короткий, но явный жест листает на кадр, даже если ближайший прежний
+      if (best === d.idx0 && Math.abs(delta) > 40) best = d.idx0 + (delta > 0 ? 1 : -1);
+      go(best);
+    }
+    view.addEventListener('pointerup', endDrag);
+    view.addEventListener('pointercancel', endDrag);
+
+    view.addEventListener('click', function (e) {
+      if (swallow) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
+
+    // колесо вбок (тачпад): один жест — один кадр
+    var wheelAt = -1e9;
+    view.addEventListener('wheel', function (e) {
+      if (Math.abs(e.deltaX) <= Math.abs(e.deltaY) || Math.abs(e.deltaX) < 8) return;
+      e.preventDefault();
+      if (e.timeStamp - wheelAt < 380) return;
+      wheelAt = e.timeStamp;
+      var fwd = sign() === -1 ? e.deltaX > 0 : e.deltaX < 0;
+      go(idx + (fwd ? 1 : -1));
+    }, { passive: false });
+
+    // размеры меняются при смене окна, шрифта и загрузке кадров
+    if (window.ResizeObserver) {
+      var ro = new ResizeObserver(schedule);
+      ro.observe(view);
+      ro.observe(track);
+    } else {
+      window.addEventListener('resize', schedule);
+    }
+
+    return {
+      el: root,
+      update: measure,
+      step: function (d) { go(idx + d); },
+      get index() { return idx; },
+      get last() { return last; },
+    };
+  }
+
+  /* ── вкладки описания ───────────────────────────────────────────────────── */
+
+  var creditsUI = null;          // что сейчас открыто в описании: работа, вкладка, листалки
+  var rebuilding = false;        // перестройка уже идёт — applyLocale не должен запускать вторую
+
+  function buildTabs(into, defs, wantKey) {
+    var start = 0;
+    defs.forEach(function (d, i) { if (d.key === wantKey) start = i; });
+
+    var bar = null;
+    var btns = [];
+    if (defs.length > 1) {
+      bar = document.createElement('div');
+      bar.className = 'panel-tabs';
+      bar.setAttribute('role', 'tablist');
+    }
+    var area = document.createElement('div');
+    area.className = 'panel-tabbody';
+
+    function show(i, focus) {
+      creditsUI.key = defs[i].key;
+      defs.forEach(function (d, n) {
+        d.node.hidden = n !== i;
+        if (btns[n]) {
+          btns[n].classList.toggle('is-on', n === i);
+          btns[n].setAttribute('aria-selected', n === i ? 'true' : 'false');
+          btns[n].tabIndex = n === i ? 0 : -1;
+        }
+      });
+      if (defs[i].car) defs[i].car.update();
+      // видео на скрытой вкладке не играет: незачем жечь процессор
+      defs.forEach(function (d, n) {
+        if (!d.media) return;
+        if (n === i) {
+          var pr = d.media.play();
+          if (pr && pr.catch) pr.catch(function () { /* автозапуск мог не разрешиться */ });
+        } else {
+          d.media.pause();
+        }
+      });
+      if (focus && btns[i]) btns[i].focus();
+    }
+
+    defs.forEach(function (d, i) {
+      d.node.classList.add('panel-pane');
+      d.node.setAttribute('role', 'tabpanel');
+      area.appendChild(d.node);
+      if (!bar) return;
+
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'panel-tab';
+      b.setAttribute('role', 'tab');
+      b.dataset.t = d.label;
+      b.addEventListener('click', function () { show(i); });
+      b.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        // клавиши вкладок — их собственные, листалка под ними не должна их забирать
+        e.preventDefault();
+        e.stopPropagation();
+        var fwd = (e.key === 'ArrowRight') !== document.body.classList.contains('is-rtl');
+        show((i + (fwd ? 1 : -1) + defs.length) % defs.length, true);
+      });
+      bar.appendChild(b);
+      btns.push(b);
+    });
+
+    creditsUI.activeCar = function () {
+      for (var i = 0; i < defs.length; i++) if (defs[i].key === creditsUI.key) return defs[i].car || null;
+      return null;
+    };
+
+    if (bar) into.appendChild(bar);
+    into.appendChild(area);
+    show(start);
+  }
+
+  /* ── описание клипа ─────────────────────────────────────────────────────────
+     Только у клипа. Страница не прокручивается: заголовок и вводная строка
+     занимают сколько им нужно, всё остальное место — вкладка, а ряд кадров
+     растягивается по высоте на оставшееся, так что при любом окне и размере
+     шрифта страница видна целиком. Вкладки: «как это снималось» и «из
+     инстаграма». У снятых фильмов остался прежний вид (renderFilmPanel). */
+
+  function renderClipPanel(film, wantKey) {
+    var body = document.querySelector('#panel-credits .panel-body');
+    var head = document.querySelector('#panel-credits .credits-film');
+    var h2 = document.querySelector('#panel-credits h2');
+    if (!body) return;
+
+    if (h2) h2.dataset.t = film.soon ? 'aboutClip' : 'aboutFilm';
+    if (head) head.textContent = tin('films', film.id);
+    body.textContent = '';
+
+    var rows = creditsFor(film);
+    var syn = tin('synopsis', film.id);
+
+    // вводная строка над вкладками: синопсис, а у клипа — кто снял
+    if (syn) {
+      var sp = document.createElement('p');
+      sp.className = 'credits-synopsis';
+      sp.textContent = syn;
+      body.appendChild(sp);
+    } else if (!rows.length && film.creditsKey) {
+      var cl = document.createElement('p');
+      cl.className = 'credits-line';
+      cl.dataset.t = film.creditsKey;
+      body.appendChild(cl);
+    }
+
+    creditsUI = { film: film, key: wantKey || null, activeCar: function () { return null; } };
+    var defs = [];
+
+    // история клипа — своими словами Дарины, а рядом кусок самого клипа
+    if (film.story) {
+      var st = film.story;
+      var story = document.createElement('div');
+      story.className = 'clip-story';
+
+      var txt = document.createElement('div');
+      txt.className = 'clip-story-text';
+      var paras = tlist(st.text);
+      paras.forEach(function (para, i) {
+        var pp = document.createElement('p');
+        // последняя строка — «премьера скоро»: набирается как плашка «скоро» на анонсе
+        if (i === paras.length - 1 && paras.length > 1) pp.className = 'clip-story-end';
+        pp.textContent = para;
+        txt.appendChild(pp);
+      });
+      story.appendChild(txt);
+
+      var media = null;
+      if (st.src) {
+        var fig = document.createElement('figure');
+        fig.className = 'clip-story-media';
+        media = document.createElement('video');
+        media.muted = true;
+        media.defaultMuted = true;
+        media.loop = true;
+        media.playsInline = true;
+        media.setAttribute('muted', '');
+        media.setAttribute('playsinline', '');
+        media.setAttribute('webkit-playsinline', '');
+        media.preload = 'auto';
+        if (st.poster) media.poster = st.poster;
+        (Array.isArray(st.src) ? st.src : [st.src]).forEach(function (url) {
+          var so = document.createElement('source');
+          so.src = url;
+          var type = MIME[(url.split('.').pop() || '').toLowerCase()];
+          if (type) so.type = type;
+          media.appendChild(so);
+        });
+        fig.appendChild(media);
+        if (st.caption) {
+          var fc = document.createElement('figcaption');
+          fc.dataset.t = st.caption;
+          fig.appendChild(fc);
+        }
+        story.appendChild(fig);
+      }
+      defs.push({ key: 'story', label: st.tab, node: story, media: media });
+    }
+
+    if (film.bts && film.bts.length) {
+      var shots = film.bts.filter(function (x) { return x && x.cover; }).map(function (shot, i) {
+        var fig = document.createElement('figure');
+        fig.className = 'credits-shot' + (shot.shot !== undefined ? ' credits-shot--cap' : '');
+        var im = document.createElement('img');
+        im.src = shot.cover;
+        im.alt = '';
+        im.draggable = false;
+        fig.appendChild(im);
+        if (shot.shot !== undefined) {
+          var cap = document.createElement('figcaption');
+          cap.dataset.tShot = String(shot.shot);
+          fig.appendChild(cap);
+        }
+        fig.addEventListener('click', function () { openLightbox(film.bts, i); });
+        return fig;
+      });
+      var carShots = buildCarousel(shots);
+      defs.push({ key: 'wall', label: 'wall', node: carShots.el, car: carShots });
+    }
+
+    if (film.posts && film.posts.length) {
+      var tiles = film.posts.filter(function (x) { return x && x.cover; }).map(function (post) {
+        var tile = document.createElement(post.url ? 'a' : 'figure');
+        tile.className = 'credits-shot credits-post';
+        if (post.url) {
+          tile.href = post.url;
+          tile.target = '_blank';
+          tile.rel = 'noopener';
+          tile.draggable = false;
+        }
+        var pi = document.createElement('img');
+        pi.src = post.cover;
+        pi.alt = '';
+        pi.draggable = false;
+        tile.appendChild(pi);
+        if (post.kind === 'video') {
+          var pl = document.createElement('span');
+          pl.className = 'post-play';
+          pl.setAttribute('aria-hidden', 'true');
+          tile.appendChild(pl);
+        }
+        return tile;
+      });
+      var carPosts = buildCarousel(tiles);
+      defs.push({ key: 'fromInstagram', label: 'fromInstagram', node: carPosts.el, car: carPosts });
+    }
+
+    if (rows.length) {
+      var grid = document.createElement('div');
+      grid.className = 'credits-grid';
+      rows.forEach(function (row) {
+        var line = document.createElement('div');
+        line.className = 'credits-row';
+
+        var role = document.createElement('span');
+        role.className = 'credits-role';
+        role.textContent = row[0];
+        line.appendChild(role);
+
+        var names = document.createElement('span');
+        names.className = 'credits-names';
+        (row[1] || []).forEach(function (nm) {
+          var one = document.createElement('span');
+          one.textContent = nm;
+          names.appendChild(one);
+        });
+        line.appendChild(names);
+        grid.appendChild(line);
+      });
+      defs.push({ key: 'credits', label: 'credits', node: grid });
+    }
+
+    buildTabs(body, defs, wantKey);
+
+    // подставить подписи в только что собранное; вторую перестройку из applyLocale не запускаем
+    var was = rebuilding;
+    rebuilding = true;
+    applyLocale();
+    rebuilding = was;
+  }
+
+  /** Описание снятого фильма: прежний вид — синопсис, лента кадров, титры списком. */
+  function renderFilmPanel(film) {
     var body = document.querySelector('#panel-credits .panel-body');
     var head = document.querySelector('#panel-credits .credits-film');
     var h2 = document.querySelector('#panel-credits h2');
@@ -1181,6 +1637,19 @@
     }
 
     applyLocale();
+  }
+
+  /** Описание работы. Клип — вкладки и листалка без прокрутки, снятые фильмы — как были. */
+  function openCredits(film) {
+    var panel = document.getElementById('panel-credits');
+    var isClip = !!film.soon;
+    if (panel) panel.classList.toggle('panel--clip', isClip);
+    if (isClip) {
+      renderClipPanel(film, null);
+    } else {
+      creditsUI = null;
+      renderFilmPanel(film);
+    }
     openPanel('credits');
   }
 
@@ -1206,9 +1675,9 @@
   }
 
   /** Раскладывает строки текущего языка по разметке. */
-  // языки, набранные связным письмом: французский (Mistral), итальянский
-  // (Monotype Corsiva) и арабская вязь
-  var SCRIPT_LOCALES = ['fr', 'it', 'ar-SA'];
+  // языки, набранные связным письмом: итальянский (Monotype Corsiva) и арабская
+  // вязь. Французский сюда не входит: текст на Didot, на Mistral только заголовки
+  var SCRIPT_LOCALES = ['it', 'ar-SA'];
 
   function applyLocale() {
     var d = dict(locale);
@@ -1248,6 +1717,8 @@
     each('.lb-prev', function (b) { b.setAttribute('aria-label', t('prev')); });
     each('.lb-next', function (b) { b.setAttribute('aria-label', t('next')); });
     each('.lb-restart', function (b) { b.setAttribute('aria-label', t('replay')); });
+    each('.car-prev', function (b) { b.setAttribute('aria-label', t('prev')); });
+    each('.car-next', function (b) { b.setAttribute('aria-label', t('next')); });
     if (lb.play) lb.play.setAttribute('aria-label', t(lb.playing ? 'pause' : 'play'));
     if (cueEl) cueEl.setAttribute('aria-label', t('next'));
 
@@ -1264,6 +1735,11 @@
     // открытый правовой документ переписываем на новый язык
     var legal = document.getElementById('panel-legal');
     if (legal && !legal.hidden && legal.dataset.doc) openLegal(legal.dataset.doc);
+
+    // открытое описание работы тоже пересобирается, оставаясь на той же вкладке
+    if (!rebuilding && creditsUI && panelOpen && panelOpen.id === 'panel-credits') {
+      renderClipPanel(creditsUI.film, creditsUI.key);
+    }
   }
 
   function setLocale(code) {
