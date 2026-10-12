@@ -178,7 +178,11 @@ a:hover { color: var(--accent); }
   top: 50%;
   inset-inline: auto;
   transform: translateY(-50%);
-  font-size: 11px;
+  font-size: 15px;
+  /* Поля доводят область нажатия до 44×44 — это усиленный уровень WCAG 2.2
+     (2.5.5); минимум по 2.5.8 вдвое меньше. Сам текст не двигается:
+     отступ от края уменьшен ровно на величину бокового поля. */
+  padding: 14px 12px;
   color: var(--ink-dim);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -189,8 +193,8 @@ a:hover { color: var(--accent); }
   cursor: pointer;
   font-family: inherit;
 }
-.side-start { inset-inline-start: 22px; }
-.side-end   { inset-inline-end: 22px; }
+.side-start { inset-inline-start: 10px; }   /* 22 − 12: текст остаётся на 22px */
+.side-end   { inset-inline-end: 10px; }
 
 /* ── 2..N. экраны с фильмами ─────────────────────────────────────────────── */
 
@@ -813,8 +817,9 @@ body.is-rtl .credits-sub { letter-spacing: 0; text-transform: none; }
   .section { min-height: 0; }
   /* на вертикальном экране лицо крупное: подпись уходит выше, на волосы */
   .hero-logo { transform: translate(-50%, -235%); width: 76vw; }
-  .side-start { inset-inline-start: 14px; }
-  .side-end   { inset-inline-end: 14px; }
+  .side { padding: 14px 10px; }
+  .side-start { inset-inline-start: 4px; }    /* 14 − 10 */
+  .side-end   { inset-inline-end: 4px; }
   .film-title { inset-inline-start: 14px; bottom: 54px; }
   .cuts { inset-inline-end: 14px; bottom: 56px; gap: 2px; }
   .lang { top: 10px; gap: 0; }
@@ -970,7 +975,15 @@ body.is-lightbox { overflow: hidden; }
 html[lang="en-GB"] body {
   font-family: 'Comic Sans MS', 'Comic Sans', Papyrus, 'Chalkboard SE', 'Comic Neue', cursive;
 }
+/* Испанский: основной набор — Algerian (гравированные капители), а Jokerman
+   остаётся только в заголовках. Запасные к Algerian — того же рисунка. */
 html[lang="es"] body {
+  font-family: Algerian, 'Copperplate Gothic Bold', 'Copperplate Gothic', Copperplate, 'Engravers MT', 'Trajan Pro', serif;
+}
+html[lang="es"] .film-title .t,
+html[lang="es"] .soon-title,
+html[lang="es"] .credits-film,
+html[lang="es"] .panel-inner h2 {
   font-family: Jokerman, 'Jokerman LET', Hobo, 'Hobo Std', 'HoboStd', Chiller, fantasy, Verdana, sans-serif;
 }
 html[lang="eu"] body {
@@ -1032,35 +1045,40 @@ html[lang="it"] .credits-synopsis { font-size: 16px; }
 .section--footer {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;   /* содержимое внизу, как в референсе */
+  /* сверху — место под переключатель языков, он fixed и иначе ложится на
+     контакты; снизу — имя. Текст центруется в том, что осталось между ними. */
+  padding-top: clamp(84px, 11vh, 132px);
 }
 
 .foot {
   position: relative;
   z-index: 3;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   width: 100%;
   max-width: 1180px;
   margin: 0 auto;
-  padding: 0 clamp(16px, 5vw, 54px);
-  margin-bottom: clamp(18px, 4vh, 44px);
+  padding: 0 clamp(16px, 5vw, 54px) clamp(18px, 4vh, 44px);
 }
 
 .foot-top {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 14px clamp(22px, 3.5vw, 40px);
 }
+/* контакты в едином стиле с боковыми ссылками: подчёркнутый текст, без плашек */
 .foot-pill {
   display: inline-block;
-  padding: 11px 22px;
-  border-radius: 999px;
-  background: var(--ink);
-  color: #111;
-  font-size: 12px;
-  text-decoration: none;
-  transition: background 200ms ease, color 200ms ease;
+  padding: 8px 0;
+  font-size: 15px;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color 180ms ease;
 }
-.foot-pill:hover { background: #fff; }
+.foot-pill:hover { color: var(--accent); }
 
 .foot-rule {
   height: 1px;
@@ -1105,6 +1123,10 @@ html[lang="it"] .credits-synopsis { font-size: 16px; }
 .foot-mark {
   position: relative;          /* стоит под текстом, а не за ним */
   z-index: 1;
+  flex: 0 0 auto;
+  /* потолок: на широком экране имя иначе занимало бы почти весь вьюпорт
+     и выдавливало текст под переключатель языков */
+  max-height: clamp(180px, 38vh, 420px);
   pointer-events: none;
   line-height: 0;
   overflow: hidden;
@@ -1141,7 +1163,7 @@ html[lang="it"] .credits-synopsis { font-size: 16px; }
 }
 
 @media (max-width: 720px) {
-  .foot { margin-bottom: clamp(80px, 18vh, 160px); }
-  .foot-pill { padding: 9px 16px; font-size: 11px; }
+  .section--footer { padding-top: clamp(96px, 14vh, 140px); }  /* переключатель в две строки */
+  .foot-pill { font-size: 14px; }
   .foot-who, .foot-copy, .foot-links button { font-size: 11px; }
 }
