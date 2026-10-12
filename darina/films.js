@@ -56,6 +56,8 @@ window.FILMS = [
     kicker: 'музыкальный клип',
     title: '',     // впишите название, когда можно раскрыть
     note: '',      // например «премьера — осень 2026»; можно оставить пустым
-    poster: '',    // кадр для фона, если захотите показать
+    // подложка — бэкстейдж со съёмок, сам клип не показывает
+    src: ['assets/films/clip-teaser.webm', 'assets/films/clip-teaser.mp4'],
+    poster: 'assets/films/clip-poster.jpg',
   },
 ];

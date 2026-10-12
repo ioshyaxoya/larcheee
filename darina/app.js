@@ -113,6 +113,29 @@
       s.appendChild(ph);
     }
 
+    // подложка из бэкстейджа: крутится сама, без нарезки
+    if (film.src) {
+      var sv = document.createElement('video');
+      sv.className = 'soon-video';
+      sv.muted = true;
+      sv.defaultMuted = true;
+      sv.playsInline = true;
+      sv.setAttribute('playsinline', '');
+      sv.setAttribute('webkit-playsinline', '');
+      sv.setAttribute('muted', '');
+      sv.loop = true;
+      sv.preload = 'metadata';
+      (Array.isArray(film.src) ? film.src : [film.src]).forEach(function (url) {
+        if (!url) return;
+        var so = document.createElement('source');
+        so.src = url;
+        var type = MIME[(url.split('.').pop() || '').toLowerCase()];
+        if (type) so.type = type;
+        sv.appendChild(so);
+      });
+      s.appendChild(sv);
+    }
+
     var glow = document.createElement('div');
     glow.className = 'soon-glow';
     s.appendChild(glow);
@@ -326,6 +349,38 @@
   };
 
   /* ======================================================================
+   * 2b. Плеер экрана-анонса — без нарезки, просто цикл
+   * ==================================================================== */
+
+  function SoonMedia(section) {
+    this.section = section;
+    this.video = section.querySelector('video');
+  }
+
+  SoonMedia.prototype.start = function () {
+    if (!this.video) return;
+    var self = this;
+    var p = this.video.play();
+    if (p && p.then) {
+      p.then(function () { self.section.classList.add('is-playing'); })
+       .catch(function () { /* автоплей заблокирован — остаётся постер */ });
+    } else {
+      this.section.classList.add('is-playing');
+    }
+  };
+
+  SoonMedia.prototype.stop = function () {
+    if (this.video) this.video.pause();
+  };
+
+  SoonMedia.prototype.warm = function () {
+    if (this.video && this.video.preload !== 'auto') {
+      this.video.preload = 'auto';
+      if (this.video.networkState !== 2) this.video.load();
+    }
+  };
+
+  /* ======================================================================
    * 3. Индикатор нарезки (29 рисок)
    * ==================================================================== */
 
@@ -354,14 +409,22 @@
    * 4. Deck — постраничная прокрутка
    * ==================================================================== */
 
-  // движок на каждую секцию; у экрана-анонса его нет, поэтому карта по индексу
+  // engineBySection — только фильмы, нужен индикатору нарезки;
+  // playersBySection — всё, что надо включать и глушить при листании
   var engineBySection = [];
+  var playersBySection = [];
   FILMS.forEach(function (film, i) {
     var si = i + 1;
-    if (film.soon) { engineBySection[si] = null; return; }
-    engineBySection[si] = new CutEngine(sections[si], film, function (index, total) {
+    if (film.soon) {
+      engineBySection[si] = null;
+      playersBySection[si] = sections[si].querySelector('video') ? new SoonMedia(sections[si]) : null;
+      return;
+    }
+    var eng = new CutEngine(sections[si], film, function (index, total) {
       if (current === si) paintTicks(index, total);
     });
+    engineBySection[si] = eng;
+    playersBySection[si] = eng;
   });
   var engines = engineBySection.filter(Boolean);
 
@@ -391,11 +454,11 @@
     sections.forEach(function (s, n) { s.classList.toggle('is-active', n === i); });
 
     // видео: играет только активный экран, соседи — прогреваются
-    engineBySection.forEach(function (e, si) {
-      if (!e) return;
-      if (si === i) { e.start(); return; }
-      e.stop();
-      if (Math.abs(si - i) === 1) e.warm();
+    playersBySection.forEach(function (pl, si) {
+      if (!pl) return;
+      if (si === i) { pl.start(); return; }
+      pl.stop();
+      if (Math.abs(si - i) === 1) pl.warm();
     });
 
     // индикатор нарезки — только там, где реально есть фильм
@@ -528,5 +591,6 @@
     sections: sections,
     engines: engines,
     engineBySection: engineBySection,
+    playersBySection: playersBySection,
   };
 })();
