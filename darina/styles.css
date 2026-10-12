@@ -489,6 +489,9 @@ a.wall-tile:hover .wall-cap { color: var(--accent); }
 }
 
 /* метка «это видео» */
+/* смещение вверх компенсирует поле под подписью; без подписи его нет */
+.wall-tile--bare .wall-play { top: 50%; }
+
 .wall-play {
   position: absolute;
   left: 50%;

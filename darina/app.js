@@ -297,11 +297,12 @@
     var seq = 0;
 
     groups.forEach(function (group) {
-      if (group.film || group.kind) {
+      if (group.film || group.kind || group.key) {
         var h = document.createElement('div');
         h.className = 'wall-group';
         if (group.film) h.dataset.tFilm = group.film;
-        else h.dataset.tKind = group.kind;
+        else if (group.kind) h.dataset.tKind = group.kind;
+        else h.dataset.t = group.key;
         inner.appendChild(h);
       }
 

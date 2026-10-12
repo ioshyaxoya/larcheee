@@ -187,8 +187,19 @@ window.FILMS = [
         { cover: 'assets/wall/drive-07.jpg' },
         { cover: 'assets/wall/drive-08.jpg' },
       ] },
-      // у клипа подписи есть: shot — номер в i18n.js → shots[]
-      // url сделает плитку ссылкой на пост, когда ссылки появятся
+      // посты-анонсы с её аккаунта. Обложки скачаны, а не прилинкованы:
+      // Instagram отдаёт их по подписанным ссылкам, которые протухают.
+      // kind: 'video' рисует на плитке метку воспроизведения (рилсы).
+      { key: 'fromInstagram', posts: [
+        { cover: 'assets/wall/ig-01.jpg', url: 'https://www.instagram.com/darinadanilyuk/p/DdbDMEJDbM4/' },
+        { cover: 'assets/wall/ig-02.jpg', url: 'https://www.instagram.com/darinadanilyuk/reel/DdUW3YoR6GJ/', kind: 'video' },
+        { cover: 'assets/wall/ig-03.jpg', url: 'https://www.instagram.com/darinadanilyuk/p/DdeFqJJjew2/' },
+        { cover: 'assets/wall/ig-04.jpg', url: 'https://www.instagram.com/darinadanilyuk/p/DdpSVALjWU2/' },
+        { cover: 'assets/wall/ig-05.jpg', url: 'https://www.instagram.com/darinadanilyuk/reel/Ddy96zFNdm2/', kind: 'video' },
+        { cover: 'assets/wall/ig-06.jpg', url: 'https://www.instagram.com/darinadanilyuk/reel/DeMTNLxN-ly/', kind: 'video' },
+      ] },
+
+      // у съёмки клипа подписи есть: shot — номер в i18n.js → shots[]
       { kind: 'mv', posts: [
         { cover: 'assets/wall/shoot-01.jpg', shot: 0, url: '' },
         { cover: 'assets/wall/shoot-02.jpg', shot: 1, url: '' },
